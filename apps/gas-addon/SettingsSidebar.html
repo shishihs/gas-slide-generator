@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <base target="_top">
+    <style>
+        :root {
+            --primary-color: #1a73e8;
+            --primary-hover: #1557b0;
+            --success-color: #34a853;
+            --error-color: #ea4335;
+            --background-color: #f8f9fa;
+            --border-color: #dadce0;
+            --text-primary: #202124;
+            --text-secondary: #5f6368;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Google Sans', Roboto, Arial, sans-serif;
+            padding: 16px;
+            margin: 0;
+            background-color: var(--background-color);
+            color: var(--text-primary);
+        }
+
+        h3 {
+            margin: 0 0 8px 0;
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        p {
+            margin: 0 0 16px 0;
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .section {
+            background: white;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border-color);
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 13px;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        input[type="text"]::placeholder {
+            color: #9aa0a6;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        #status {
+            margin-top: 12px;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 13px;
+            display: none;
+        }
+
+        #status.show {
+            display: block;
+        }
+
+        #status.success {
+            background-color: #e6f4ea;
+            color: var(--success-color);
+        }
+
+        #status.error {
+            background-color: #fce8e6;
+            color: var(--error-color);
+        }
+
+        .help-text {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .info-box {
+            background-color: #e8f0fe;
+            border-radius: 4px;
+            padding: 12px;
+            font-size: 12px;
+            color: var(--primary-color);
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+
+        .info-box code {
+            background-color: rgba(0, 0, 0, 0.1);
+            padding: 2px 4px;
+            border-radius: 2px;
+            font-family: 'Roboto Mono', monospace;
+        }
+    </style>
+</head>
+
+<body>
+    <h3>⚙️ Settings</h3>
+    <p>Configure the Slide Generator add-on settings.</p>
+
+    <div class="info-box">
+        ℹ️ GAS から Vertex AI に直接接続します。GCP プロジェクトへのリンクと適切な権限が必要です。
+    </div>
+
+    <div class="section">
+        <div class="section-title">GCP Configuration</div>
+
+        <div class="form-group">
+            <label for="gcpProjectId">GCP Project ID</label>
+            <input type="text" id="gcpProjectId" placeholder="your-project-id">
+            <div class="help-text">
+                Vertex AI API が有効化されている GCP プロジェクトの ID
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="vertexAiLocation">Vertex AI Location</label>
+            <select id="vertexAiLocation">
+                <option value="asia-northeast1">asia-northeast1 (Tokyo)</option>
+                <option value="us-central1">us-central1 (Iowa)</option>
+                <option value="europe-west1">europe-west1 (Belgium)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="vertexAiModel">AI Model</label>
+            <select id="vertexAiModel">
+                <option value="gemini-1.5-flash">Gemini 1.5 Flash (Fast)</option>
+                <option value="gemini-1.5-pro">Gemini 1.5 Pro (Quality)</option>
+                <option value="gemini-1.0-pro">Gemini 1.0 Pro</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Slide Template</div>
+
+        <div class="form-group">
+            <label for="templateSlideId">Template Slide ID</label>
+            <input type="text" id="templateSlideId" placeholder="1234567890abcdefghij...">
+            <div class="help-text">
+                テンプレートとなる Google Slides の ID<br>
+                URL から取得: <code>docs.google.com/presentation/d/{ID}/edit</code>
+            </div>
+        </div>
+    </div>
+
+    <button class="btn-primary" onclick="saveSettings()">
+        Save Settings
+    </button>
+
+    <div id="status"></div>
+
+    <script>
+        // Load current settings on page load
+        window.onload = function () {
+            google.script.run
+                .withSuccessHandler(function (settings) {
+                    if (settings) {
+                        document.getElementById('gcpProjectId').value = settings.gcpProjectId || '';
+                        document.getElementById('vertexAiLocation').value = settings.vertexAiLocation || 'asia-northeast1';
+                        document.getElementById('vertexAiModel').value = settings.vertexAiModel || 'gemini-1.5-flash';
+                        document.getElementById('templateSlideId').value = settings.templateSlideId || '';
+                    }
+                })
+                .getCurrentSettings();
+        };
+
+        function saveSettings() {
+            const gcpProjectId = document.getElementById('gcpProjectId').value.trim();
+            const vertexAiLocation = document.getElementById('vertexAiLocation').value;
+            const vertexAiModel = document.getElementById('vertexAiModel').value;
+            const templateSlideId = document.getElementById('templateSlideId').value.trim();
+
+            if (!gcpProjectId) {
+                showStatus('error', '❌ GCP Project ID is required.');
+                return;
+            }
+
+            // Create properties object
+            const props = {
+                'GCP_PROJECT_ID': gcpProjectId,
+                'VERTEX_AI_LOCATION': vertexAiLocation,
+                'VERTEX_AI_MODEL': vertexAiModel,
+                'TEMPLATE_SLIDE_ID': templateSlideId
+            };
+
+            // Save using the GAS backend
+            google.script.run
+                .withSuccessHandler(function () {
+                    showStatus('success', '✅ Settings saved successfully!');
+                })
+                .withFailureHandler(function (error) {
+                    showStatus('error', '❌ Error: ' + error.message);
+                })
+                .saveScriptProperties(props);
+        }
+
+        function showStatus(type, message) {
+            const status = document.getElementById('status');
+            status.className = 'show ' + type;
+            status.textContent = message;
+        }
+    </script>
+</body>
+
+</html>

@@ -2,14 +2,13 @@ import { PresentationApplicationService } from '../src/application/PresentationA
 import { GasSlideRepository } from '../src/infrastructure/gas/GasSlideRepository';
 import { Presentation } from '../src/domain/model/Presentation';
 
-// Mock GAS globals
-(global as any).SlidesApp = {
-    create: jest.fn().mockReturnValue({
+const mockSlidesApp = {
+    create: jest.fn().mockImplementation((title) => ({
         getUrl: jest.fn().mockReturnValue('https://mock-slide.com'),
         getSlides: jest.fn().mockReturnValue([]),
         getMasters: jest.fn().mockReturnValue([]),
         getLayouts: jest.fn().mockReturnValue([]),
-        appendSlide: jest.fn().mockReturnValue({
+        appendSlide: jest.fn().mockImplementation(() => ({
             getPlaceholder: jest.fn().mockReturnValue({
                 asShape: jest.fn().mockReturnValue({
                     getText: jest.fn().mockReturnValue({
@@ -23,21 +22,14 @@ import { Presentation } from '../src/domain/model/Presentation';
                     getText: jest.fn().mockReturnValue({ setText: jest.fn() })
                 })
             })
-        }),
-        PredefinedLayout: { TITLE_AND_BODY: 'TITLE_AND_BODY', TITLE: 'TITLE' },
-        PlaceholderType: {
-            TITLE: 'TITLE',
-            CENTERED_TITLE: 'CENTERED_TITLE',
-            SUBTITLE: 'SUBTITLE',
-            BODY: 'BODY'
-        }
-    }),
-    openById: jest.fn().mockReturnValue({
+        }))
+    })),
+    openById: jest.fn().mockImplementation(() => ({
         getUrl: jest.fn().mockReturnValue('https://template-copy.com'),
-        getSlides: jest.fn().mockReturnValue([{}, {}]), // 2 existing slides
+        getSlides: jest.fn().mockReturnValue([{ remove: jest.fn() }, { remove: jest.fn() }]),
         getMasters: jest.fn().mockReturnValue([]),
         getLayouts: jest.fn().mockReturnValue([]),
-        appendSlide: jest.fn().mockReturnValue({
+        appendSlide: jest.fn().mockImplementation(() => ({
             getPlaceholder: jest.fn().mockReturnValue({
                 asShape: jest.fn().mockReturnValue({
                     getText: jest.fn().mockReturnValue({
@@ -51,9 +43,22 @@ import { Presentation } from '../src/domain/model/Presentation';
                     getText: jest.fn().mockReturnValue({ setText: jest.fn() })
                 })
             })
-        })
-    })
+        }))
+    })),
+    PredefinedLayout: {
+        TITLE_AND_BODY: 'TITLE_AND_BODY',
+        TITLE: 'TITLE',
+        SECTION_HEADER: 'SECTION_HEADER'
+    },
+    PlaceholderType: {
+        TITLE: 'TITLE',
+        CENTERED_TITLE: 'CENTERED_TITLE',
+        SUBTITLE: 'SUBTITLE',
+        BODY: 'BODY'
+    }
 };
+
+(global as any).SlidesApp = mockSlidesApp;
 
 (global as any).DriveApp = {
     getFileById: jest.fn().mockReturnValue({

@@ -1,5 +1,5 @@
-import { PresentationApplicationService, CreatePresentationRequest } from '../application/PresentationApplicationService';
-import { GasSlideRepository } from '../infrastructure/gas/GasSlideRepository';
+import { PresentationApplicationService, CreatePresentationRequest } from './application/PresentationApplicationService';
+import { GasSlideRepository } from './infrastructure/gas/GasSlideRepository';
 
 /**
  * Slide Generator API
@@ -21,13 +21,25 @@ function doPost(e: GoogleAppsScript.Events.DoPost) {
         const postData = JSON.parse(e.postData.contents);
 
         // Extract JSON payload (handling wrapped structure if needed)
-        const requestData: CreatePresentationRequest = postData.json || postData;
+        const data = postData.json || postData;
+
+        const request: CreatePresentationRequest = {
+            title: data.title || 'Untitled Presentation',
+            templateId: data.templateId, // Optional ID for template
+            slides: data.slides.map((s: any) => ({
+                title: s.title,
+                subtitle: s.subtitle,
+                content: s.content || [],
+                layout: s.layout,
+                notes: s.notes
+            }))
+        };
 
         // Dependency Injection Composition Root
         const repository = new GasSlideRepository();
         const service = new PresentationApplicationService(repository);
 
-        const slideUrl = service.createPresentation(requestData);
+        const slideUrl = service.createPresentation(request);
 
         return createJsonResponse({
             success: true,

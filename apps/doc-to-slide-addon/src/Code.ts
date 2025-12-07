@@ -115,7 +115,7 @@ function showSettingsSidebar() {
  * 3. Receives JSON response
  * 4. Stores the result and opens the sidebar
  */
-function convertDocumentToJson(): any {
+function convertDocumentToJson() {
     const ui = DocumentApp.getUi();
 
     try {
@@ -144,7 +144,7 @@ function convertDocumentToJson(): any {
 
         return jsonResult;
 
-    } catch (error: any) {
+    } catch (error) {
         Logger.log('Error: ' + error.toString());
         ui.alert('Error', 'Failed to convert document: ' + error.message, ui.ButtonSet.OK);
         throw error;
@@ -165,7 +165,7 @@ function getSlideGeneratorApiUrl() {
  * @param {Object} jsonData - The JSON data containing slide information
  * @returns {Object} - Result containing the new slide URL
  */
-function generateSlidesFromJson(jsonData: any): any {
+function generateSlidesFromJson(jsonData) {
     try {
         const apiUrl = getSlideGeneratorApiUrl();
 
@@ -188,9 +188,9 @@ function generateSlidesFromJson(jsonData: any): any {
             templateId: templateId || undefined
         };
 
-        const headers: GoogleAppsScript.URL_Fetch.HttpHeaders = token ? { 'Authorization': `Bearer ${token}` } : {};
+        const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
 
-        const options: GoogleAppsScript.URL_Fetch.URLFetchRequestOptions = {
+        const options = {
             method: 'post',
             contentType: 'application/json',
             headers: headers,
@@ -218,7 +218,7 @@ function generateSlidesFromJson(jsonData: any): any {
             slideUrl: result.url
         };
 
-    } catch (error: any) { // Type assertion
+    } catch (error) { // Type assertion
         Logger.log('Error generating slides: ' + error.toString());
         return {
             success: false,
@@ -243,7 +243,7 @@ function generateSlidesFromJson(jsonData: any): any {
  * @param {string} documentContent - The document content to process
  * @returns {Object} - The JSON response from Vertex AI
  */
-function callVertexAI(documentContent: string): any {
+function callVertexAI(documentContent) {
     // === MOCK MODE FOR TESTING ===
     const userProperties = PropertiesService.getUserProperties();
     const useMock = userProperties.getProperty('USE_MOCK_RESPONSE') === 'true';
@@ -311,7 +311,7 @@ function callVertexAI(documentContent: string): any {
         },
     };
 
-    const options: GoogleAppsScript.URL_Fetch.URLFetchRequestOptions = {
+    const options = {
         method: 'post',
         contentType: 'application/json',
         headers: {
@@ -345,7 +345,7 @@ function callVertexAI(documentContent: string): any {
         // Parse the JSON from the response
         return parseJsonFromResponse(generatedText);
 
-    } catch (error: any) {
+    } catch (error) {
         Logger.log(`Error: ${error.toString()}`);
         throw error;
     }
@@ -354,7 +354,7 @@ function callVertexAI(documentContent: string): any {
 /**
  * Build the prompt for slide generation
  */
-function buildSlideGenerationPrompt(documentContent: string): string {
+function buildSlideGenerationPrompt(documentContent) {
     return `
 You are a professional presentation designer. Your task is to convert the following document content into a structured JSON format for Google Slides.
 
@@ -421,7 +421,7 @@ Rules:
  * Parse JSON from Vertex AI response
  * More robust parsing to handle accumulated markdown or preamble
  */
-function parseJsonFromResponse(text: string): any {
+function parseJsonFromResponse(text) {
     let jsonString = text.trim();
 
     // 1. Remove markdown code blocks if present
@@ -442,7 +442,7 @@ function parseJsonFromResponse(text: string): any {
 
     try {
         return JSON.parse(jsonString);
-    } catch (error: any) {
+    } catch (error) {
         Logger.log('Failed to parse JSON: ' + error.toString());
         Logger.log('Raw text: ' + text);
         Logger.log('Attempted string: ' + jsonString);
@@ -468,7 +468,7 @@ function getDocumentContent() {
  * Store JSON data in document properties
  * @param {Object} jsonData - The JSON data to store
  */
-function storeJsonData(jsonData: any): void {
+function storeJsonData(jsonData) {
     const jsonString = JSON.stringify(jsonData);
     PropertiesService.getDocumentProperties().setProperty('SLIDE_JSON', jsonString);
 }
@@ -486,7 +486,7 @@ function getStoredJsonData() {
  * Save script properties from the Settings sidebar
  * @param {Object} props - Object containing property key-value pairs
  */
-function saveScriptProperties(props: any): void {
+function saveScriptProperties(props) {
     const scriptProps = { ...props };
     delete scriptProps.USE_MOCK_RESPONSE;
 
@@ -503,7 +503,7 @@ function saveScriptProperties(props: any): void {
  * Get current script properties for display in Settings sidebar
  * @returns {Object} - Current property values
  */
-function getCurrentSettings(): any {
+function getCurrentSettings() {
     const props = PropertiesService.getScriptProperties();
     const userProps = PropertiesService.getUserProperties();
     return {

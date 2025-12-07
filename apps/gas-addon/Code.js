@@ -30,7 +30,7 @@ function getVertexAiLocation() {
  * Get the Vertex AI model from Script Properties
  */
 function getVertexAiModel() {
-    return PropertiesService.getScriptProperties().getProperty('VERTEX_AI_MODEL') || 'gemini-1.5-flash';
+    return PropertiesService.getScriptProperties().getProperty('VERTEX_AI_MODEL') || 'gemini-2.5-flash';
 }
 
 /**
@@ -48,7 +48,7 @@ function setupScriptProperties() {
     const props = {
         'GCP_PROJECT_ID': 'YOUR_GCP_PROJECT_ID',
         'VERTEX_AI_LOCATION': 'asia-northeast1',
-        'VERTEX_AI_MODEL': 'gemini-1.5-flash',
+        'VERTEX_AI_MODEL': 'gemini-2.5-flash',
         'TEMPLATE_SLIDE_ID': 'YOUR_TEMPLATE_SLIDE_ID',
     };
     PropertiesService.getScriptProperties().setProperties(props);
@@ -113,7 +113,7 @@ function showSettingsSidebar() {
  * 1. Gets the document content
  * 2. Calls Vertex AI directly
  * 3. Receives JSON response
- * 4. Stores the JSON for slide generation
+ * 4. Stores the result and opens the sidebar
  */
 function convertDocumentToJson() {
     const ui = DocumentApp.getUi();
@@ -129,6 +129,8 @@ function convertDocumentToJson() {
             return null;
         }
 
+        doc.saveAndClose(); // Save pending changes
+
         // 2. Call Vertex AI directly
         const jsonResult = callVertexAI(documentText);
 
@@ -137,7 +139,8 @@ function convertDocumentToJson() {
 
         Logger.log('JSON Result: ' + JSON.stringify(jsonResult));
 
-        ui.alert('Success', 'Document converted to JSON successfully!\n\nClick "Generate Slide" to create slides.', ui.ButtonSet.OK);
+        // 4. Open the sidebar automatically to show the result
+        showGenerateSlideSidebar();
 
         return jsonResult;
 
@@ -249,10 +252,11 @@ function callVertexAI(documentContent) {
             }]
         }],
         generationConfig: {
-            temperature: 0.2,
+            temperature: 0.1, // Lower temperature for more deterministic output (better for JSON)
             topK: 40,
             topP: 0.95,
             maxOutputTokens: 8192,
+            responseMimeType: "application/json" // Force JSON output mode if supported by the model
         },
     };
 
@@ -301,75 +305,97 @@ function callVertexAI(documentContent) {
  */
 function buildSlideGenerationPrompt(documentContent) {
     return `
-You are a presentation designer. Convert the following document content into a structured JSON format for Google Slides.
+You are a professional presentation designer. Your task is to convert the following document content into a structured JSON format for Google Slides.
+
+Target Audience: Business professionals
+Tone: Professional, Clear, Concise
 
 Document Content:
 ---
 ${documentContent}
 ---
 
-Output the result as a valid JSON object with the following structure:
+Create a presentation structure with 5-12 slides depending on the content length.
+The output MUST be a valid JSON object following this strict schema:
+
 {
-  "title": "Main presentation title",
+  "theme": "modern", // Suggested theme keyword (e.g., modern, corporate, creative)
+  "metada": {
+    "estimatedDuration": "10 min",
+    "audience": "General"
+  },
   "slides": [
     {
-      "type": "title",
-      "title": "Slide title",
-      "subtitle": "Optional subtitle"
+      "type": "TITLE",
+      "title": "Main Presentation Title",
+      "subtitle": "Subtitle or Presenter Name",
+      "notes": "Speaker notes for the title slide"
     },
     {
-      "type": "content",
-      "title": "Slide title",
-      "bullets": ["Point 1", "Point 2", "Point 3"]
+      "type": "AGENDA",
+      "title": "Agenda",
+      "items": ["Topic 1", "Topic 2", "Topic 3"]
     },
     {
-      "type": "section",
-      "title": "Section title"
+      "type": "CONTENT",
+      "title": "Slide Title",
+      "body": {
+        "text": "Main paragraph text if any",
+        "bullets": ["Key point 1", "Key point 2", "Key point 3"]
+      },
+      "notes": "Speaker notes explaining the content"
     },
     {
-      "type": "conclusion",
-      "title": "Conclusion",
-      "keyPoints": ["Key takeaway 1", "Key takeaway 2"]
+      "type": "SECTION",
+      "title": "Section Title",
+      "subtitle": "Brief description of the section"
+    },
+    {
+      "type": "CONCLUSION",
+      "title": "Summary / Key Takeaways",
+      "points": ["Takeaway 1", "Takeaway 2"]
     }
   ]
 }
 
-Guidelines:
-- Create 5-10 slides based on the content
-- Use clear, concise bullet points
-- Include a title slide at the beginning
-- Group related content into sections
-- End with a conclusion or summary slide
-
-Output ONLY the JSON, no additional text or explanation.
+Rules:
+1. **Summarize**: Do not just copy text. Summarize long paragraphs into concise bullet points.
+2. **Structure**: logical flow (Title -> Agenda -> Content -> Conclusion).
+3. **Content**: Each slide should have 3-5 bullet points max for readability.
+4. **JSON Only**: Output pure JSON. No markdown formatting (like \`\`\`json), no introductory text.
 `;
 }
 
 /**
  * Parse JSON from Vertex AI response
+ * More robust parsing to handle accumulated markdown or preamble
  */
 function parseJsonFromResponse(text) {
     let jsonString = text.trim();
 
-    // Remove markdown code blocks if present
-    if (jsonString.startsWith('```json')) {
-        jsonString = jsonString.slice(7);
-    } else if (jsonString.startsWith('```')) {
-        jsonString = jsonString.slice(3);
+    // 1. Remove markdown code blocks if present
+    // Matches ```json ... ``` or just ``` ... ```
+    const codeBlockRegex = /```(?:json)?\s*([\s\S]*?)\s*```/i;
+    const match = jsonString.match(codeBlockRegex);
+    if (match && match[1]) {
+        jsonString = match[1].trim();
     }
 
-    if (jsonString.endsWith('```')) {
-        jsonString = jsonString.slice(0, -3);
-    }
+    // 2. If it still looks like it has extra text, try to find the first { and last }
+    const firstBrace = jsonString.indexOf('{');
+    const lastBrace = jsonString.lastIndexOf('}');
 
-    jsonString = jsonString.trim();
+    if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+        jsonString = jsonString.substring(firstBrace, lastBrace + 1);
+    }
 
     try {
         return JSON.parse(jsonString);
     } catch (error) {
         Logger.log('Failed to parse JSON: ' + error.toString());
         Logger.log('Raw text: ' + text);
-        throw new Error('Failed to parse JSON from Vertex AI response');
+        Logger.log('Attempted string: ' + jsonString);
+        throw new Error('Failed to parse JSON from Vertex AI response. The AI might have returned invalid format.');
     }
 }
 

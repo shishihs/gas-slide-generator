@@ -55,6 +55,8 @@ function doPost(e: GoogleAppsScript.Events.DoPost) {
     }
 }
 
+(global as any).doPost = doPost;
+
 function createJsonResponse(data: SlideGenerationResponse) {
     return ContentService.createTextOutput(JSON.stringify(data))
         .setMimeType(ContentService.MimeType.JSON);

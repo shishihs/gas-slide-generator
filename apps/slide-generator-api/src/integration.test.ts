@@ -5,10 +5,34 @@ import { Presentation } from '../src/domain/model/Presentation';
 const mockSlidesApp = {
     create: jest.fn().mockImplementation((title) => ({
         getUrl: jest.fn().mockReturnValue('https://mock-slide.com'),
+        getPageWidth: jest.fn().mockReturnValue(960),
+        getPageHeight: jest.fn().mockReturnValue(540),
         getSlides: jest.fn().mockReturnValue([]),
         getMasters: jest.fn().mockReturnValue([]),
         getLayouts: jest.fn().mockReturnValue([]),
         appendSlide: jest.fn().mockImplementation(() => ({
+            getBackground: jest.fn().mockReturnValue({
+                setSolidFill: jest.fn()
+            }),
+            insertShape: jest.fn().mockReturnValue({
+                getText: jest.fn().mockReturnValue({
+                    setText: jest.fn(),
+                    getTextStyle: jest.fn().mockReturnValue({
+                        setFontFamily: jest.fn().mockReturnThis(),
+                        setFontSize: jest.fn().mockReturnThis(),
+                        setBold: jest.fn().mockReturnThis(),
+                        setForegroundColor: jest.fn().mockReturnThis()
+                    }),
+                    getParagraphs: jest.fn().mockReturnValue([])
+                }),
+                getBorder: jest.fn().mockReturnValue({
+                    setTransparent: jest.fn()
+                }),
+                getFill: jest.fn().mockReturnValue({
+                    setSolidFill: jest.fn()
+                }),
+                setContentAlignment: jest.fn()
+            }),
             getPlaceholder: jest.fn().mockReturnValue({
                 asShape: jest.fn().mockReturnValue({
                     getText: jest.fn().mockReturnValue({
@@ -26,10 +50,34 @@ const mockSlidesApp = {
     })),
     openById: jest.fn().mockImplementation(() => ({
         getUrl: jest.fn().mockReturnValue('https://template-copy.com'),
+        getPageWidth: jest.fn().mockReturnValue(960),
+        getPageHeight: jest.fn().mockReturnValue(540),
         getSlides: jest.fn().mockReturnValue([{ remove: jest.fn() }, { remove: jest.fn() }]),
         getMasters: jest.fn().mockReturnValue([]),
         getLayouts: jest.fn().mockReturnValue([]),
         appendSlide: jest.fn().mockImplementation(() => ({
+            getBackground: jest.fn().mockReturnValue({
+                setSolidFill: jest.fn()
+            }),
+            insertShape: jest.fn().mockReturnValue({
+                getText: jest.fn().mockReturnValue({
+                    setText: jest.fn(),
+                    getTextStyle: jest.fn().mockReturnValue({
+                        setFontFamily: jest.fn().mockReturnThis(),
+                        setFontSize: jest.fn().mockReturnThis(),
+                        setBold: jest.fn().mockReturnThis(),
+                        setForegroundColor: jest.fn().mockReturnThis()
+                    }),
+                    getParagraphs: jest.fn().mockReturnValue([])
+                }),
+                getBorder: jest.fn().mockReturnValue({
+                    setTransparent: jest.fn()
+                }),
+                getFill: jest.fn().mockReturnValue({
+                    setSolidFill: jest.fn()
+                }),
+                setContentAlignment: jest.fn()
+            }),
             getPlaceholder: jest.fn().mockReturnValue({
                 asShape: jest.fn().mockReturnValue({
                     getText: jest.fn().mockReturnValue({
@@ -55,6 +103,28 @@ const mockSlidesApp = {
         CENTERED_TITLE: 'CENTERED_TITLE',
         SUBTITLE: 'SUBTITLE',
         BODY: 'BODY'
+    },
+    ShapeType: {
+        TEXT_BOX: 'TEXT_BOX',
+        RECTANGLE: 'RECTANGLE',
+        ELLIPSE: 'ELLIPSE'
+    },
+    ArrowStyle: {
+        FILL_ARROW: 'FILL_ARROW'
+    },
+    LineCategory: {
+        STRAIGHT: 'STRAIGHT'
+    },
+    ParagraphAlignment: {
+        START: 'START',
+        CENTER: 'CENTER',
+        END: 'END',
+        JUSTIFIED: 'JUSTIFIED'
+    },
+    ContentAlignment: {
+        TOP: 'TOP',
+        MIDDLE: 'MIDDLE',
+        BOTTOM: 'BOTTOM'
     }
 };
 

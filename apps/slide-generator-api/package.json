@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "build": "mkdir -p dist && cp src/appsscript.json dist/ && cp src/main.ts dist/main.ts && esbuild src/api.ts --bundle --outfile=dist/api.gs --format=iife --banner:js=\"var global = this;\""
   },
   "keywords": [],
   "author": "",
@@ -15,6 +16,7 @@
     "@types/google-apps-script": "^2.0.8",
     "@types/jest": "^30.0.0",
     "@types/node": "^24.10.1",
+    "esbuild": "^0.27.1",
     "jest": "^30.2.0",
     "ts-jest": "^29.4.6",
     "typescript": "^5.9.3"

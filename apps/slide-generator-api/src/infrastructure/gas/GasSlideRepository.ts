@@ -1,5 +1,11 @@
+
 import { ISlideRepository } from '../../domain/repositories/ISlideRepository';
 import { Presentation } from '../../domain/model/Presentation';
+import { LayoutManager } from '../../common/utils/LayoutManager';
+import { GasTitleSlideGenerator } from './generators/GasTitleSlideGenerator';
+import { GasSectionSlideGenerator } from './generators/GasSectionSlideGenerator';
+import { GasContentSlideGenerator } from './generators/GasContentSlideGenerator';
+import { CONFIG } from '../../common/config/SlideConfig';
 
 // This class acts as an Anti-Corruption Layer (ACL) adaptation
 // It translates Domain objects into GAS API calls.
@@ -21,106 +27,80 @@ export class GasSlideRepository implements ISlideRepository {
             pres = slidesApp.create(presentation.title);
         }
 
-        const templateSlides = pres.getSlides(); // Pre-existing slides in the template
-        const masterSlides = pres.getMasters();  // Master layouts (if needed, but usually we just copy existing slides or use layouts)
+        const templateSlides = pres.getSlides();
 
-        // In this strategy, we assume the template HAS layout slides we can duplicate, 
-        // OR we just append new blank slides if no template. 
-        // Better strategy for "Template": The template has 'Master' layouts named 'TITLE', 'CONTENT' etc.
-        // We will append slides using those layouts.
+        // Initialize LayoutManager
+        const pageWidth = pres.getPageWidth();
+        const pageHeight = pres.getPageHeight();
+        const layoutManager = new LayoutManager(pageWidth, pageHeight);
 
-        // 2. Clear initial "copy" content if we want a fresh start, 
-        //    BUT usually a template copy is the base. 
-        //    Let's remove all slides from the copy first, preserving masters.
-        //    (Actually GAS doesn't easily let you delete all slides if 0 left, so we keep one then delete it later)
+        // Initialize Generators
+        // TODO: Pass actual credit image if we have it (e.g. from user properties or drive)
+        const titleGenerator = new GasTitleSlideGenerator(null);
+        const sectionGenerator = new GasSectionSlideGenerator(null);
+        const contentGenerator = new GasContentSlideGenerator(null);
 
-        // Strategy B: We append new slides using `pres.appendSlide(layout)`.
+        // Settings (Mock/Default for now. Should interact with UserProperties or Request)
+        const settings = {
+            primaryColor: CONFIG.COLORS.primary_color,
+            enableGradient: false,
+            showTitleUnderline: true,
+            showBottomBar: true,
+            showDateColumn: true,
+            showPageNumber: true,
+            ...CONFIG.COLORS
+        };
 
-        presentation.slides.forEach(slideModel => {
-            let layout: GoogleAppsScript.Slides.Layout | undefined;
+        presentation.slides.forEach((slideModel, index) => {
+            // Strategy: Use Rich Generator if available
+            // Note: Domain Model 'LayoutType' matches with generator logic
 
-            // Find layout by name (approximate match)
-            const layouts = pres.getLayouts();
-            // Try to find a layout that matches the requested type (e.g. "TITLE", "CONTENT")
-            // This relies on the Template having named layouts. 
-            // If not found, use a default mapping to PredefinedLayouts.
+            // Common data mapping
+            const commonData = {
+                title: slideModel.title.value,
+                subtitle: slideModel.subtitle,
+                date: new Date().toLocaleDateString(),
+                points: slideModel.content.items, // Map content items to points for Content/Agenda
+                content: slideModel.content.items,
+                // Add images or other specific props if they exist in domain model (currently minimal)
+            };
 
-            for (const l of layouts) {
-                const name = l.getLayoutName();
-                // In GAS, we verify layout names. Often they are random IDs unless renamed.
-                // If templateId is NOT provided, we use Predefined.
+            const slide = pres.appendSlide(slidesApp.PredefinedLayout.BLANK);
+
+            if (slideModel.layout === 'TITLE') {
+                titleGenerator.generate(slide, commonData, layoutManager, index + 1, settings);
+            } else if (slideModel.layout === 'SECTION') {
+                sectionGenerator.generate(slide, commonData, layoutManager, index + 1, settings);
+            } else if (slideModel.layout === 'CONTENT' || slideModel.layout === 'AGENDA') {
+                // Treat Agenda as Content for now, or create separate if logic diverges
+                contentGenerator.generate(slide, commonData, layoutManager, index + 1, settings);
+            } else {
+                // Fallback for types not yet fully implemented in new Generators
+                // Use Content Generator as generic fallback? Or keep simplified placeholder logic?
+                // Let's use ContentGenerator as generic fallback for now if it works, or just basic TITLE_AND_BODY
+                // But since we appended BLANK, we must draw something.
+                // Using ContentGenerator is safest "Rich" fallback.
+                contentGenerator.generate(slide, commonData, layoutManager, index + 1, settings);
             }
 
-            // Fallback for custom templates: Use Predefined if templateId is missing
-            let safeLayout = slidesApp.PredefinedLayout.TITLE_AND_BODY;
-
-            if (slideModel.layout === 'TITLE') safeLayout = slidesApp.PredefinedLayout.TITLE;
-            if (slideModel.layout === 'SECTION') safeLayout = slidesApp.PredefinedLayout.SECTION_HEADER;
-            if (slideModel.layout === 'AGENDA') safeLayout = slidesApp.PredefinedLayout.TITLE_AND_BODY; // Fallback
-
-            const slide = pres.appendSlide(safeLayout);
-
-            // 3. Placeholder Replacement Strategy
-            // We look for shapes matching placeholders or specific IDs.
-            // For standard layouts, we use placeholders.
-
-            // Set Title
-            const titlePlaceholder = slide.getPlaceholder(slidesApp.PlaceholderType.TITLE) || slide.getPlaceholder(slidesApp.PlaceholderType.CENTERED_TITLE);
-            if (titlePlaceholder) {
-                titlePlaceholder.asShape().getText().setText(slideModel.title.value);
-            }
-
-            // Set Subtitle
-            if (slideModel.subtitle) {
-                const subtitlePlaceholder = slide.getPlaceholder(slidesApp.PlaceholderType.SUBTITLE);
-                if (subtitlePlaceholder) {
-                    subtitlePlaceholder.asShape().getText().setText(slideModel.subtitle);
-                }
-            }
-
-            // Set Body / Content
-            const bodyPlaceholder = slide.getPlaceholder(slidesApp.PlaceholderType.BODY);
-            if (bodyPlaceholder) {
-                const textRange = bodyPlaceholder.asShape().getText();
-                textRange.setText(slideModel.content.items.join('\n'));
-
-                // Apply Bullets
-                const paragraphs = textRange.getParagraphs();
-                for (let i = 0; i < paragraphs.length; i++) {
-                    // Check if setBullet exists (it might not on all types, but Paragraph usually has it)
-                    // In GAS types, Paragraph.setBullet() exists.
-                    try {
-                        (paragraphs[i] as any).setBullet(true);
-                    } catch (e) {
-                        // Ignore if bullet not supported
-                    }
-                }
-            }
-
-            // Set Notes
+            // Also add speaker notes if present (Global handling)
             if (slideModel.notes) {
                 const notesPage = slide.getNotesPage();
                 notesPage.getSpeakerNotesShape().getText().setText(slideModel.notes);
             }
         });
 
-        // Remove the slides that existed from the original template copy (if any)
-        // We only want the *newly generated* slides.
-        // Be careful not to delete the ones we just added. We added them to the END.
-        // So we delete indices 0 to (templateSlides.length - 1).
+        // Remove the slides that existed from the original template
+        const initialCount = templateSlides.length;
         if (templateId) {
-            const currentSlides = pres.getSlides();
-            const initialCount = templateSlides.length;
-            // We must remove from valid indices. 
-            // If we remove index 0 repeatedly, we remove the first N slides.
             for (let i = 0; i < initialCount; i++) {
-                // Check to ensure we don't delete our new slides if something went wrong
                 if (pres.getSlides().length > presentation.slides.length) {
                     pres.getSlides()[0].remove();
                 }
             }
         } else {
-            // If we created from scratch, remove the first blank default slide
+            // Remove the first blank slide created by .create()
+            // Main strategy created new slides, so we remove the original one.
             if (pres.getSlides().length > presentation.slides.length) {
                 pres.getSlides()[0].remove();
             }

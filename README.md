@@ -8,33 +8,50 @@ Google ドキュメントの内容を Vertex AI で解析し、Google Slides を
 
 | メニュー項目 | 説明 |
 |-------------|------|
+| **Create Template** | 5つのレイアウトを持つテンプレートスライドを自動生成 |
 | **Convert to JSON** | ドキュメントを Vertex AI で解析し、スライド用 JSON に変換 |
 | **Generate Slide** | JSON を基にテンプレートから Google Slides を自動生成 |
 
 ## アーキテクチャ
 
 ```
-GAS アドオン  ──────→  Vertex AI (Gemini)
-              直接呼び出し
-              (OAuth認証)
+┌─────────────────────┐     ┌──────────────────────────┐
+│  doc-to-slide-addon │ ──▶ │   slide-generator-api    │
+│  (Google Docs Add-on│     │   (GAS Library)          │
+└─────────────────────┘     └──────────────────────────┘
+         │                            │
+         ▼                            ▼
+   Vertex AI API              Google Slides API
 ```
 
-**Cloud Functions 不要！** GAS から Vertex AI を直接呼び出します。
+**Cloud Functions 不要！** GAS Library 連携でシンプルなアーキテクチャを実現。
 
 ## クイックスタート
 
-詳細は [docs/README.md](./docs/README.md) を参照してください。
+1. **Slide Generator > Create Template** - テンプレート生成
+2. 生成されたスライドでテーマを調整
+3. **Slide Generator > Convert to JSON** - ドキュメント解析
+4. **Slide Generator > Generate Slide** - スライド生成
+
+## 対応レイアウト
+
+| レイアウト名 | 用途 |
+|-------------|------|
+| `TITLE` | 表紙（タイトル＋サブタイトル） |
+| `AGENDA` | 目次・アジェンダ |
+| `CONTENT` | メインコンテンツ |
+| `SECTION` | セクション区切り |
+| `CONCLUSION` | まとめ |
 
 ## ファイル構成
 
 ```
-.
-├── apps/
-│   └── gas-addon/        # GAS アドオンコード
-│       ├── Code.js
-│       ├── GenerateSlideSidebar.html
-│       ├── SettingsSidebar.html
-│       └── appsscript.json
-└── docs/
-    └── README.md         # 詳細ドキュメント
+apps/
+├── doc-to-slide-addon/   # Google Docs Add-on
+│   ├── src/Code.ts
+│   └── src/appsscript.json
+└── slide-generator-api/  # Slide Generator Library
+    ├── src/api.ts
+    └── src/domain/       # DDD Architecture
 ```
+

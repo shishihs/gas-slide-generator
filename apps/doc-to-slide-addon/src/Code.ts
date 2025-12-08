@@ -37,7 +37,21 @@ function getVertexAiModel() {
  * Get the template Slide ID from Script Properties
  */
 function getTemplateSlideId() {
-    return PropertiesService.getScriptProperties().getProperty('TEMPLATE_SLIDE_ID');
+    const val = PropertiesService.getScriptProperties().getProperty('TEMPLATE_SLIDE_ID');
+    return extractPresentationIdFromUrl(val);
+}
+
+/**
+ * Extract Presentation ID from a URL or return as is
+ * @param {string} urlOrId - The URL or ID string
+ * @returns {string|null} - The extracted ID or original string
+ */
+function extractPresentationIdFromUrl(urlOrId) {
+    if (!urlOrId) return null;
+    // Common pattern for Google Doc/Slide/Sheet URLs
+    // e.g. https://docs.google.com/presentation/d/1234567890abcdef/edit...
+    const match = urlOrId.match(/\/d\/([a-zA-Z0-9-_]+)/);
+    return match ? match[1] : urlOrId;
 }
 
 /**

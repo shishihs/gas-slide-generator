@@ -19,9 +19,16 @@ export class GasSlideRepository implements ISlideRepository {
 
         if (templateId) {
             // 1. Copy Template
-            const templateFile = driveApp.getFileById(templateId);
-            const newFile = templateFile.makeCopy(presentation.title);
-            pres = slidesApp.openById(newFile.getId());
+            try {
+                Logger.log(`Attempting to access template ID: ${templateId}`);
+                const templateFile = driveApp.getFileById(templateId);
+                const newFile = templateFile.makeCopy(presentation.title);
+                Logger.log(`Template copied. New File ID: ${newFile.getId()}`);
+                pres = slidesApp.openById(newFile.getId());
+            } catch (e: any) {
+                Logger.log(`Error accessing/copying template: ${e.toString()}`);
+                throw new Error(`Failed to access or copy template with ID: ${templateId}. Ensure the ID is correct and the script has permission to access it. Details: ${e.message}`);
+            }
         } else {
             // Fallback: Create Blank
             pres = slidesApp.create(presentation.title);
@@ -65,21 +72,44 @@ export class GasSlideRepository implements ISlideRepository {
                 // Add images or other specific props if they exist in domain model (currently minimal)
             };
 
-            const slide = pres.appendSlide(slidesApp.PredefinedLayout.BLANK);
+            // Determine Layout
+            let slideLayout: GoogleAppsScript.Slides.Layout;
+            const layouts = pres.getLayouts();
+
+            // Helper to find layout by name (case-insensitive)
+            const findLayout = (name: string) => {
+                return layouts.find(l => l.getLayoutName().toUpperCase() === name.toUpperCase());
+            };
 
             if (slideModel.layout === 'TITLE') {
+                slideLayout = findLayout('TITLE') || layouts[0]; // Fallback to first if not found (usually Title)
+            } else if (slideModel.layout === 'SECTION') {
+                slideLayout = findLayout('SECTION_HEADER') || findLayout('SECTION ONLY') || layouts[1];
+            } else if (slideModel.layout === 'CONTENT' || slideModel.layout === 'AGENDA') {
+                slideLayout = findLayout('TITLE_AND_BODY') || layouts[2]; // Default content
+            } else {
+                slideLayout = findLayout('TITLE_AND_BODY') || layouts[layouts.length - 1]; // Fallback
+            }
+
+            // Fallback for safety if somehow no layout matched (shouldn't happen with default templates)
+            if (!slideLayout) {
+                slideLayout = layouts[0];
+            }
+
+            const slide = pres.appendSlide(slideLayout);
+
+            if (slideModel.layout === 'TITLE') {
+                // For Title slide, we want to respect the template placeholders, 
+                // so we pass a flag or handle it in the generator. 
+                // The current generator 'draws' shapes. We need to update the generator first 
+                // or parallel. The user implementation plan says update Generator as well.
                 titleGenerator.generate(slide, commonData, layoutManager, index + 1, settings);
             } else if (slideModel.layout === 'SECTION') {
                 sectionGenerator.generate(slide, commonData, layoutManager, index + 1, settings);
             } else if (slideModel.layout === 'CONTENT' || slideModel.layout === 'AGENDA') {
-                // Treat Agenda as Content for now, or create separate if logic diverges
+                // Treat Agenda as Content for now
                 contentGenerator.generate(slide, commonData, layoutManager, index + 1, settings);
             } else {
-                // Fallback for types not yet fully implemented in new Generators
-                // Use Content Generator as generic fallback? Or keep simplified placeholder logic?
-                // Let's use ContentGenerator as generic fallback for now if it works, or just basic TITLE_AND_BODY
-                // But since we appended BLANK, we must draw something.
-                // Using ContentGenerator is safest "Rich" fallback.
                 contentGenerator.generate(slide, commonData, layoutManager, index + 1, settings);
             }
 

@@ -11,6 +11,8 @@ export const CONFIG = {
         main: ''
     },
     POS_PX: {
+        // [LEGACY] These coordinates are now used primarily as fallbacks when template placeholders are missing.
+        // We encourage using Google Slides Templates instead of modifying these values.
         titleSlide: {
             logo: {
                 left: 55,

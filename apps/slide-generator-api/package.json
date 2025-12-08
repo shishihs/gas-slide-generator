@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "jest",
-    "build": "mkdir -p dist && cp src/appsscript.json dist/ && cp src/main.ts dist/main.ts && esbuild src/api.ts --bundle --outfile=dist/api.gs --format=iife --banner:js=\"var global = this;\""
+    "build": "mkdir -p dist && cp src/appsscript.json dist/ && esbuild src/api.ts --bundle --outfile=dist/api.gs --format=iife --banner:js=\"var global = this;\" --footer:js=\"function generateSlides(data){ return global.generateSlides(data); } function doPost(e){ return global.doPost(e); } function doGet(e){ return global.doGet(e); }\""
   },
   "keywords": [],
   "author": "",

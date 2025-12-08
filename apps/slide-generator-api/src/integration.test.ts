@@ -9,7 +9,11 @@ const mockSlidesApp = {
         getPageHeight: jest.fn().mockReturnValue(540),
         getSlides: jest.fn().mockReturnValue([]),
         getMasters: jest.fn().mockReturnValue([]),
-        getLayouts: jest.fn().mockReturnValue([]),
+        getLayouts: jest.fn().mockReturnValue([
+            { getLayoutName: jest.fn().mockReturnValue('TITLE') },
+            { getLayoutName: jest.fn().mockReturnValue('SECTION_HEADER') },
+            { getLayoutName: jest.fn().mockReturnValue('TITLE_AND_BODY') }
+        ]),
         appendSlide: jest.fn().mockImplementation(() => ({
             getBackground: jest.fn().mockReturnValue({
                 setSolidFill: jest.fn()
@@ -37,10 +41,32 @@ const mockSlidesApp = {
                 asShape: jest.fn().mockReturnValue({
                     getText: jest.fn().mockReturnValue({
                         setText: jest.fn(),
-                        getParagraphs: jest.fn().mockReturnValue([])
+                        getParagraphs: jest.fn().mockReturnValue([]),
+                        getTextStyle: jest.fn().mockReturnValue({
+                            setFontFamily: jest.fn().mockReturnThis(),
+                            setFontSize: jest.fn().mockReturnThis(),
+                            setBold: jest.fn().mockReturnThis(),
+                            setForegroundColor: jest.fn().mockReturnThis()
+                        })
                     })
                 })
             }),
+            getPlaceholders: jest.fn().mockReturnValue([{
+                getPlaceholderType: jest.fn().mockReturnValue('BODY'),
+                asShape: jest.fn().mockReturnValue({
+                    getText: jest.fn().mockReturnValue({
+                        setText: jest.fn(),
+                        getParagraphs: jest.fn().mockReturnValue([]),
+                        getTextStyle: jest.fn().mockReturnValue({
+                            setFontFamily: jest.fn().mockReturnThis(),
+                            setFontSize: jest.fn().mockReturnThis(),
+                            setBold: jest.fn().mockReturnThis(),
+                            setForegroundColor: jest.fn().mockReturnThis()
+                        })
+                    }),
+                    getLeft: jest.fn().mockReturnValue(100)
+                })
+            }]),
             getNotesPage: jest.fn().mockReturnValue({
                 getSpeakerNotesShape: jest.fn().mockReturnValue({
                     getText: jest.fn().mockReturnValue({ setText: jest.fn() })
@@ -54,7 +80,11 @@ const mockSlidesApp = {
         getPageHeight: jest.fn().mockReturnValue(540),
         getSlides: jest.fn().mockReturnValue([{ remove: jest.fn() }, { remove: jest.fn() }]),
         getMasters: jest.fn().mockReturnValue([]),
-        getLayouts: jest.fn().mockReturnValue([]),
+        getLayouts: jest.fn().mockReturnValue([
+            { getLayoutName: jest.fn().mockReturnValue('TITLE') },
+            { getLayoutName: jest.fn().mockReturnValue('SECTION_HEADER') },
+            { getLayoutName: jest.fn().mockReturnValue('TITLE_AND_BODY') }
+        ]),
         appendSlide: jest.fn().mockImplementation(() => ({
             getBackground: jest.fn().mockReturnValue({
                 setSolidFill: jest.fn()
@@ -82,10 +112,32 @@ const mockSlidesApp = {
                 asShape: jest.fn().mockReturnValue({
                     getText: jest.fn().mockReturnValue({
                         setText: jest.fn(),
-                        getParagraphs: jest.fn().mockReturnValue([])
+                        getParagraphs: jest.fn().mockReturnValue([]),
+                        getTextStyle: jest.fn().mockReturnValue({
+                            setFontFamily: jest.fn().mockReturnThis(),
+                            setFontSize: jest.fn().mockReturnThis(),
+                            setBold: jest.fn().mockReturnThis(),
+                            setForegroundColor: jest.fn().mockReturnThis()
+                        })
                     })
                 })
             }),
+            getPlaceholders: jest.fn().mockReturnValue([{
+                getPlaceholderType: jest.fn().mockReturnValue('BODY'),
+                asShape: jest.fn().mockReturnValue({
+                    getText: jest.fn().mockReturnValue({
+                        setText: jest.fn(),
+                        getParagraphs: jest.fn().mockReturnValue([]),
+                        getTextStyle: jest.fn().mockReturnValue({
+                            setFontFamily: jest.fn().mockReturnThis(),
+                            setFontSize: jest.fn().mockReturnThis(),
+                            setBold: jest.fn().mockReturnThis(),
+                            setForegroundColor: jest.fn().mockReturnThis()
+                        })
+                    }),
+                    getLeft: jest.fn().mockReturnValue(100)
+                })
+            }]),
             getNotesPage: jest.fn().mockReturnValue({
                 getSpeakerNotesShape: jest.fn().mockReturnValue({
                     getText: jest.fn().mockReturnValue({ setText: jest.fn() })
@@ -96,7 +148,8 @@ const mockSlidesApp = {
     PredefinedLayout: {
         TITLE_AND_BODY: 'TITLE_AND_BODY',
         TITLE: 'TITLE',
-        SECTION_HEADER: 'SECTION_HEADER'
+        SECTION_HEADER: 'SECTION_HEADER',
+        BLANK: 'BLANK' // Added BLANK
     },
     PlaceholderType: {
         TITLE: 'TITLE',
@@ -130,11 +183,16 @@ const mockSlidesApp = {
 
 (global as any).SlidesApp = mockSlidesApp;
 
+(global as any).Logger = {
+    log: jest.fn()
+};
+
 (global as any).DriveApp = {
     getFileById: jest.fn().mockReturnValue({
         makeCopy: jest.fn().mockReturnValue({
             getId: jest.fn().mockReturnValue('new-copy-id')
-        })
+        }),
+        getBlob: jest.fn()
     })
 };
 

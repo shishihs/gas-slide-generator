@@ -104,6 +104,8 @@ var global = this;
           main: ""
         },
         POS_PX: {
+          // [LEGACY] These coordinates are now used primarily as fallbacks when template placeholders are missing.
+          // We encourage using Google Slides Templates instead of modifying these values.
           titleSlide: {
             logo: {
               left: 55,
@@ -1053,69 +1055,6 @@ var global = this;
       shape.getBorder().setTransparent();
     }
   }
-  function createPillShapeUnderline(slide, x, y, width, height, settings) {
-    const shapes = [];
-    const diameter = height;
-    const radius = height / 2;
-    const rectWidth = Math.max(0, width - diameter);
-    if (width < diameter) {
-      const centerCircle = slide.insertShape(SlidesApp.ShapeType.ELLIPSE, x, y, diameter, diameter);
-      const color = settings.enableGradient ? settings.gradientStart : settings.primaryColor;
-      centerCircle.getFill().setSolidFill(color);
-      centerCircle.getBorder().setTransparent();
-      return;
-    }
-    const leftCircle = slide.insertShape(SlidesApp.ShapeType.ELLIPSE, x, y, diameter, diameter);
-    shapes.push(leftCircle);
-    let mainShape;
-    if (rectWidth > 0) {
-      if (settings.enableGradient) {
-        mainShape = createGradientRectangle(
-          slide,
-          x + radius,
-          y,
-          rectWidth,
-          height,
-          [settings.gradientStart, settings.gradientEnd]
-        );
-        if (mainShape) shapes.push(mainShape);
-      } else {
-        mainShape = slide.insertShape(
-          SlidesApp.ShapeType.RECTANGLE,
-          x + radius,
-          y,
-          rectWidth,
-          height
-        );
-        mainShape.getFill().setSolidFill(settings.primaryColor);
-        mainShape.getBorder().setTransparent();
-        shapes.push(mainShape);
-      }
-    }
-    const rightCircle = slide.insertShape(
-      SlidesApp.ShapeType.ELLIPSE,
-      x + width - diameter,
-      y,
-      diameter,
-      diameter
-    );
-    shapes.push(rightCircle);
-    if (settings.enableGradient) {
-      leftCircle.getFill().setSolidFill(settings.gradientStart);
-      rightCircle.getFill().setSolidFill(settings.gradientEnd);
-    } else {
-      leftCircle.getFill().setSolidFill(settings.primaryColor);
-      rightCircle.getFill().setSolidFill(settings.primaryColor);
-    }
-    leftCircle.getBorder().setTransparent();
-    rightCircle.getBorder().setTransparent();
-    if (shapes.length > 1) {
-      try {
-        if (slide.group) slide.group(shapes);
-      } catch (e) {
-      }
-    }
-  }
   function normalizeImages(arr) {
     return (arr || []).map((v) => typeof v === "string" ? {
       url: v
@@ -1141,31 +1080,6 @@ var global = this;
       } catch (e) {
       }
     }
-  }
-  function adjustShapeText_External(shape, preCalculatedWidthPt = null, widthOverride = null, heightOverride = null) {
-    const PADDING_TOP_BOTTOM = 7.5;
-    const PADDING_LEFT_RIGHT = 10;
-    function getEffectiveCharCount(text) {
-      let count = 0;
-      if (!text) return 0;
-      for (let i = 0; i < text.length; i++) {
-        const char = text[i];
-        if (char.match(/[^\x00-\x7F\uFF61-\uFF9F]/)) {
-          count += 1;
-        } else {
-          count += 0.6;
-        }
-      }
-      return count;
-    }
-    function _isShapeShortBox(shape2, baseFontSize, heightOverride2 = null) {
-      if (!baseFontSize || baseFontSize === 0) {
-        return false;
-      }
-      const boxHeight = heightOverride2 !== null ? heightOverride2 : shape2.getHeight();
-      return boxHeight <= baseFontSize * 2;
-    }
-    return { isOverflow: false, details: "Simplified implementation in cleanup." };
   }
   function drawBottomBar(slide, layout, settings) {
     const barRect = layout.getRect("bottomBar");
@@ -1237,76 +1151,6 @@ var global = this;
       return null;
     }
   }
-  function estimateTextWidthPt(text, fontSize) {
-    let count = 0;
-    if (!text) return 0;
-    for (let i = 0; i < text.length; i++) {
-      const char = text[i];
-      if (char.match(/[^\x00-\x7F\uFF61-\uFF9F]/)) {
-        count += 1;
-      } else {
-        count += 0.6;
-      }
-    }
-    return count * fontSize;
-  }
-  function drawStandardTitleHeader(slide, layout, key, title, settings, preCalculatedWidthPt = null, imageUpdateOption = "update") {
-    if (imageUpdateOption === "update") {
-      const logoRect = safeGetRect(layout, `${key}.headerLogo`);
-      try {
-        if (CONFIG.LOGOS.header && logoRect) {
-          const imageData = insertImageFromUrlOrFileId(CONFIG.LOGOS.header);
-          if (imageData && typeof imageData !== "string") {
-            const logo = slide.insertImage(imageData);
-            const asp = logo.getHeight() / logo.getWidth();
-            logo.setLeft(logoRect.left).setTop(logoRect.top).setWidth(logoRect.width).setHeight(logoRect.width * asp);
-          }
-        }
-      } catch (e) {
-      }
-    }
-    const titleRect = safeGetRect(layout, `${key}.title`);
-    if (!titleRect) {
-      return;
-    }
-    const initialFontSize = CONFIG.FONTS.sizes.contentTitle;
-    const optimalHeight = layout.pxToPt(initialFontSize + 8);
-    const cmToPt = 28.3465;
-    const verticalShiftPt = 0.3 * cmToPt;
-    const adjustedTop = titleRect.top + verticalShiftPt;
-    const titleShape = slide.insertShape(
-      SlidesApp.ShapeType.TEXT_BOX,
-      titleRect.left,
-      adjustedTop,
-      titleRect.width,
-      optimalHeight
-    );
-    setStyledText(titleShape, title || "", {
-      size: initialFontSize,
-      bold: true,
-      fontType: "large"
-    });
-    try {
-      titleShape.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
-    } catch (e) {
-    }
-    if (settings.showTitleUnderline && title) {
-      const uRect = safeGetRect(layout, `${key}.titleUnderline`);
-      if (!uRect) {
-        return;
-      }
-      let underlineWidthPt = 0;
-      if (preCalculatedWidthPt !== null && preCalculatedWidthPt > 0) {
-        underlineWidthPt = preCalculatedWidthPt;
-      } else {
-        underlineWidthPt = estimateTextWidthPt(title, initialFontSize);
-      }
-      const desiredWidthPt = underlineWidthPt + 10;
-      const maxUnderlineWidth = layout.pageW_pt - uRect.left - layout.pxToPt(25);
-      const finalWidth = Math.min(desiredWidthPt, maxUnderlineWidth);
-      createPillShapeUnderline(slide, uRect.left, uRect.top, finalWidth, uRect.height, settings);
-    }
-  }
   function drawSubheadIfAny(slide, layout, key, subhead, preCalculatedWidthPt = null) {
     if (!subhead) return 0;
     const rect = safeGetRect(layout, `${key}.subhead`);
@@ -1340,29 +1184,6 @@ var global = this;
   function adjustAreaForSubhead(area, subhead, layout) {
     return area;
   }
-  function setBoldTextSize(shapeOrTextRange, size = 16) {
-    let textRange;
-    try {
-      if (shapeOrTextRange && typeof shapeOrTextRange.getText === "function") {
-        textRange = shapeOrTextRange.getText();
-      } else if (shapeOrTextRange && typeof shapeOrTextRange.getRuns === "function") {
-        textRange = shapeOrTextRange;
-      } else {
-        return;
-      }
-      if (!textRange || textRange.isEmpty()) {
-        return;
-      }
-      const runs = textRange.getRuns();
-      runs.forEach((run) => {
-        const style = run.getTextStyle();
-        if (style.isBold()) {
-          style.setFontSize(size);
-        }
-      });
-    } catch (e) {
-    }
-  }
   var init_SlideUtils = __esm({
     "src/common/utils/SlideUtils.ts"() {
       init_SlideConfig();
@@ -1381,8 +1202,25 @@ var global = this;
           this.creditImageBlob = creditImageBlob;
         }
         generate(slide, data, layout, pageNum, settings, imageUpdateOption = "update") {
-          setBackgroundImageFromUrl(slide, layout, CONFIG.BACKGROUND_IMAGES.title, CONFIG.COLORS.background_white, imageUpdateOption);
-          if (imageUpdateOption === "update") {
+          const titlePlaceholder = slide.getPlaceholder(SlidesApp.PlaceholderType.TITLE) || slide.getPlaceholder(SlidesApp.PlaceholderType.CENTERED_TITLE);
+          if (titlePlaceholder) {
+            const shape = titlePlaceholder.asShape();
+            shape.getText().setText(data.title || "");
+          }
+          const subtitlePlaceholder = slide.getPlaceholder(SlidesApp.PlaceholderType.SUBTITLE);
+          if (subtitlePlaceholder) {
+            if (data.date) {
+              subtitlePlaceholder.asShape().getText().setText(data.date);
+            } else {
+              subtitlePlaceholder.asShape().getText().setText("");
+            }
+          } else {
+            const bodyPlaceholder = slide.getPlaceholder(SlidesApp.PlaceholderType.BODY);
+            if (bodyPlaceholder && data.date) {
+              bodyPlaceholder.asShape().getText().setText(data.date);
+            }
+          }
+          if (imageUpdateOption === "update" && CONFIG.LOGOS.header) {
             const logoRect = layout.getRect("titleSlide.logo");
             try {
               if (CONFIG.LOGOS.header) {
@@ -1395,53 +1233,6 @@ var global = this;
               }
             } catch (e) {
             }
-          }
-          const titleRect = layout.getRect("titleSlide.title");
-          const newTop = (layout.pageH_pt - titleRect.height) / 2;
-          const newWidth = titleRect.width + layout.pxToPt(60);
-          const titleShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, titleRect.left, newTop, newWidth, titleRect.height);
-          setStyledText(titleShape, data.title, {
-            size: CONFIG.FONTS.sizes.title,
-            bold: true,
-            fontType: "large"
-          });
-          try {
-            titleShape.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
-          } catch (e) {
-          }
-          try {
-            const titleText = data.title || "";
-            if (titleText.indexOf("\n") === -1) {
-              const preCalculatedWidth = data && typeof data._title_widthPt === "number" ? data._title_widthPt : null;
-              if (preCalculatedWidth !== null && preCalculatedWidth < 900) {
-                adjustShapeText_External(titleShape, preCalculatedWidth);
-              } else {
-                adjustShapeText_External(titleShape, null);
-              }
-            }
-          } catch (e) {
-          }
-          try {
-            const titleTextRange = titleShape.getText();
-            if (!titleTextRange.isEmpty()) {
-              const firstRun = titleTextRange.getRuns()[0];
-              if (firstRun) {
-                const currentFontSize = firstRun.getTextStyle().getFontSize();
-                if (currentFontSize === 41) {
-                  titleTextRange.getTextStyle().setFontSize(40);
-                }
-              }
-            }
-          } catch (e) {
-          }
-          if (settings.showDateColumn) {
-            const dateRect = layout.getRect("titleSlide.date");
-            const dateShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, dateRect.left, dateRect.top, dateRect.width, dateRect.height);
-            dateShape.getText().setText(data.date || "");
-            applyTextStyle(dateShape.getText(), {
-              size: CONFIG.FONTS.sizes.date,
-              fontType: "large"
-            });
           }
           if (settings.showBottomBar) {
             drawBottomBar(slide, layout, settings);
@@ -1523,25 +1314,19 @@ var global = this;
             } catch (e) {
             }
           }
-          const titleRect = layout.getRect("sectionSlide.title");
-          const titleShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, titleRect.left, titleRect.top, titleRect.width, titleRect.height);
-          titleShape.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
-          setStyledText(titleShape, data.title, {
-            size: CONFIG.FONTS.sizes.sectionTitle,
-            bold: true,
-            align: SlidesApp.ParagraphAlignment.CENTER,
-            fontType: "large"
-          });
-          try {
-            const titleText = data.title || "";
-            const textAreaWidthPt = titleRect.width;
-            if (titleText.indexOf("\n") === -1) {
-              const preCalculatedWidth = data && typeof data._title_widthPt === "number" ? data._title_widthPt : null;
-              if (textAreaWidthPt > 0 && (preCalculatedWidth === null || preCalculatedWidth < textAreaWidthPt * 1.4)) {
-                adjustShapeText_External(titleShape, preCalculatedWidth);
-              }
-            }
-          } catch (e) {
+          const titlePlaceholder = slide.getPlaceholder(SlidesApp.PlaceholderType.TITLE) || slide.getPlaceholder(SlidesApp.PlaceholderType.CENTERED_TITLE);
+          if (titlePlaceholder) {
+            titlePlaceholder.asShape().getText().setText(data.title || "");
+          } else {
+            const titleRect = layout.getRect("sectionSlide.title");
+            const titleShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, titleRect.left, titleRect.top, titleRect.width, titleRect.height);
+            titleShape.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
+            setStyledText(titleShape, data.title, {
+              size: CONFIG.FONTS.sizes.sectionTitle,
+              bold: true,
+              align: SlidesApp.ParagraphAlignment.CENTER,
+              fontType: "large"
+            });
           }
           addCucFooter(slide, layout, pageNum, settings, this.creditImageBlob);
         }
@@ -1553,16 +1338,17 @@ var global = this;
   var GasContentSlideGenerator;
   var init_GasContentSlideGenerator = __esm({
     "src/infrastructure/gas/generators/GasContentSlideGenerator.ts"() {
-      init_SlideConfig();
       init_SlideUtils();
       GasContentSlideGenerator = class {
         constructor(creditImageBlob) {
           this.creditImageBlob = creditImageBlob;
         }
         generate(slide, data, layout, pageNum, settings, imageUpdateOption = "update") {
-          setBackgroundImageFromUrl(slide, layout, CONFIG.BACKGROUND_IMAGES.main, CONFIG.COLORS.background_white, imageUpdateOption);
-          const titleWidthPt = data && typeof data._title_widthPt === "number" ? data._title_widthPt : null;
-          drawStandardTitleHeader(slide, layout, "contentSlide", data.title, settings, titleWidthPt, imageUpdateOption);
+          const titlePlaceholder = slide.getPlaceholder(SlidesApp.PlaceholderType.TITLE) || slide.getPlaceholder(SlidesApp.PlaceholderType.CENTERED_TITLE);
+          if (titlePlaceholder) {
+            titlePlaceholder.asShape().getText().setText(data.title || "");
+          } else {
+          }
           const subheadWidthPt = data && typeof data._subhead_widthPt === "number" ? data._subhead_widthPt : null;
           const dy = drawSubheadIfAny(slide, layout, "contentSlide", data.subhead, subheadWidthPt);
           let points = Array.isArray(data.points) ? data.points.slice(0) : [];
@@ -1572,60 +1358,57 @@ var global = this;
           }
           const hasImages = Array.isArray(data.images) && data.images.length > 0;
           const isTwo = !!(data.twoColumn || data.columns);
-          if (isTwo && (data.columns || points) || !isTwo && points && points.length > 0) {
-            if (isTwo) {
-              let L = [], R = [];
-              if (Array.isArray(data.columns) && data.columns.length === 2) {
-                L = data.columns[0] || [];
-                R = data.columns[1] || [];
-              } else {
-                const mid = Math.ceil(points.length / 2);
-                L = points.slice(0, mid);
-                R = points.slice(mid);
-              }
-              const baseLeftRect = layout.getRect("contentSlide.twoColLeft");
-              const baseRightRect = layout.getRect("contentSlide.twoColRight");
-              const adjustedLeftRect = adjustAreaForSubhead(baseLeftRect, data.subhead, layout);
-              const adjustedRightRect = adjustAreaForSubhead(baseRightRect, data.subhead, layout);
-              const leftRect = offsetRect(adjustedLeftRect, 0, dy);
-              const rightRect = offsetRect(adjustedRightRect, 0, dy);
-              createContentCushion(slide, leftRect, settings, layout);
-              createContentCushion(slide, rightRect, settings, layout);
-              const padding = layout.pxToPt(20);
-              const leftTextRect = { left: leftRect.left + padding, top: leftRect.top + padding, width: leftRect.width - padding * 2, height: leftRect.height - padding * 2 };
-              const rightTextRect = { left: rightRect.left + padding, top: rightRect.top + padding, width: rightRect.width - padding * 2, height: rightRect.height - padding * 2 };
-              const leftShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, leftTextRect.left, leftTextRect.top, leftTextRect.width, leftTextRect.height);
-              const rightShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, rightTextRect.left, rightTextRect.top, rightTextRect.width, rightTextRect.height);
-              setBulletsWithInlineStyles(leftShape, L);
-              setBulletsWithInlineStyles(rightShape, R);
-              setBoldTextSize(leftShape, 16);
-              setBoldTextSize(rightShape, 16);
-              try {
-                adjustShapeText_External(leftShape, null);
-              } catch (e) {
-              }
-              try {
-                adjustShapeText_External(rightShape, null);
-              } catch (e) {
-              }
+          const bodies = slide.getPlaceholders().filter((p) => p.getPlaceholderType() === SlidesApp.PlaceholderType.BODY);
+          if (isTwo && bodies.length >= 2) {
+            let L = [], R = [];
+            if (Array.isArray(data.columns) && data.columns.length === 2) {
+              L = data.columns[0] || [];
+              R = data.columns[1] || [];
+            } else {
+              const mid = Math.ceil(points.length / 2);
+              L = points.slice(0, mid);
+              R = points.slice(mid);
+            }
+            const sortedBodies = bodies.map((p) => p.asShape()).sort((a, b) => a.getLeft() - b.getLeft());
+            setBulletsWithInlineStyles(sortedBodies[0], L);
+            setBulletsWithInlineStyles(sortedBodies[1], R);
+          } else if (isTwo) {
+            if (Array.isArray(data.columns) && data.columns.length === 2) {
+            }
+            let L = [], R = [];
+            if (Array.isArray(data.columns) && data.columns.length === 2) {
+              L = data.columns[0] || [];
+              R = data.columns[1] || [];
+            } else {
+              const mid = Math.ceil(points.length / 2);
+              L = points.slice(0, mid);
+              R = points.slice(mid);
+            }
+            const baseLeftRect = layout.getRect("contentSlide.twoColLeft");
+            const baseRightRect = layout.getRect("contentSlide.twoColRight");
+            const adjustedLeftRect = adjustAreaForSubhead(baseLeftRect, data.subhead, layout);
+            const adjustedRightRect = adjustAreaForSubhead(baseRightRect, data.subhead, layout);
+            const leftRect = offsetRect(adjustedLeftRect, 0, dy);
+            const rightRect = offsetRect(adjustedRightRect, 0, dy);
+            const padding = layout.pxToPt(20);
+            const leftTextRect = { left: leftRect.left + padding, top: leftRect.top + padding, width: leftRect.width - padding * 2, height: leftRect.height - padding * 2 };
+            const rightTextRect = { left: rightRect.left + padding, top: rightRect.top + padding, width: rightRect.width - padding * 2, height: rightRect.height - padding * 2 };
+            const leftShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, leftTextRect.left, leftTextRect.top, leftTextRect.width, leftTextRect.height);
+            const rightShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, rightTextRect.left, rightTextRect.top, rightTextRect.width, rightTextRect.height);
+            setBulletsWithInlineStyles(leftShape, L);
+            setBulletsWithInlineStyles(rightShape, R);
+          } else {
+            if (bodies.length > 0) {
+              const bodyShape = bodies[0].asShape();
+              setBulletsWithInlineStyles(bodyShape, points);
             } else {
               const baseBodyRect = layout.getRect("contentSlide.body");
               const adjustedBodyRect = adjustAreaForSubhead(baseBodyRect, data.subhead, layout);
               const bodyRect = offsetRect(adjustedBodyRect, 0, dy);
-              createContentCushion(slide, bodyRect, settings, layout);
               const padding = layout.pxToPt(20);
               const textRect = { left: bodyRect.left + padding, top: bodyRect.top + padding, width: bodyRect.width - padding * 2, height: bodyRect.height - padding * 2 };
               const bodyShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, textRect.left, textRect.top, textRect.width, textRect.height);
               setBulletsWithInlineStyles(bodyShape, points);
-              setBoldTextSize(bodyShape, 16);
-              try {
-                bodyShape.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
-              } catch (e) {
-              }
-              try {
-                adjustShapeText_External(bodyShape, null);
-              } catch (e) {
-              }
             }
           }
           if (hasImages && !points.length && !isTwo) {
@@ -1659,9 +1442,16 @@ var global = this;
           const driveApp = DriveApp;
           let pres;
           if (templateId) {
-            const templateFile = driveApp.getFileById(templateId);
-            const newFile = templateFile.makeCopy(presentation.title);
-            pres = slidesApp.openById(newFile.getId());
+            try {
+              Logger.log(`Attempting to access template ID: ${templateId}`);
+              const templateFile = driveApp.getFileById(templateId);
+              const newFile = templateFile.makeCopy(presentation.title);
+              Logger.log(`Template copied. New File ID: ${newFile.getId()}`);
+              pres = slidesApp.openById(newFile.getId());
+            } catch (e) {
+              Logger.log(`Error accessing/copying template: ${e.toString()}`);
+              throw new Error(`Failed to access or copy template with ID: ${templateId}. Ensure the ID is correct and the script has permission to access it. Details: ${e.message}`);
+            }
           } else {
             pres = slidesApp.create(presentation.title);
           }
@@ -1691,7 +1481,24 @@ var global = this;
               content: slideModel.content.items
               // Add images or other specific props if they exist in domain model (currently minimal)
             };
-            const slide = pres.appendSlide(slidesApp.PredefinedLayout.BLANK);
+            let slideLayout;
+            const layouts = pres.getLayouts();
+            const findLayout = (name) => {
+              return layouts.find((l) => l.getLayoutName().toUpperCase() === name.toUpperCase());
+            };
+            if (slideModel.layout === "TITLE") {
+              slideLayout = findLayout("TITLE") || layouts[0];
+            } else if (slideModel.layout === "SECTION") {
+              slideLayout = findLayout("SECTION_HEADER") || findLayout("SECTION ONLY") || layouts[1];
+            } else if (slideModel.layout === "CONTENT" || slideModel.layout === "AGENDA") {
+              slideLayout = findLayout("TITLE_AND_BODY") || layouts[2];
+            } else {
+              slideLayout = findLayout("TITLE_AND_BODY") || layouts[layouts.length - 1];
+            }
+            if (!slideLayout) {
+              slideLayout = layouts[0];
+            }
+            const slide = pres.appendSlide(slideLayout);
             if (slideModel.layout === "TITLE") {
               titleGenerator.generate(slide, commonData, layoutManager, index + 1, settings);
             } else if (slideModel.layout === "SECTION") {
@@ -1729,10 +1536,12 @@ var global = this;
     "src/api.ts"() {
       init_PresentationApplicationService();
       init_GasSlideRepository();
-      function doPost(e) {
+      global.doPost = doPost;
+      global.doGet = doGet;
+      global.generateSlides = generateSlides;
+      function generateSlides(data) {
         try {
-          const postData = JSON.parse(e.postData.contents);
-          const data = postData.json || postData;
+          Logger.log("Library Call: generateSlides with data: " + JSON.stringify(data));
           const request = {
             title: data.title || "Untitled Presentation",
             templateId: data.templateId,
@@ -1748,10 +1557,35 @@ var global = this;
           const repository = new GasSlideRepository();
           const service = new PresentationApplicationService(repository);
           const slideUrl = service.createPresentation(request);
-          return createJsonResponse({
+          return {
             success: true,
             url: slideUrl
-          });
+          };
+        } catch (error) {
+          Logger.log("Library Error: " + error.toString());
+          return {
+            success: false,
+            error: error.message || error.toString()
+          };
+        }
+      }
+      function doGet(e) {
+        return ContentService.createTextOutput("Slide Generator API is running. Authorization successful.");
+      }
+      function doPost(e) {
+        try {
+          const postData = JSON.parse(e.postData.contents);
+          if (postData.action === "test") {
+            return createJsonResponse({
+              success: true,
+              message: "POST Connection Successful",
+              received: postData
+            });
+          }
+          const data = postData.json || postData;
+          Logger.log("Incoming Request Data: " + JSON.stringify(data));
+          const result = generateSlides(data);
+          return createJsonResponse(result);
         } catch (error) {
           Logger.log("API Error: " + error.toString());
           return createJsonResponse({
@@ -1768,3 +1602,4 @@ var global = this;
   });
   require_api();
 })();
+function generateSlides(data){ return global.generateSlides(data); } function doPost(e){ return global.doPost(e); } function doGet(e){ return global.doGet(e); }

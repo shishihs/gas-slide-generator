@@ -85,26 +85,24 @@ export class GasSectionSlideGenerator implements ISlideGenerator {
             } catch (e) { }
         }
 
-        const titleRect = layout.getRect('sectionSlide.title');
-        const titleShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, titleRect.left, titleRect.top, titleRect.width, titleRect.height);
-        titleShape.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
-        setStyledText(titleShape, data.title, {
-            size: CONFIG.FONTS.sizes.sectionTitle,
-            bold: true,
-            align: SlidesApp.ParagraphAlignment.CENTER,
-            fontType: 'large'
-        });
-
-        try {
-            const titleText = data.title || '';
-            const textAreaWidthPt = titleRect.width;
-            if (titleText.indexOf('\n') === -1) {
-                const preCalculatedWidth = (data && typeof data._title_widthPt === 'number') ? data._title_widthPt : null;
-                if (textAreaWidthPt > 0 && (preCalculatedWidth === null || preCalculatedWidth < (textAreaWidthPt * 1.4))) {
-                    adjustShapeText_External(titleShape, preCalculatedWidth);
-                }
-            }
-        } catch (e) { }
+        // Title Placeholder
+        const titlePlaceholder = slide.getPlaceholder(SlidesApp.PlaceholderType.TITLE) || slide.getPlaceholder(SlidesApp.PlaceholderType.CENTERED_TITLE);
+        if (titlePlaceholder) {
+            titlePlaceholder.asShape().getText().setText(data.title || '');
+            // Use manual alignment if needed, but template usually handles it.
+            // sectionTitle size is also handled by template.
+        } else {
+            // Fallback
+            const titleRect = layout.getRect('sectionSlide.title');
+            const titleShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, titleRect.left, titleRect.top, titleRect.width, titleRect.height);
+            titleShape.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
+            setStyledText(titleShape, data.title, {
+                size: CONFIG.FONTS.sizes.sectionTitle,
+                bold: true,
+                align: SlidesApp.ParagraphAlignment.CENTER,
+                fontType: 'large'
+            });
+        }
 
         addCucFooter(slide, layout, pageNum, settings, this.creditImageBlob);
     }

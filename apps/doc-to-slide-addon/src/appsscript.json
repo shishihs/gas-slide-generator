@@ -1,13 +1,22 @@
 {
   "timeZone": "Asia/Tokyo",
-  "dependencies": {},
+  "dependencies": {
+    "libraries": [
+      {
+        "userSymbol": "SlideGeneratorApi",
+        "version": "13",
+        "libraryId": "1ErChmOvJ536ITJ32hJSwdKfmdjlKAJP92q-Jj5O2MM_6-lnx87UJyHkD",
+        "developmentMode": false
+      }
+    ]
+  },
   "exceptionLogging": "STACKDRIVER",
   "runtimeVersion": "V8",
   "oauthScopes": [
     "https://www.googleapis.com/auth/documents.currentonly",
     "https://www.googleapis.com/auth/script.external_request",
     "https://www.googleapis.com/auth/presentations",
-    "https://www.googleapis.com/auth/drive.file",
+    "https://www.googleapis.com/auth/drive",
     "https://www.googleapis.com/auth/script.container.ui",
     "https://www.googleapis.com/auth/cloud-platform",
     "openid"

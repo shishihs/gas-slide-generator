@@ -113,7 +113,7 @@
         }
 
         #status {
-            margin-top: 12px;
+            margin-bottom: 12px;
             padding: 10px;
             border-radius: 4px;
             font-size: 13px;
@@ -201,14 +201,6 @@
         </div>
 
         <div class="form-group">
-            <label for="slideGeneratorApiUrl">Slide Generator API URL</label>
-            <input type="text" id="slideGeneratorApiUrl" placeholder="https://script.google.com/macros/s/.../exec">
-            <div class="help-text">
-                The URL of the deployed Slide Generator Web App.
-            </div>
-        </div>
-
-        <div class="form-group">
             <label style="display:flex; align-items:center;">
                 <input type="checkbox" id="useMockResponse" style="width:auto; margin-right:8px;">
                 Use Mock Vertex AI Response (Testing)
@@ -230,43 +222,45 @@
         </div>
     </div>
 
-    <button class="btn-primary" onclick="saveSettings()">
-        Save Settings
-    </button>
+    <div id="status" style="margin: 10px 0; padding: 10px; border-radius: 4px; min-height: 20px;"></div>
 
-    <div id="status"></div>
+    <div style="display: flex; gap: 10px; margin-top: 10px;">
+        <button class="btn-primary" onclick="saveSettings()">
+            Save Settings
+        </button>
+    </div>
 
     <script>
         // Load current settings on page load
         window.onload = function () {
-            google.script.run
-                .withSuccessHandler(function (settings) {
-                    if (settings) {
-                        document.getElementById('gcpProjectId').value = settings.gcpProjectId || '';
-                        document.getElementById('vertexAiLocation').value = settings.vertexAiLocation || 'asia-northeast1';
-                        // Handle potential undefined/null values gracefully
-                        document.getElementById('vertexAiModel').value = settings.vertexAiModel || 'gemini-2.5-flash';
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = 'Loading settings...';
+            google.script.run.withSuccessHandler(function (settings) {
+                if (settings) {
+                    document.getElementById('gcpProjectId').value = settings.gcpProjectId || '';
+                    document.getElementById('vertexAiLocation').value = settings.vertexAiLocation || 'asia-northeast1';
+                    document.getElementById('vertexAiModel').value = settings.vertexAiModel || 'gemini-2.5-flash';
 
-                        // New field for API URL
-                        if (document.getElementById('slideGeneratorApiUrl')) {
-                            document.getElementById('slideGeneratorApiUrl').value = settings.slideGeneratorApiUrl || '';
-                        }
-                        if (document.getElementById('useMockResponse')) {
-                            document.getElementById('useMockResponse').checked = settings.useMockResponse === 'true';
-                        }
-                        document.getElementById('templateSlideId').value = settings.templateSlideId || '';
+                    if (document.getElementById('useMockResponse')) {
+                        document.getElementById('useMockResponse').checked = settings.useMockResponse === 'true';
                     }
-                })
-                .getCurrentSettings();
+                    document.getElementById('templateSlideId').value = settings.templateSlideId || '';
+                }
+                statusDiv.textContent = '';
+            }).withFailureHandler(function (err) {
+                statusDiv.textContent = 'Error loading settings: ' + err;
+                statusDiv.style.backgroundColor = '#fce8e6';
+                statusDiv.style.color = '#c5221f';
+            }).getCurrentSettings();
         };
 
         function saveSettings() {
             const gcpProjectId = document.getElementById('gcpProjectId').value.trim();
             const vertexAiLocation = document.getElementById('vertexAiLocation').value;
             const vertexAiModel = document.getElementById('vertexAiModel').value;
-            const slideGeneratorApiUrl = document.getElementById('slideGeneratorApiUrl').value.trim();
             const useMockResponse = document.getElementById('useMockResponse').checked;
             const templateSlideId = document.getElementById('templateSlideId').value.trim();
+            const statusDiv = document.getElementById('status');
 
             if (!gcpProjectId) {
                 showStatus('error', '❌ GCP Project ID is required.');
@@ -278,7 +272,6 @@
                 'GCP_PROJECT_ID': gcpProjectId,
                 'VERTEX_AI_LOCATION': vertexAiLocation,
                 'VERTEX_AI_MODEL': vertexAiModel,
-                'SLIDE_GENERATOR_API_URL': slideGeneratorApiUrl,
                 'USE_MOCK_RESPONSE': useMockResponse.toString(),
                 'TEMPLATE_SLIDE_ID': templateSlideId
             };

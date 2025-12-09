@@ -196,8 +196,13 @@
     }
 
     @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
     }
   </style>
 </head>
@@ -223,7 +228,7 @@
     <div class="section-title">✅ Slides Generated!</div>
     <p>Your presentation has been created successfully.</p>
     <a id="slideLink" href="#" target="_blank" class="link">Open Presentation →</a>
-    
+
     <div style="margin-top: 16px; border-top: 1px solid #eee; padding-top: 12px;">
       <button class="btn-secondary" onclick="resetUI()">Create Another</button>
     </div>
@@ -244,7 +249,7 @@
       document.getElementById('resultSection').style.display = 'none';
 
       showStatus('loading', '<span class="spinner"></span>Step 1/2: Analyzing document content...');
-      
+
       google.script.run
         .withSuccessHandler(onJsonSuccess)
         .withFailureHandler(onError)
@@ -262,7 +267,7 @@
       }
 
       showStatus('loading', '<span class="spinner"></span>Step 2/2: Generating slides... (This may take a minute)');
-      
+
       google.script.run
         .withSuccessHandler(onSlideSuccess)
         .withFailureHandler(onError)
@@ -276,7 +281,7 @@
       const btn = document.getElementById('generateBtn');
       btn.disabled = false;
       btn.textContent = 'Generate Slides';
-      
+
       if (result.success) {
         showStatus('success', '✅ All steps completed successfully!');
         const resultSection = document.getElementById('resultSection');
@@ -311,6 +316,11 @@
       document.getElementById('status').style.display = 'none';
       document.getElementById('generateBtn').disabled = false;
     }
+
+    // Auto-start generation on load
+    window.onload = function () {
+      startGeneration();
+    };
   </script>
 </body>
 

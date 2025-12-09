@@ -206,156 +206,111 @@
   <h3>🎨 Generate Slide</h3>
   <p>Convert your document content into beautifully formatted Google Slides.</p>
 
-  <!-- Step 1: Load JSON -->
-  <div class="section">
-    <div class="section-title">Step 1: Prepare JSON Data</div>
-    <p style="margin-bottom: 12px;">First, convert your document to JSON format using Vertex AI.</p>
-    <button class="btn-secondary" onclick="convertToJson()">
-      Convert Document to JSON
-    </button>
-  </div>
-
-  <!-- Step 2: Preview JSON -->
-  <div class="section" id="previewSection" style="display: none;">
-    <div class="section-title">Step 2: Review JSON</div>
-    <div id="jsonPreview">Loading...</div>
-    <button class="btn-secondary" onclick="refreshJson()">
-      Refresh JSON
-    </button>
-  </div>
-
-  <!-- Step 3: Generate Slides -->
-  <div class="section" id="generateSection" style="display: none;">
-    <div class="section-title">Step 3: Generate Slides</div>
-    <p style="margin-bottom: 12px;">Create a new Google Slide presentation from the JSON data.</p>
-    <button class="btn-primary" id="generateBtn" onclick="generateSlides()">
+  <!-- Main Action -->
+  <div class="section" id="mainSection">
+    <div class="section-title">Generate Presentation</div>
+    <p style="margin-bottom: 12px;">Create a Google Slide presentation from this document.</p>
+    <button class="btn-primary" id="generateBtn" onclick="startGeneration()">
       Generate Slides
     </button>
   </div>
+
+  <!-- Status / Progress -->
+  <div id="status"></div>
 
   <!-- Result -->
   <div id="resultSection" class="section" style="display: none;">
     <div class="section-title">✅ Slides Generated!</div>
     <p>Your presentation has been created successfully.</p>
     <a id="slideLink" href="#" target="_blank" class="link">Open Presentation →</a>
+    
+    <div style="margin-top: 16px; border-top: 1px solid #eee; padding-top: 12px;">
+      <button class="btn-secondary" onclick="resetUI()">Create Another</button>
+    </div>
   </div>
 
-  <!-- Status -->
-  <div id="status"></div>
-
   <script>
-    let storedJson = null;
-
     /**
-     * Convert document to JSON
-     * Calls the GAS backend function
-     * 
-     * パターン: google.script.run を使ったGAS関数呼び出し
-     * - withSuccessHandler: 成功時のコールバック
-     * - withFailureHandler: 失敗時のコールバック
+     * Start the generation process
+     * Step 1: Convert Doc to JSON
+     * Step 2: Generate Slides from JSON
      */
-    function convertToJson() {
-      showStatus('loading', '<span class="spinner"></span>Converting document to JSON...');
+    function startGeneration() {
+      const btn = document.getElementById('generateBtn');
+      btn.disabled = true;
+      btn.textContent = 'Processing...';
+
+      // Hide result if visible
+      document.getElementById('resultSection').style.display = 'none';
+
+      showStatus('loading', '<span class="spinner"></span>Step 1/2: Analyzing document content...');
       
       google.script.run
-        .withSuccessHandler(onConvertSuccess)
+        .withSuccessHandler(onJsonSuccess)
         .withFailureHandler(onError)
         .convertDocumentToJson();
     }
 
-    function onConvertSuccess(result) {
-      storedJson = result;
-      showStatus('success', '✅ Document converted to JSON successfully!');
-      showJsonPreview(result);
-      document.getElementById('previewSection').style.display = 'block';
-      document.getElementById('generateSection').style.display = 'block';
-    }
-
-    function showJsonPreview(json) {
-      const preview = document.getElementById('jsonPreview');
-      preview.textContent = JSON.stringify(json, null, 2);
-    }
-
-    function refreshJson() {
-      google.script.run
-        .withSuccessHandler(function(json) {
-          if (json) {
-            storedJson = json;
-            showJsonPreview(json);
-            showStatus('success', '✅ JSON refreshed!');
-          } else {
-            showStatus('error', '❌ No stored JSON found. Please convert the document first.');
-          }
-        })
-        .withFailureHandler(onError)
-        .getStoredJsonData();
-    }
-
     /**
-     * Generate slides from JSON
+     * Callback when JSON conversion is successful
+     * Automatically triggers slide generation
      */
-    function generateSlides() {
-      if (!storedJson) {
-        showStatus('error', '❌ No JSON data available. Please convert the document first.');
+    function onJsonSuccess(jsonResult) {
+      if (!jsonResult) {
+        onError(new Error('No data returned from analysis.'));
         return;
       }
 
-      const btn = document.getElementById('generateBtn');
-      btn.disabled = true;
-      btn.textContent = 'Generating...';
-      
-      showStatus('loading', '<span class="spinner"></span>Generating slides... This may take a moment.');
+      showStatus('loading', '<span class="spinner"></span>Step 2/2: Generating slides... (This may take a minute)');
       
       google.script.run
-        .withSuccessHandler(onGenerateSuccess)
-        .withFailureHandler(onGenerateError)
-        .generateSlidesFromJson(storedJson);
+        .withSuccessHandler(onSlideSuccess)
+        .withFailureHandler(onError)
+        .generateSlidesFromJson(jsonResult);
     }
 
-    function onGenerateSuccess(result) {
+    /**
+     * Callback when slide generation is successful
+     */
+    function onSlideSuccess(result) {
       const btn = document.getElementById('generateBtn');
       btn.disabled = false;
       btn.textContent = 'Generate Slides';
       
       if (result.success) {
-        showStatus('success', '✅ Slides generated successfully!');
-        document.getElementById('resultSection').style.display = 'block';
+        showStatus('success', '✅ All steps completed successfully!');
+        const resultSection = document.getElementById('resultSection');
+        resultSection.style.display = 'block';
         document.getElementById('slideLink').href = result.slideUrl;
       } else {
         showStatus('error', '❌ Failed to generate slides: ' + result.error);
       }
     }
 
-    function onGenerateError(error) {
+    /**
+     * Global Error Handler
+     */
+    function onError(error) {
       const btn = document.getElementById('generateBtn');
       btn.disabled = false;
       btn.textContent = 'Generate Slides';
-      onError(error);
-    }
-
-    function onError(error) {
       showStatus('error', '❌ Error: ' + error.message);
     }
 
+    /**
+     * Helper to show status messages
+     */
     function showStatus(type, message) {
       const status = document.getElementById('status');
       status.className = 'show ' + type;
       status.innerHTML = message;
     }
 
-    // Check for existing JSON on load
-    window.onload = function() {
-      google.script.run
-        .withSuccessHandler(function(json) {
-          if (json) {
-            storedJson = json;
-            showJsonPreview(json);
-            document.getElementById('previewSection').style.display = 'block';
-            document.getElementById('generateSection').style.display = 'block';
-          }
-        })
-        .getStoredJsonData();
-    };
+    function resetUI() {
+      document.getElementById('resultSection').style.display = 'none';
+      document.getElementById('status').style.display = 'none';
+      document.getElementById('generateBtn').disabled = false;
+    }
   </script>
 </body>
 

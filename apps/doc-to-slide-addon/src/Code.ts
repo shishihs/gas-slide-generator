@@ -85,12 +85,77 @@ function setupScriptProperties() {
 function onOpen() {
     DocumentApp.getUi()
         .createMenu('Slide Generator')
-        .addItem('Convert to JSON', 'convertDocumentToJson')
         .addItem('Generate Slide', 'showGenerateSlideSidebar')
         .addSeparator()
         .addItem('Create Template', 'createTemplateSlide')
         .addItem('Settings', 'showSettingsSidebar')
+        .addSeparator()
+        .addItem('Debug Info', 'debugTest')
         .addToUi();
+}
+
+/**
+ * Diagnostic function to debug permissions and file access
+ */
+function debugTest() {
+    const ui = DocumentApp.getUi();
+    const logs = [];
+    const log = (msg) => {
+        Logger.log(msg);
+        logs.push(msg);
+    };
+
+    try {
+        try {
+            log('User: ' + Session.getActiveUser().getEmail());
+            log('EffectiveUser: ' + Session.getEffectiveUser().getEmail());
+        } catch (e) {
+            log('User Info Error: ' + e.toString());
+        }
+
+        // Check DriveApp generic access
+        try {
+            const root = DriveApp.getRootFolder();
+            log('Drive Root Access: OK (' + root.getName() + ')');
+        } catch (e) {
+            log('Drive Root Error: ' + e.toString());
+        }
+
+        // Check Template
+        const templateId = getTemplateSlideId();
+        log('Template ID: ' + templateId);
+
+        if (templateId) {
+            try {
+                log('Attempting verify copy (Advanced Drive API)...');
+                // Use Advanced Drive Service for debug as well
+                const copy = Drive.Files.copy({
+                    title: 'Debug_Copy_Test',
+                    parents: [{ id: 'root' }]
+                }, templateId);
+
+                log('Copy Success: ' + copy.id);
+
+                // Cleanup using Drive.Files since DriveApp might be broken
+                try {
+                    Drive.Files.trash(copy.id);
+                    log('Cleanup: OK');
+                } catch (cleanupErr) {
+                    log('Cleanup Warning: ' + cleanupErr.toString());
+                }
+
+            } catch (e) {
+                log('Template Copy Error (Advanced API): ' + e.toString());
+            }
+        } else {
+            log('No Template ID set.');
+        }
+
+    } catch (e) {
+        log('Fatal Error: ' + e.toString());
+    }
+
+    ui.alert('Debug Log', logs.slice(0, 30).join('\n'), ui.ButtonSet.OK);
 }
 
 /**
@@ -111,119 +176,14 @@ function createTemplateSlide() {
     const ui = DocumentApp.getUi();
 
     try {
-        // 1. Create a new presentation and get ID
-        Logger.log('Creating new presentation...');
-        let presentation = SlidesApp.create('Slide Generator Template');
-        const presentationId = presentation.getId();
-        const presentationUrl = presentation.getUrl();
-
-        // Save and close to ensure creation is finalized
-        presentation.saveAndClose();
-        Logger.log('Presentation created and closed. ID: ' + presentationId);
-
-        // 2. Re-open the presentation to modify it
-        // This 'create -> close -> open' pattern helps avoid race conditions with new files
-        Utilities.sleep(1000); // Wait a second for Drive propagation
-        presentation = SlidesApp.openById(presentationId);
-        Logger.log('Presentation re-opened.');
-
-        const defaultSlides = presentation.getSlides();
-        // Remove the default blank slide
-        for (const slide of defaultSlides) {
-            slide.remove();
-        }
-
-        // Define layouts with their corresponding PredefinedLayout and structure
-        const layoutConfigs = [
-            {
-                name: 'TITLE',
-                predefinedLayout: SlidesApp.PredefinedLayout.TITLE,
-                description: 'プレゼンテーションの表紙（タイトル＋サブタイトル）',
-                placeholders: { title: 'タイトルを入力', subtitle: 'サブタイトルを入力' }
-            },
-            {
-                name: 'AGENDA',
-                predefinedLayout: SlidesApp.PredefinedLayout.TITLE_AND_BODY,
-                description: '目次・アジェンダ用（タイトル＋本文）',
-                placeholders: { title: 'アジェンダ', body: '• 項目1\n• 項目2\n• 項目3' }
-            },
-            {
-                name: 'CONTENT',
-                predefinedLayout: SlidesApp.PredefinedLayout.TITLE_AND_BODY,
-                description: 'メインコンテンツ用（タイトル＋本文）',
-                placeholders: { title: 'スライドタイトル', body: '• ポイント1\n• ポイント2\n• ポイント3' }
-            },
-            {
-                name: 'SECTION',
-                predefinedLayout: SlidesApp.PredefinedLayout.SECTION_HEADER,
-                description: 'セクション区切り用（大きなタイトル）',
-                placeholders: { title: 'セクション名' }
-            },
-            {
-                name: 'CONCLUSION',
-                predefinedLayout: SlidesApp.PredefinedLayout.TITLE_AND_BODY,
-                description: '結論・まとめ用（タイトル＋本文）',
-                placeholders: { title: 'まとめ', body: '• 結論1\n• 結論2' }
-            }
-        ];
-
-        // Create slides for each layout
-        Logger.log('Creating ' + layoutConfigs.length + ' layout slides...');
-
-        let createdCount = 0;
-        for (const config of layoutConfigs) {
-            Logger.log('Creating slide for layout: ' + config.name);
-            try {
-                const slide = presentation.appendSlide(config.predefinedLayout);
-                createdCount++;
-
-                // Tag the slide with layout name in speaker notes (critical for identification)
-                slide.getNotesPage().getSpeakerNotesShape().getText().setText(
-                    `LAYOUT:${config.name}\n${config.description}`
-                );
-
-                // Fill in placeholder text
-                const shapes = slide.getShapes();
-                for (const shape of shapes) {
-                    const placeholderType = shape.getPlaceholderType();
-
-                    if (placeholderType === SlidesApp.PlaceholderType.TITLE ||
-                        placeholderType === SlidesApp.PlaceholderType.CENTERED_TITLE) {
-                        if (config.placeholders.title) {
-                            shape.getText().setText(config.placeholders.title);
-                        }
-                    } else if (placeholderType === SlidesApp.PlaceholderType.SUBTITLE) {
-                        if (config.placeholders.subtitle) {
-                            shape.getText().setText(config.placeholders.subtitle);
-                        }
-                    } else if (placeholderType === SlidesApp.PlaceholderType.BODY) {
-                        if (config.placeholders.body) {
-                            shape.getText().setText(config.placeholders.body);
-                        }
-                    }
-                }
-
-                // Add a small label at the bottom to identify the layout (for user reference)
-                const labelShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, 20, 500, 300, 20);
-                labelShape.getText().setText(`[TEMPLATE: ${config.name}]`);
-                labelShape.getText().getTextStyle().setFontSize(8).setForegroundColor('#AAAAAA');
-            } catch (e) {
-                Logger.log('Error creating slide for ' + config.name + ': ' + e.toString());
-            }
-        }
-
-        // Finalize changes
-        presentation.saveAndClose();
-
-        // Save to settings
-        PropertiesService.getScriptProperties().setProperty('TEMPLATE_SLIDE_ID', presentationId);
+        const result = createTemplatePresentation();
 
         // Show success message with instructions
         ui.alert(
             '✅ テンプレート作成完了',
             `テンプレートスライドを作成し、設定に保存しました。\n` +
-            `作成予定: ${layoutConfigs.length} 枚\n` +
-            `作成成功: ${createdCount} 枚\n\n` +
+            `作成予定: ${result.expected} 枚\n` +
+            `作成成功: ${result.count} 枚\n\n` +
             `【作成されたレイアウト】\n` +
             `• TITLE - 表紙\n` +
             `• AGENDA - 目次\n` +
@@ -235,16 +195,129 @@ function createTemplateSlide() {
             `2. スライド > テーマを変更 でデザインを選択\n` +
             `3. フォントや色を調整\n` +
             `4. Add-on で Generate Slide を実行\n\n` +
-            `URL: ${presentationUrl}`,
+            `URL: ${result.url}`,
             ui.ButtonSet.OK
         );
 
-        Logger.log('Template created: ' + presentationId);
+        Logger.log('Template created: ' + result.id);
 
     } catch (error) {
         ui.alert('エラー', 'テンプレート作成に失敗しました: ' + error.toString(), ui.ButtonSet.OK);
         Logger.log('Error creating template: ' + error.toString());
     }
+}
+
+/**
+ * Core logic to create the template presentation
+ * Returns information about the created template
+ */
+function createTemplatePresentation() {
+    // 1. Create a new presentation and get ID
+    Logger.log('Creating new presentation...');
+    let presentation = SlidesApp.create('Slide Generator Template');
+    const presentationId = presentation.getId();
+    const presentationUrl = presentation.getUrl();
+
+    // 2. Modify the presentation directly without closing/reopening
+    // This avoids race conditions where the ID is not yet propagated.
+
+    const defaultSlides = presentation.getSlides();
+    // Remove the default blank slide
+    for (const slide of defaultSlides) {
+        slide.remove();
+    }
+
+    // Define layouts with their corresponding PredefinedLayout and structure
+    const layoutConfigs = [
+        {
+            name: 'TITLE',
+            predefinedLayout: SlidesApp.PredefinedLayout.TITLE,
+            description: 'プレゼンテーションの表紙（タイトル＋サブタイトル）',
+            placeholders: { title: 'タイトルを入力', subtitle: 'サブタイトルを入力' }
+        },
+        {
+            name: 'AGENDA',
+            predefinedLayout: SlidesApp.PredefinedLayout.TITLE_AND_BODY,
+            description: '目次・アジェンダ用（タイトル＋本文）',
+            placeholders: { title: 'アジェンダ', body: '• 項目1\n• 項目2\n• 項目3' }
+        },
+        {
+            name: 'CONTENT',
+            predefinedLayout: SlidesApp.PredefinedLayout.TITLE_AND_BODY,
+            description: 'メインコンテンツ用（タイトル＋本文）',
+            placeholders: { title: 'スライドタイトル', body: '• ポイント1\n• ポイント2\n• ポイント3' }
+        },
+        {
+            name: 'SECTION',
+            predefinedLayout: SlidesApp.PredefinedLayout.SECTION_HEADER,
+            description: 'セクション区切り用（大きなタイトル）',
+            placeholders: { title: 'セクション名' }
+        },
+        {
+            name: 'CONCLUSION',
+            predefinedLayout: SlidesApp.PredefinedLayout.TITLE_AND_BODY,
+            description: '結論・まとめ用（タイトル＋本文）',
+            placeholders: { title: 'まとめ', body: '• 結論1\n• 結論2' }
+        }
+    ];
+
+    // Create slides for each layout
+    Logger.log('Creating ' + layoutConfigs.length + ' layout slides...');
+
+    let createdCount = 0;
+    for (const config of layoutConfigs) {
+        Logger.log('Creating slide for layout: ' + config.name);
+        try {
+            const slide = presentation.appendSlide(config.predefinedLayout);
+            createdCount++;
+
+            // Tag the slide with layout name in speaker notes (critical for identification)
+            slide.getNotesPage().getSpeakerNotesShape().getText().setText(
+                `LAYOUT:${config.name}\n${config.description}`
+            );
+
+            // Fill in placeholder text
+            const shapes = slide.getShapes();
+            for (const shape of shapes) {
+                const placeholderType = shape.getPlaceholderType();
+
+                if (placeholderType === SlidesApp.PlaceholderType.TITLE ||
+                    placeholderType === SlidesApp.PlaceholderType.CENTERED_TITLE) {
+                    if (config.placeholders.title) {
+                        shape.getText().setText(config.placeholders.title);
+                    }
+                } else if (placeholderType === SlidesApp.PlaceholderType.SUBTITLE) {
+                    if (config.placeholders.subtitle) {
+                        shape.getText().setText(config.placeholders.subtitle);
+                    }
+                } else if (placeholderType === SlidesApp.PlaceholderType.BODY) {
+                    if (config.placeholders.body) {
+                        shape.getText().setText(config.placeholders.body);
+                    }
+                }
+            }
+
+            // Add a small label at the bottom to identify the layout (for user reference)
+            const labelShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, 20, 500, 300, 20);
+            labelShape.getText().setText(`[TEMPLATE: ${config.name}]`);
+            labelShape.getText().getTextStyle().setFontSize(8).setForegroundColor('#AAAAAA');
+        } catch (e) {
+            Logger.log('Error creating slide for ' + config.name + ': ' + e.toString());
+        }
+    }
+
+    // Finalize changes
+    presentation.saveAndClose();
+
+    // Save to settings
+    PropertiesService.getScriptProperties().setProperty('TEMPLATE_SLIDE_ID', presentationId);
+
+    return {
+        id: presentationId,
+        url: presentationUrl,
+        count: createdCount,
+        expected: layoutConfigs.length
+    };
 }
 
 /**
@@ -308,8 +381,8 @@ function convertDocumentToJson() {
 
         Logger.log('JSON Result: ' + JSON.stringify(jsonResult));
 
-        // 4. Open the sidebar automatically to show the result
-        showGenerateSlideSidebar();
+        // 4. Sidebar update is handled by the client-side success handler
+        // showGenerateSlideSidebar();
 
         return jsonResult;
 
@@ -330,10 +403,80 @@ function convertDocumentToJson() {
 function generateSlidesFromJson(jsonData) {
     try {
         const templateId = getTemplateSlideId();
+        let destinationId = undefined;
 
-        // Check if jsonData is an array (from new Mock structure) or invalid
+
+
         let slidesData = [];
-        let title = 'Generated Presentation';
+        let title = 'Generated Presentation'; // Initialize title here
+
+        if (templateId) {
+            // Update title based on jsonData for the copy operation
+            if (jsonData && jsonData.title) title = jsonData.title;
+            else if (Array.isArray(jsonData) && jsonData.length > 0 && jsonData[0].title) title = jsonData[0].title;
+            else if (jsonData && jsonData.slides && jsonData.slides.length > 0 && jsonData.slides[0].title) title = jsonData.slides[0].title;
+
+            try {
+                Logger.log('Step 1: Preparing to copy using Advanced Drive API (Drive.Files)...');
+
+                Logger.log('Step 2: Copying template ID: ' + templateId + ' with title: ' + title);
+
+                // Use Advanced Drive Service (v2)
+                // This bypasses DriveApp Server Errors
+                const copiedFile = Drive.Files.copy({
+                    title: title,
+                    parents: [{ id: 'root' }] // Explicitly place in root or let it inherit? 'root' is safer for finding it.
+                }, templateId);
+
+                destinationId = copiedFile.id;
+                Logger.log('Step 2 Success: Copy made. Destination ID: ' + destinationId);
+
+            } catch (e) {
+                Logger.log('Advanced Drive API Failed: ' + e.toString());
+                Logger.log('Falling back to DriveApp (just in case)...');
+                try {
+                    const templateFile = DriveApp.getFileById(templateId);
+                    const newFile = templateFile.makeCopy(title);
+                    destinationId = newFile.getId();
+                    Logger.log('Fallback Success: Destination ID: ' + destinationId);
+                } catch (e2) {
+                    Logger.log('All copy methods failed. Error: ' + e2.toString());
+                }
+            }
+
+            if (!destinationId) {
+                Logger.log('Template access failed. Attempting to auto-create a new template...');
+                try {
+                    // Auto-fix: Create a new template on the fly
+                    Logger.log('Generating fallback template...');
+                    const newTemplate = createTemplatePresentation(); // This also updates the property
+                    const newTemplateId = newTemplate.id;
+                    Logger.log('New template created: ' + newTemplateId);
+
+                    // Wait for Drive propagation before copying
+                    Utilities.sleep(5000);
+
+                    // Use the new valid template
+                    const newTemplateFile = DriveApp.getFileById(newTemplateId);
+                    const newFile = newTemplateFile.makeCopy(title);
+                    destinationId = newFile.getId();
+                    templateId = newTemplateId; // Update for payload
+
+                    Logger.log('Auto-healing successful. New Template ID: ' + templateId + ', Destination: ' + destinationId);
+
+                } catch (autoFixError) {
+                    Logger.log('Auto-healing failed: ' + autoFixError.toString());
+                    // Critical failure
+                    throw new Error(
+                        `Failed to access or copy the template slide (ID: ${templateId}). \n` +
+                        `Attempted to auto-generate a new template but failed: ${autoFixError.message}\n` +
+                        `Please try manually using 'Slide Generator > Create Template'.`
+                    );
+                }
+            }
+        }
+
+
         let theme = 'SIMPLE_LIGHT';
 
         if (Array.isArray(jsonData)) {
@@ -359,7 +502,8 @@ function generateSlidesFromJson(jsonData) {
             title: title,
             slides: slidesData,
             theme: theme,
-            templateId: templateId || undefined
+            templateId: templateId || undefined,
+            destinationId: destinationId // Pass the pre-copied ID
         };
 
         console.log('Checking for SlideGeneratorApi library...');
@@ -373,6 +517,7 @@ function generateSlidesFromJson(jsonData) {
         }
 
         console.log('Calling SlideGeneratorApi.generateSlides...');
+        console.log('Payload being sent to library:', JSON.stringify(payload)); // DEBUG LOG
         const result = SlideGeneratorApi.generateSlides(payload);
         console.log('Library Result:', JSON.stringify(result));
 

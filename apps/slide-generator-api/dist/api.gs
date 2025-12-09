@@ -32,12 +32,13 @@ var global = this;
   var init_Slide = __esm({
     "src/domain/model/Slide.ts"() {
       Slide = class {
-        constructor(title, content, layout = "CONTENT", subtitle, notes) {
+        constructor(title, content, layout = "CONTENT", subtitle, notes, rawData) {
           this.title = title;
           this.content = content;
           this.layout = layout;
           this.subtitle = subtitle;
           this.notes = notes;
+          this.rawData = rawData;
         }
       };
     }
@@ -79,10 +80,10 @@ var global = this;
             const title = new SlideTitle(slideData.title);
             const content = new SlideContent(slideData.content);
             const layout = slideData.layout || "CONTENT";
-            const slide = new Slide(title, content, layout, slideData.subtitle, slideData.notes);
+            const slide = new Slide(title, content, layout, slideData.subtitle, slideData.notes, slideData);
             presentation.addSlide(slide);
           }
-          return this.slideRepository.createPresentation(presentation, request.templateId);
+          return this.slideRepository.createPresentation(presentation, request.templateId, request.destinationId);
         }
       };
     }
@@ -709,14 +710,14 @@ var global = this;
           text_small_font: "#1F2937",
           background_white: "#FFFFFF",
           card_bg: "#f6e9f0",
-          background_gray: "",
-          faint_gray: "",
-          ghost_gray: "",
-          table_header_bg: "",
-          lane_border: "",
-          card_border: "",
-          neutral_gray: "",
-          process_arrow: ""
+          background_gray: "#F1F3F4",
+          faint_gray: "#FAFAFA",
+          ghost_gray: "#E0E0E0",
+          table_header_bg: "#E8EAED",
+          lane_border: "#DADCE0",
+          card_border: "#DADCE0",
+          neutral_gray: "#9AA0A6",
+          process_arrow: "#4285F4"
         },
         DIAGRAM: {
           laneGap_px: 24,
@@ -1204,8 +1205,11 @@ var global = this;
         generate(slide, data, layout, pageNum, settings, imageUpdateOption = "update") {
           const titlePlaceholder = slide.getPlaceholder(SlidesApp.PlaceholderType.TITLE) || slide.getPlaceholder(SlidesApp.PlaceholderType.CENTERED_TITLE);
           if (titlePlaceholder) {
+            Logger.log(`Title Slide: Found Title Placeholder`);
             const shape = titlePlaceholder.asShape();
             shape.getText().setText(data.title || "");
+          } else {
+            Logger.log("Title Slide: WARNING - No Title Placeholder found on this layout.");
           }
           const subtitlePlaceholder = slide.getPlaceholder(SlidesApp.PlaceholderType.SUBTITLE);
           if (subtitlePlaceholder) {
@@ -1358,7 +1362,19 @@ var global = this;
           }
           const hasImages = Array.isArray(data.images) && data.images.length > 0;
           const isTwo = !!(data.twoColumn || data.columns);
-          const bodies = slide.getPlaceholders().filter((p) => p.getPlaceholderType() === SlidesApp.PlaceholderType.BODY);
+          const bodies = slide.getPlaceholders().filter((p) => {
+            if (typeof p.getPlaceholderType === "function") {
+              return p.getPlaceholderType() === SlidesApp.PlaceholderType.BODY;
+            }
+            try {
+              const s = p.asShape();
+              if (typeof s.getPlaceholderType === "function") {
+                return s.getPlaceholderType() === SlidesApp.PlaceholderType.BODY;
+              }
+            } catch (e) {
+            }
+            return false;
+          });
           if (isTwo && bodies.length >= 2) {
             let L = [], R = [];
             if (Array.isArray(data.columns) && data.columns.length === 2) {
@@ -1427,6 +1443,164 @@ var global = this;
     }
   });
 
+  // src/infrastructure/gas/generators/GasDiagramSlideGenerator.ts
+  var GasDiagramSlideGenerator;
+  var init_GasDiagramSlideGenerator = __esm({
+    "src/infrastructure/gas/generators/GasDiagramSlideGenerator.ts"() {
+      init_SlideConfig();
+      init_SlideUtils();
+      GasDiagramSlideGenerator = class {
+        constructor(creditImageBlob) {
+          this.creditImageBlob = creditImageBlob;
+        }
+        generate(slide, data, layout, pageNum, settings, imageUpdateOption = "update") {
+          Logger.log(`Generating Diagram Slide: ${data.layout || data.type}`);
+          const titlePlaceholder = slide.getPlaceholder(SlidesApp.PlaceholderType.TITLE) || slide.getPlaceholder(SlidesApp.PlaceholderType.CENTERED_TITLE);
+          if (titlePlaceholder) {
+            titlePlaceholder.asShape().getText().setText(data.title || "");
+          }
+          if (data.subhead) {
+          }
+          const type = (data.layout || data.type || "").toLowerCase();
+          const bodyPlaceholder = slide.getPlaceholder(SlidesApp.PlaceholderType.BODY);
+          const workArea = bodyPlaceholder ? { left: bodyPlaceholder.getLeft(), top: bodyPlaceholder.getTop(), width: bodyPlaceholder.getWidth(), height: bodyPlaceholder.getHeight() } : layout.getRect("contentSlide.body");
+          if (type.includes("timeline")) {
+            this.drawTimeline(slide, data, workArea, settings);
+          } else if (type.includes("process")) {
+            this.drawProcess(slide, data, workArea, settings);
+          } else if (type.includes("cycle")) {
+            this.drawCycle(slide, data, workArea, settings);
+          } else if (type.includes("triangle") || type.includes("pyramid")) {
+            this.drawPyramid(slide, data, workArea, settings);
+          } else if (type.includes("compare") || type.includes("kaizen")) {
+            this.drawComparison(slide, data, workArea, settings);
+          } else if (type.includes("stepup") || type.includes("stair")) {
+            this.drawStepUp(slide, data, workArea, settings);
+          } else {
+            Logger.log("Diagram logic not implemented for type: " + type);
+          }
+          if (settings.showBottomBar) {
+            drawBottomBar(slide, layout, settings);
+          }
+          addCucFooter(slide, layout, pageNum, settings, this.creditImageBlob);
+        }
+        drawTimeline(slide, data, area, settings) {
+          const milestones = data.milestones || data.items || [];
+          if (!milestones.length) return;
+          const count = milestones.length;
+          const gap = 20;
+          const itemWidth = (area.width - gap * (count - 1)) / count;
+          const centerY = area.top + area.height / 2;
+          const line = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, area.left, centerY - 2, area.width, 4);
+          line.getBorder().setTransparent();
+          line.getFill().setSolidFill(CONFIG.COLORS.primary_color);
+          milestones.forEach((m, i) => {
+            const x = area.left + i * (itemWidth + gap);
+            const bubble = slide.insertShape(SlidesApp.ShapeType.ELLIPSE, x + itemWidth / 2 - 15, centerY - 15, 30, 30);
+            bubble.getFill().setSolidFill("#FFFFFF");
+            bubble.getBorder().getFill().setSolidFill(CONFIG.COLORS.primary_color);
+            bubble.getBorder().setWeight(2);
+            const dateBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x, centerY - 50, itemWidth, 30);
+            dateBox.getText().setText(m.date || m.label || "");
+            dateBox.getText().getParagraphStyle().setParagraphAlignment(SlidesApp.ParagraphAlignment.CENTER);
+            const descBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x, centerY + 20, itemWidth, 60);
+            descBox.getText().setText(m.state || m.description || "");
+            descBox.getText().getParagraphStyle().setParagraphAlignment(SlidesApp.ParagraphAlignment.CENTER);
+            descBox.getText().getTextStyle().setFontSize(10);
+          });
+        }
+        drawProcess(slide, data, area, settings) {
+          const steps = data.steps || data.items || [];
+          if (!steps.length) return;
+          const count = steps.length;
+          const gap = 10;
+          const itemWidth = (area.width - gap * (count - 1)) / count;
+          let x = area.left;
+          const y = area.top + 50;
+          const h = 100;
+          const accentColor = CONFIG.COLORS.process_arrow || CONFIG.COLORS.primary_color;
+          steps.forEach((step, i) => {
+            const shape = slide.insertShape(SlidesApp.ShapeType.CHEVRON, x, y, itemWidth, h);
+            shape.getFill().setSolidFill(accentColor);
+            shape.getText().setText(typeof step === "string" ? step : step.label || step.title || "");
+            shape.getText().getTextStyle().setForegroundColor("#FFFFFF").setBold(true);
+            x += itemWidth + gap;
+          });
+        }
+        drawCycle(slide, data, area, settings) {
+          const items = data.items || [];
+          const centerX = area.left + area.width / 2;
+          const centerY = area.top + area.height / 2;
+          const radius = Math.min(area.width, area.height) / 3;
+          const secondaryColor = "#666666";
+          items.forEach((item, i) => {
+            const angle = 2 * Math.PI / items.length * i - Math.PI / 2;
+            const x = centerX + Math.cos(angle) * (radius * 1.5) - 60;
+            const y = centerY + Math.sin(angle) * (radius * 1.5) - 40;
+            const shape = slide.insertShape(SlidesApp.ShapeType.ROUND_RECTANGLE, x, y, 120, 80);
+            shape.getFill().setSolidFill(secondaryColor);
+            shape.getText().setText((item.label || item.title || "") + "\n" + (item.subLabel || item.desc || ""));
+            shape.getText().getTextStyle().setForegroundColor("#FFFFFF");
+          });
+          const core = slide.insertShape(SlidesApp.ShapeType.DONUT, centerX - radius, centerY - radius, radius * 2, radius * 2);
+          core.getFill().setSolidFill(CONFIG.COLORS.primary_color);
+          if (data.centerText) {
+            const coreText = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, centerX - 40, centerY - 20, 80, 40);
+            coreText.getText().setText(data.centerText);
+            coreText.getText().getParagraphStyle().setParagraphAlignment(SlidesApp.ParagraphAlignment.CENTER);
+            coreText.getText().getTextStyle().setBold(true).setFontSize(18).setForegroundColor("#FFFFFF");
+          }
+        }
+        drawPyramid(slide, data, area, settings) {
+          const levels = data.levels || data.items || [];
+          const count = levels.length;
+          const stepHeight = Math.min(area.height, 400) / count;
+          const maxWidth = Math.min(area.width, 500);
+          const centerX = area.left + area.width / 2;
+          const topY = area.top + 20;
+          levels.forEach((lvl, i) => {
+            const currentWidth = maxWidth * ((i + 1) / count);
+            const y = topY + i * stepHeight;
+            const x = centerX - currentWidth / 2;
+            const rect = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, x, y, currentWidth, stepHeight - 5);
+            rect.getFill().setSolidFill(CONFIG.COLORS.primary_color, 1 - i * 0.15);
+            rect.getText().setText((lvl.title || lvl.label || "") + "\n" + (lvl.description || ""));
+            rect.getText().getTextStyle().setForegroundColor("#FFFFFF");
+          });
+        }
+        drawComparison(slide, data, area, settings) {
+          const leftTitle = data.leftTitle || "Plan A";
+          const rightTitle = data.rightTitle || "Plan B";
+          const gap = 20;
+          const colWidth = (area.width - gap) / 2;
+          const leftBox = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, area.left, area.top, colWidth, area.height - 50);
+          leftBox.getFill().setSolidFill("#F0F0F0");
+          leftBox.getText().setText(leftTitle + "\n\n" + (data.leftItems || []).join("\n"));
+          const rightBox = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, area.left + colWidth + gap, area.top, colWidth, area.height - 50);
+          rightBox.getFill().setSolidFill("#E0E0E0");
+          rightBox.getText().setText(rightTitle + "\n\n" + (data.rightItems || []).join("\n"));
+        }
+        drawStepUp(slide, data, area, settings) {
+          const items = data.items || [];
+          const count = items.length;
+          const stepWidth = area.width / count;
+          const stepHeight = area.height / count;
+          items.forEach((item, i) => {
+            const h = (i + 1) * stepHeight;
+            const x = area.left + i * stepWidth;
+            const y = area.top + (area.height - h);
+            const shape = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, x, y, stepWidth - 5, h);
+            shape.getFill().setSolidFill(CONFIG.COLORS.primary_color, 0.5 + i * 0.1);
+            const textBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x, y, stepWidth - 5, 50);
+            textBox.getText().setText(item.title || "");
+            textBox.getText().getParagraphStyle().setParagraphAlignment(SlidesApp.ParagraphAlignment.CENTER);
+            textBox.getText().getTextStyle().setForegroundColor("#FFFFFF").setBold(true);
+          });
+        }
+      };
+    }
+  });
+
   // src/infrastructure/gas/GasSlideRepository.ts
   var GasSlideRepository;
   var init_GasSlideRepository = __esm({
@@ -1435,13 +1609,22 @@ var global = this;
       init_GasTitleSlideGenerator();
       init_GasSectionSlideGenerator();
       init_GasContentSlideGenerator();
+      init_GasDiagramSlideGenerator();
       init_SlideConfig();
       GasSlideRepository = class {
-        createPresentation(presentation, templateId) {
+        createPresentation(presentation, templateId, destinationId) {
           const slidesApp = SlidesApp;
           const driveApp = DriveApp;
           let pres;
-          if (templateId) {
+          if (destinationId) {
+            try {
+              Logger.log(`Using existing destination ID: ${destinationId}`);
+              pres = slidesApp.openById(destinationId);
+            } catch (e) {
+              Logger.log(`Error opening destination: ${e.toString()}`);
+              throw new Error(`Failed to open destination presentation with ID: ${destinationId}. Details: ${e.message}`);
+            }
+          } else if (templateId) {
             try {
               Logger.log(`Attempting to access template ID: ${templateId}`);
               const templateFile = driveApp.getFileById(templateId);
@@ -1462,6 +1645,7 @@ var global = this;
           const titleGenerator = new GasTitleSlideGenerator(null);
           const sectionGenerator = new GasSectionSlideGenerator(null);
           const contentGenerator = new GasContentSlideGenerator(null);
+          const diagramGenerator = new GasDiagramSlideGenerator(null);
           const settings = {
             primaryColor: CONFIG.COLORS.primary_color,
             enableGradient: false,
@@ -1478,33 +1662,41 @@ var global = this;
               date: (/* @__PURE__ */ new Date()).toLocaleDateString(),
               points: slideModel.content.items,
               // Map content items to points for Content/Agenda
-              content: slideModel.content.items
-              // Add images or other specific props if they exist in domain model (currently minimal)
+              content: slideModel.content.items,
+              ...slideModel.rawData
+              // Merge all extra data from JSON
             };
             let slideLayout;
             const layouts = pres.getLayouts();
+            if (index === 0) {
+              Logger.log("Available Layouts: " + layouts.map((l) => l.getLayoutName()).join(", "));
+            }
             const findLayout = (name) => {
               return layouts.find((l) => l.getLayoutName().toUpperCase() === name.toUpperCase());
             };
-            if (slideModel.layout === "TITLE") {
+            const layoutType = (slideModel.layout || "content").toUpperCase();
+            if (layoutType === "TITLE") {
               slideLayout = findLayout("TITLE") || layouts[0];
-            } else if (slideModel.layout === "SECTION") {
-              slideLayout = findLayout("SECTION_HEADER") || findLayout("SECTION ONLY") || layouts[1];
-            } else if (slideModel.layout === "CONTENT" || slideModel.layout === "AGENDA") {
-              slideLayout = findLayout("TITLE_AND_BODY") || layouts[2];
+            } else if (layoutType === "SECTION") {
+              slideLayout = findLayout("SECTION_HEADER") || findLayout("SECTION ONLY") || findLayout("SECTION TITLE_AND_DESCRIPTION") || layouts[1];
+            } else if (layoutType === "CONTENT" || layoutType === "AGENDA") {
+              slideLayout = findLayout("TITLE_AND_BODY") || findLayout("TITLE_AND_TWO_COLUMNS") || layouts[2];
             } else {
-              slideLayout = findLayout("TITLE_AND_BODY") || layouts[layouts.length - 1];
+              slideLayout = findLayout("TITLE_AND_BODY") || findLayout("TITLE_ONLY") || layouts[layouts.length - 1];
             }
             if (!slideLayout) {
               slideLayout = layouts[0];
             }
+            Logger.log(`Slide ${index + 1} (${slideModel.layout}): Using Layout '${slideLayout.getLayoutName()}'`);
             const slide = pres.appendSlide(slideLayout);
-            if (slideModel.layout === "TITLE") {
+            const rawType = (slideModel.rawData?.type || "").toLowerCase();
+            Logger.log(`Dispatching Slide ${index + 1}: LayoutType=${layoutType}, RawType=${rawType}`);
+            if (layoutType === "TITLE") {
               titleGenerator.generate(slide, commonData, layoutManager, index + 1, settings);
-            } else if (slideModel.layout === "SECTION") {
+            } else if (layoutType === "SECTION" || rawType === "section") {
               sectionGenerator.generate(slide, commonData, layoutManager, index + 1, settings);
-            } else if (slideModel.layout === "CONTENT" || slideModel.layout === "AGENDA") {
-              contentGenerator.generate(slide, commonData, layoutManager, index + 1, settings);
+            } else if (rawType.includes("timeline") || rawType.includes("process") || rawType.includes("cycle") || rawType.includes("triangle") || rawType.includes("pyramid") || rawType.includes("diagram") || rawType.includes("compare") || rawType.includes("stepup") || rawType.includes("flowchart")) {
+              diagramGenerator.generate(slide, commonData, layoutManager, index + 1, settings);
             } else {
               contentGenerator.generate(slide, commonData, layoutManager, index + 1, settings);
             }
@@ -1546,11 +1738,18 @@ var global = this;
             title: data.title || "Untitled Presentation",
             templateId: data.templateId,
             // Optional ID for template
+            destinationId: data.destinationId,
+            // Optional ID for existing destination
             slides: data.slides.map((s) => ({
+              ...s,
+              // Spread all valid properties from source
               title: s.title,
-              subtitle: s.subtitle,
-              content: s.content || [],
-              layout: s.layout,
+              subtitle: s.subtitle || s.subhead,
+              // Handle alias if inconsistent
+              content: s.content || s.points || [],
+              // Partial alias support
+              layout: s.layout || s.type,
+              // Map type to layout
               notes: s.notes
             }))
           };

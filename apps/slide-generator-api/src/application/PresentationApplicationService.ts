@@ -5,13 +5,15 @@ import { ISlideRepository } from '../domain/repositories/ISlideRepository';
 
 export interface CreatePresentationRequest {
     title: string;
-    templateId?: string; // Optional template ID (User provided or Default)
+    templateId?: string; // Optional template ID (for copying)
+    destinationId?: string; // Optional destination ID (pre-copied presentation)
     slides: {
         title: string;
         subtitle?: string;
         content: string[];
-        layout?: string; // Matches LayoutType string
+        layout?: string;
         notes?: string;
+        [key: string]: any; // Allow arbitrary extra properties
     }[];
 }
 
@@ -31,12 +33,13 @@ export class PresentationApplicationService {
             // Cast string to LayoutType, defaulting to 'CONTENT' if undefined
             const layout = (slideData.layout as any) || 'CONTENT';
 
-            const slide = new Slide(title, content, layout, slideData.subtitle, slideData.notes);
+            // Pass the entire slideData as rawData
+            const slide = new Slide(title, content, layout, slideData.subtitle, slideData.notes, slideData);
             presentation.addSlide(slide);
         }
 
         // Repository now needs to know about templateId. 
         // We should update the interface, but for now let's pass it as a second arg if we update the interface
-        return this.slideRepository.createPresentation(presentation, request.templateId);
+        return this.slideRepository.createPresentation(presentation, request.templateId, request.destinationId);
     }
 }

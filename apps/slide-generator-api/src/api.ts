@@ -36,11 +36,13 @@ function generateSlides(data: any): SlideGenerationResponse {
         const request: CreatePresentationRequest = {
             title: data.title || 'Untitled Presentation',
             templateId: data.templateId, // Optional ID for template
+            destinationId: data.destinationId, // Optional ID for existing destination
             slides: data.slides.map((s: any) => ({
+                ...s, // Spread all valid properties from source
                 title: s.title,
-                subtitle: s.subtitle,
-                content: s.content || [],
-                layout: s.layout,
+                subtitle: s.subtitle || s.subhead, // Handle alias if inconsistent
+                content: s.content || s.points || [], // Partial alias support
+                layout: s.layout || s.type, // Map type to layout
                 notes: s.notes
             }))
         };

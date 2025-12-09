@@ -1,6 +1,6 @@
 import { SlideTitle, SlideContent } from './SlideElement';
 
-export type LayoutType = 'TITLE' | 'AGENDA' | 'CONTENT' | 'SECTION' | 'CONCLUSION';
+export type LayoutType = string;
 
 export class Slide {
     constructor(
@@ -8,6 +8,7 @@ export class Slide {
         public readonly content: SlideContent,
         public readonly layout: LayoutType = 'CONTENT',
         public readonly subtitle?: string,
-        public readonly notes?: string
+        public readonly notes?: string,
+        public readonly rawData?: any // Store extra data from JSON
     ) { }
 }

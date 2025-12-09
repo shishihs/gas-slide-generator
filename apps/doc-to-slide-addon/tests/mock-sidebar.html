@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mock Sidebar</title>
+</head>
+<body>
+    <!-- Inject the sidebar content -->
+    <div id="sidebar-container"></div>
+
+    <script>
+        // formatting function for strings
+        if (!String.prototype.format) {
+            String.prototype.format = function() {
+                var args = arguments;
+                return this.replace(/{(\d+)}/g, function(match, number) {
+                    return typeof args[number] != 'undefined'
+                        ? args[number]
+                        : match;
+                });
+            };
+        }
+
+        // 1. Mock google.script.run
+        const google = {
+            script: {
+                run: {
+                    withSuccessHandler: function(successCallback) {
+                        this.successCallback = successCallback;
+                        return this;
+                    },
+                    withFailureHandler: function(failureCallback) {
+                        this.failureCallback = failureCallback;
+                        return this;
+                    },
+                    // Mocked functions
+                    convertDocumentToJson: function() {
+                        console.log('Mock: convertDocumentToJson called');
+                        setTimeout(() => {
+                            if (this.successCallback) {
+                                this.successCallback({
+                                    title: "Mock Presentation",
+                                    slides: [
+                                        { type: "TITLE", title: "Test Title" }
+                                    ]
+                                });
+                            }
+                        }, 500);
+                    },
+                    getStoredJsonData: function() {
+                        console.log('Mock: getStoredJsonData called');
+                        setTimeout(() => {
+                            // Start empty
+                            if (this.successCallback) {
+                                this.successCallback(null);
+                            }
+                        }, 100);
+                    },
+                    generateSlidesFromJson: function(json) {
+                        console.log('Mock: generateSlidesFromJson called with', json);
+                        setTimeout(() => {
+                            if (this.successCallback) {
+                                this.successCallback({
+                                    success: true,
+                                    slideUrl: "https://docs.google.com/presentation/d/mock-presentation-id"
+                                });
+                            }
+                        }, 1000);
+                    }
+                }
+            }
+        };
+        window.google = google;
+
+        // 2. Load the actual sidebar content
+        // In a real build, we might bundle this, but for this test we'll fetch it or just check if it's loaded.
+        // For simplicity in this environment, we rely on Playwright to inject the HTML content 
+        // OR we can fetch it if we are serving this file.
+        // BUT, Playwright can serve the file content directly.
+        // Let's make this file robust: it will be loaded by Playwright, 
+        // and we will rely on Playwright to inject the template content into #sidebar-container 
+        // OR we can just paste the Sidebar content here if we want a single file.
+        
+        // HOWEVER, to keep it clean and synced, we should read the file.
+        // Since this is a browser file, it can't read local files.
+        // We will assume the test runner will replace the PLACEHOLDER below.
+    </script>
+</body>
+</html>

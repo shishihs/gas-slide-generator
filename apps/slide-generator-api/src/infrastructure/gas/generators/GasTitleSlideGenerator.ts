@@ -24,12 +24,13 @@ export class GasTitleSlideGenerator implements ISlideGenerator {
 
         // Populate Title Placeholder
         const titlePlaceholder = slide.getPlaceholder(SlidesApp.PlaceholderType.TITLE) || slide.getPlaceholder(SlidesApp.PlaceholderType.CENTERED_TITLE);
+
         if (titlePlaceholder) {
+            Logger.log(`Title Slide: Found Title Placeholder`);
             const shape = titlePlaceholder.asShape();
-            // shape.getText().setText(data.title || ''); // Simple setText
-            // If we want to support markdown-like styles (bold), we can try setStyledText but without resetting fonts.
-            // For now, simple text to guarantee template look.
             shape.getText().setText(data.title || '');
+        } else {
+            Logger.log('Title Slide: WARNING - No Title Placeholder found on this layout.');
         }
 
         // Populate Subtitle / Date (Subtitle placeholder often used for subtitle or date)

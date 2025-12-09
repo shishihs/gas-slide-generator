@@ -616,14 +616,14 @@ export const CONFIG = {
         text_small_font: '#1F2937',
         background_white: '#FFFFFF',
         card_bg: '#f6e9f0',
-        background_gray: '',
-        faint_gray: '',
-        ghost_gray: '',
-        table_header_bg: '',
-        lane_border: '',
-        card_border: '',
-        neutral_gray: '',
-        process_arrow: ''
+        background_gray: '#F1F3F4',
+        faint_gray: '#FAFAFA',
+        ghost_gray: '#E0E0E0',
+        table_header_bg: '#E8EAED',
+        lane_border: '#DADCE0',
+        card_border: '#DADCE0',
+        neutral_gray: '#9AA0A6',
+        process_arrow: '#4285F4'
     },
     DIAGRAM: {
         laneGap_px: 24,

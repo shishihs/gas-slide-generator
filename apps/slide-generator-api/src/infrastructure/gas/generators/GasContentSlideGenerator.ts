@@ -56,7 +56,22 @@ export class GasContentSlideGenerator implements ISlideGenerator {
         const isTwo = !!(data.twoColumn || data.columns);
 
         // Body Placeholders
-        const bodies = slide.getPlaceholders().filter(p => (p as any).getPlaceholderType() === SlidesApp.PlaceholderType.BODY);
+        const bodies = slide.getPlaceholders().filter(p => {
+            // Check direct method (standard Placeholder interface)
+            if (typeof (p as any).getPlaceholderType === 'function') {
+                return (p as any).getPlaceholderType() === SlidesApp.PlaceholderType.BODY;
+            }
+            // Check via asShape (sometimes needed depending on internal object structure)
+            try {
+                const s = p.asShape();
+                if (typeof s.getPlaceholderType === 'function') {
+                    return s.getPlaceholderType() === SlidesApp.PlaceholderType.BODY;
+                }
+            } catch (e) {
+                // Not a shape, or error
+            }
+            return false;
+        });
 
         if (isTwo && bodies.length >= 2) {
             // If we have at least 2 body placeholders, use them!

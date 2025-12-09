@@ -1,10 +1,17 @@
 {
   "timeZone": "Asia/Tokyo",
   "dependencies": {
+    "enabledAdvancedServices": [
+      {
+        "userSymbol": "Drive",
+        "serviceId": "drive",
+        "version": "v2"
+      }
+    ],
     "libraries": [
       {
         "userSymbol": "SlideGeneratorApi",
-        "version": "13",
+        "version": "24",
         "libraryId": "1ErChmOvJ536ITJ32hJSwdKfmdjlKAJP92q-Jj5O2MM_6-lnx87UJyHkD",
         "developmentMode": false
       }
@@ -19,6 +26,7 @@
     "https://www.googleapis.com/auth/drive",
     "https://www.googleapis.com/auth/script.container.ui",
     "https://www.googleapis.com/auth/cloud-platform",
+    "https://www.googleapis.com/auth/userinfo.email",
     "openid"
   ]
 }

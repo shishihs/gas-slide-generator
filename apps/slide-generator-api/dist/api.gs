@@ -1498,7 +1498,7 @@ var global = this;
             const x = area.left + i * (itemWidth + gap);
             const bubble = slide.insertShape(SlidesApp.ShapeType.ELLIPSE, x + itemWidth / 2 - 15, centerY - 15, 30, 30);
             bubble.getFill().setSolidFill("#FFFFFF");
-            bubble.getBorder().getFill().setSolidFill(CONFIG.COLORS.primary_color);
+            bubble.getBorder().setSolidFill(CONFIG.COLORS.primary_color);
             bubble.getBorder().setWeight(2);
             const dateBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x, centerY - 50, itemWidth, 30);
             dateBox.getText().setText(m.date || m.label || "");

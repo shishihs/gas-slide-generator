@@ -211,12 +211,12 @@
   <h3>🎨 Generate Slide</h3>
   <p>Convert your document content into beautifully formatted Google Slides.</p>
 
-  <!-- Main Action -->
-  <div class="section" id="mainSection">
-    <div class="section-title">Generate Presentation</div>
-    <p style="margin-bottom: 12px;">Create a Google Slide presentation from this document.</p>
-    <button class="btn-primary" id="generateBtn" onclick="startGeneration()">
-      Generate Slides
+  <!-- Retry Action (Only visible on error) -->
+  <div class="section" id="retrySection" style="display: none;">
+    <div class="section-title">⚠️ Error Occurred</div>
+    <p style="margin-bottom: 12px;">The generation process encountered an error.</p>
+    <button class="btn-primary" onclick="startGeneration()">
+      Retry
     </button>
   </div>
 
@@ -230,7 +230,7 @@
     <a id="slideLink" href="#" target="_blank" class="link">Open Presentation →</a>
 
     <div style="margin-top: 16px; border-top: 1px solid #eee; padding-top: 12px;">
-      <button class="btn-secondary" onclick="resetUI()">Create Another</button>
+      <button class="btn-secondary" onclick="startGeneration()">Create Another</button>
     </div>
   </div>
 
@@ -241,11 +241,8 @@
      * Step 2: Generate Slides from JSON
      */
     function startGeneration() {
-      const btn = document.getElementById('generateBtn');
-      btn.disabled = true;
-      btn.textContent = 'Processing...';
-
-      // Hide result if visible
+      // Create cleaner UI state
+      document.getElementById('retrySection').style.display = 'none';
       document.getElementById('resultSection').style.display = 'none';
 
       showStatus('loading', '<span class="spinner"></span>Step 1/2: Analyzing document content...');
@@ -278,17 +275,13 @@
      * Callback when slide generation is successful
      */
     function onSlideSuccess(result) {
-      const btn = document.getElementById('generateBtn');
-      btn.disabled = false;
-      btn.textContent = 'Generate Slides';
-
       if (result.success) {
         showStatus('success', '✅ All steps completed successfully!');
         const resultSection = document.getElementById('resultSection');
         resultSection.style.display = 'block';
         document.getElementById('slideLink').href = result.slideUrl;
       } else {
-        showStatus('error', '❌ Failed to generate slides: ' + result.error);
+        onError(new Error(result.error));
       }
     }
 
@@ -296,9 +289,7 @@
      * Global Error Handler
      */
     function onError(error) {
-      const btn = document.getElementById('generateBtn');
-      btn.disabled = false;
-      btn.textContent = 'Generate Slides';
+      document.getElementById('retrySection').style.display = 'block';
       showStatus('error', '❌ Error: ' + error.message);
     }
 
@@ -311,11 +302,6 @@
       status.innerHTML = message;
     }
 
-    function resetUI() {
-      document.getElementById('resultSection').style.display = 'none';
-      document.getElementById('status').style.display = 'none';
-      document.getElementById('generateBtn').disabled = false;
-    }
 
     // Auto-start generation on load
     window.onload = function () {

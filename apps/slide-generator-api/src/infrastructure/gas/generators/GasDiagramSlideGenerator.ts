@@ -78,7 +78,7 @@ export class GasDiagramSlideGenerator implements ISlideGenerator {
             bubble.getFill().setSolidFill('#FFFFFF');
             // Border color: getFill() returns LineFill
             // @ts-ignore
-            bubble.getBorder().getFill().setSolidFill(CONFIG.COLORS.primary_color);
+            bubble.getBorder().setSolidFill(CONFIG.COLORS.primary_color);
             bubble.getBorder().setWeight(2);
 
             // Date/Label

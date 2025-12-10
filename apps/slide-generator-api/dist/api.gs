@@ -780,6 +780,41 @@ var global = this;
     }
   });
 
+  // src/infrastructure/gas/generators/GasTitleSlideGenerator.ts
+  var GasTitleSlideGenerator;
+  var init_GasTitleSlideGenerator = __esm({
+    "src/infrastructure/gas/generators/GasTitleSlideGenerator.ts"() {
+      GasTitleSlideGenerator = class {
+        constructor(creditImageBlob) {
+          this.creditImageBlob = creditImageBlob;
+        }
+        generate(slide, data, layout, pageNum, settings, imageUpdateOption = "update") {
+          const titlePlaceholder = slide.getPlaceholder(SlidesApp.PlaceholderType.TITLE) || slide.getPlaceholder(SlidesApp.PlaceholderType.CENTERED_TITLE);
+          if (titlePlaceholder) {
+            Logger.log(`Title Slide: Found Title Placeholder`);
+            const shape = titlePlaceholder.asShape();
+            shape.getText().setText(data.title || "");
+          } else {
+            Logger.log("Title Slide: WARNING - No Title Placeholder found on this layout.");
+          }
+          const subtitlePlaceholder = slide.getPlaceholder(SlidesApp.PlaceholderType.SUBTITLE);
+          if (subtitlePlaceholder) {
+            if (data.date) {
+              subtitlePlaceholder.asShape().getText().setText(data.date);
+            } else {
+              subtitlePlaceholder.asShape().getText().setText("");
+            }
+          } else {
+            const bodyPlaceholder = slide.getPlaceholder(SlidesApp.PlaceholderType.BODY);
+            if (bodyPlaceholder && data.date) {
+              bodyPlaceholder.asShape().getText().setText(data.date);
+            }
+          }
+        }
+      };
+    }
+  });
+
   // src/common/utils/ColorUtils.ts
   function hexToRgb(hex) {
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -788,6 +823,54 @@ var global = this;
       g: parseInt(result[2], 16),
       b: parseInt(result[3], 16)
     } : null;
+  }
+  function lightenColor(color, amount) {
+    const rgb = hexToRgb(color);
+    if (!rgb) return color;
+    const lighten = (c) => Math.min(255, Math.round(c + (255 - c) * amount));
+    const newR = lighten(rgb.r);
+    const newG = lighten(rgb.g);
+    const newB = lighten(rgb.b);
+    return `#${newR.toString(16).padStart(2, "0")}${newG.toString(16).padStart(2, "0")}${newB.toString(16).padStart(2, "0")}`;
+  }
+  function darkenColor(color, amount) {
+    const rgb = hexToRgb(color);
+    if (!rgb) return color;
+    const darken = (c) => Math.max(0, Math.round(c * (1 - amount)));
+    const newR = darken(rgb.r);
+    const newG = darken(rgb.g);
+    const newB = darken(rgb.b);
+    return `#${newR.toString(16).padStart(2, "0")}${newG.toString(16).padStart(2, "0")}${newB.toString(16).padStart(2, "0")}`;
+  }
+  function generatePyramidColors(baseColor, levels) {
+    const colors = [];
+    for (let i = 0; i < levels; i++) {
+      const lightenAmount = i / Math.max(1, levels - 1) * 0.6;
+      colors.push(lightenColor(baseColor, lightenAmount));
+    }
+    return colors;
+  }
+  function generateProcessColors(baseColor, steps) {
+    const colors = [];
+    for (let i = 0; i < steps; i++) {
+      const lightenAmount = 0.5 * (1 - i / Math.max(1, steps - 1));
+      colors.push(lightenColor(baseColor, lightenAmount));
+    }
+    return colors;
+  }
+  function generateTimelineCardColors(baseColor, milestones) {
+    const colors = [];
+    for (let i = 0; i < milestones; i++) {
+      const lightenAmount = 0.4 * (1 - i / Math.max(1, milestones - 1));
+      colors.push(lightenColor(baseColor, lightenAmount));
+    }
+    return colors;
+  }
+  function generateCompareColors(baseColor) {
+    return {
+      left: darkenColor(baseColor, 0.3),
+      right: baseColor
+    };
   }
   var init_ColorUtils = __esm({
     "src/common/utils/ColorUtils.ts"() {
@@ -957,18 +1040,6 @@ var global = this;
       }
     });
   }
-  function setBackgroundImageFromUrl(slide, layout, imageUrl, fallbackColor, imageUpdateOption = "update") {
-    slide.getBackground().setSolidFill(fallbackColor);
-    if (imageUpdateOption === "update") {
-      if (!imageUrl) return;
-      try {
-        const image = insertImageFromUrlOrFileId(imageUrl);
-        if (!image) return;
-        slide.insertImage(image).setWidth(layout.pageW_pt).setHeight(layout.pageH_pt).setLeft(0).setTop(0).sendToBack();
-      } catch (e) {
-      }
-    }
-  }
   function insertImageFromUrlOrFileId(urlOrFileId) {
     if (!urlOrFileId) return null;
     function extractFileIdFromUrl(url) {
@@ -1023,39 +1094,6 @@ var global = this;
       return null;
     }
   }
-  function createGradientRectangle(slide, x, y, width, height, colors) {
-    const numStrips = Math.max(20, Math.floor(width / 2));
-    const stripWidth = width / numStrips;
-    const startColor = hexToRgb(colors[0]), endColor = hexToRgb(colors[1]);
-    if (!startColor || !endColor) return null;
-    const shapes = [];
-    for (let i = 0; i < numStrips; i++) {
-      const ratio = i / (numStrips - 1);
-      const r = Math.round(startColor.r + (endColor.r - startColor.r) * ratio);
-      const g = Math.round(startColor.g + (endColor.g - startColor.g) * ratio);
-      const b = Math.round(startColor.b + (endColor.b - startColor.b) * ratio);
-      const strip = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, x + i * stripWidth, y, stripWidth + 0.5, height);
-      strip.getFill().setSolidFill(r, g, b);
-      strip.getBorder().setTransparent();
-      shapes.push(strip);
-    }
-    if (shapes.length > 1) {
-      try {
-        if (slide.group) return slide.group(shapes);
-      } catch (e) {
-      }
-    }
-    return shapes[0] || null;
-  }
-  function applyFill(slide, x, y, width, height, settings) {
-    if (settings.enableGradient) {
-      createGradientRectangle(slide, x, y, width, height, [settings.gradientStart, settings.gradientEnd]);
-    } else {
-      const shape = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, x, y, width, height);
-      shape.getFill().setSolidFill(settings.primaryColor);
-      shape.getBorder().setTransparent();
-    }
-  }
   function normalizeImages(arr) {
     return (arr || []).map((v) => typeof v === "string" ? {
       url: v
@@ -1082,26 +1120,16 @@ var global = this;
       }
     }
   }
-  function drawBottomBar(slide, layout, settings) {
-    const barRect = layout.getRect("bottomBar");
-    applyFill(slide, barRect.left, barRect.top, barRect.width, barRect.height, settings);
-  }
-  function drawCreditImage(slide, layout, creditImageBlob, creditLink) {
-    try {
-      const creditPosPx = CONFIG.POS_PX.footer.creditImage;
-      if (!creditPosPx || !creditImageBlob) {
-        return;
-      }
-      const img = slide.insertImage(creditImageBlob);
-      const newHeight = layout.pxToPt(creditPosPx.height) * layout.scaleY;
-      const aspect = img.getWidth() / img.getHeight();
-      const newWidth = newHeight * aspect;
-      const rightMarginPt = layout.pxToPt(creditPosPx.right) * layout.scaleX;
-      const newLeft = layout.pageW_pt - rightMarginPt - newWidth;
-      const topPt = layout.pxToPt(creditPosPx.top) * layout.scaleY;
-      img.setLeft(newLeft).setTop(topPt).setWidth(newWidth).setHeight(newHeight).setLinkUrl(creditLink);
-    } catch (e) {
-    }
+  function drawArrowBetweenRects(slide, a, b, arrowH, arrowGap, settings) {
+    const fromX = a.left + a.width;
+    const fromY = a.top + a.height / 2;
+    const toX = b.left;
+    const toY = b.top + b.height / 2;
+    if (toX - fromX <= 0) return;
+    const line = slide.insertLine(SlidesApp.LineCategory.STRAIGHT, fromX, fromY, toX, toY);
+    line.getLineFill().setSolidFill(settings.primaryColor);
+    line.setWeight(1.5);
+    line.setEndArrow(SlidesApp.ArrowStyle.FILL_ARROW);
   }
   function addCucFooter(slide, layout, pageNum, settings, creditImageBlob) {
     const CREDIT_IMAGE_LINK = "https://note.com/majin_108";
@@ -1118,9 +1146,6 @@ var global = this;
         leftShape.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
       } catch (e) {
       }
-    }
-    if (creditImageBlob) {
-      drawCreditImage(slide, layout, creditImageBlob, CREDIT_IMAGE_LINK);
     }
     if (pageNum > 0 && settings && settings.showPageNumber) {
       const rightRect = layout.getRect("footer.rightPage");
@@ -1192,64 +1217,6 @@ var global = this;
     }
   });
 
-  // src/infrastructure/gas/generators/GasTitleSlideGenerator.ts
-  var GasTitleSlideGenerator;
-  var init_GasTitleSlideGenerator = __esm({
-    "src/infrastructure/gas/generators/GasTitleSlideGenerator.ts"() {
-      init_SlideConfig();
-      init_SlideUtils();
-      GasTitleSlideGenerator = class {
-        constructor(creditImageBlob) {
-          this.creditImageBlob = creditImageBlob;
-        }
-        generate(slide, data, layout, pageNum, settings, imageUpdateOption = "update") {
-          const titlePlaceholder = slide.getPlaceholder(SlidesApp.PlaceholderType.TITLE) || slide.getPlaceholder(SlidesApp.PlaceholderType.CENTERED_TITLE);
-          if (titlePlaceholder) {
-            Logger.log(`Title Slide: Found Title Placeholder`);
-            const shape = titlePlaceholder.asShape();
-            shape.getText().setText(data.title || "");
-          } else {
-            Logger.log("Title Slide: WARNING - No Title Placeholder found on this layout.");
-          }
-          const subtitlePlaceholder = slide.getPlaceholder(SlidesApp.PlaceholderType.SUBTITLE);
-          if (subtitlePlaceholder) {
-            if (data.date) {
-              subtitlePlaceholder.asShape().getText().setText(data.date);
-            } else {
-              subtitlePlaceholder.asShape().getText().setText("");
-            }
-          } else {
-            const bodyPlaceholder = slide.getPlaceholder(SlidesApp.PlaceholderType.BODY);
-            if (bodyPlaceholder && data.date) {
-              bodyPlaceholder.asShape().getText().setText(data.date);
-            }
-          }
-          if (imageUpdateOption === "update" && CONFIG.LOGOS.header) {
-            const logoRect = layout.getRect("titleSlide.logo");
-            try {
-              if (CONFIG.LOGOS.header) {
-                const imageData = insertImageFromUrlOrFileId(CONFIG.LOGOS.header);
-                if (imageData && typeof imageData !== "string") {
-                  const logo = slide.insertImage(imageData);
-                  const aspect = logo.getHeight() / logo.getWidth();
-                  logo.setLeft(logoRect.left).setTop(logoRect.top).setWidth(logoRect.width).setHeight(logoRect.width * aspect);
-                }
-              }
-            } catch (e) {
-            }
-          }
-          if (settings.showBottomBar) {
-            drawBottomBar(slide, layout, settings);
-          }
-          if (this.creditImageBlob) {
-            const CREDIT_IMAGE_LINK = "https://note.com/majin_108";
-            drawCreditImage(slide, layout, this.creditImageBlob, CREDIT_IMAGE_LINK);
-          }
-        }
-      };
-    }
-  });
-
   // src/infrastructure/gas/generators/GasSectionSlideGenerator.ts
   var GasSectionSlideGenerator;
   var init_GasSectionSlideGenerator = __esm({
@@ -1262,18 +1229,6 @@ var global = this;
           this.sectionCounter = 0;
         }
         generate(slide, data, layout, pageNum, settings, imageUpdateOption = "update") {
-          const imageUrl = CONFIG.BACKGROUND_IMAGES.section || CONFIG.BACKGROUND_IMAGES.main || "";
-          let fallbackColor;
-          if (imageUrl) {
-            fallbackColor = CONFIG.COLORS.background_white;
-          } else {
-            if (CONFIG.COLORS.background_white.toUpperCase() !== "#FFFFFF") {
-              fallbackColor = CONFIG.COLORS.background_white;
-            } else {
-              fallbackColor = CONFIG.COLORS.background_gray;
-            }
-          }
-          setBackgroundImageFromUrl(slide, layout, imageUrl, fallbackColor, imageUpdateOption);
           this.sectionCounter++;
           const parsedNum = (() => {
             if (Number.isFinite(data.sectionNo)) {
@@ -1434,9 +1389,6 @@ var global = this;
             createContentCushion(slide, area, settings, layout);
             renderImagesInArea(slide, layout, area, normalizeImages(data.images), imageUpdateOption);
           }
-          if (settings.showBottomBar) {
-            drawBottomBar(slide, layout, settings);
-          }
           addCucFooter(slide, layout, pageNum, settings, this.creditImageBlob);
         }
       };
@@ -1449,6 +1401,7 @@ var global = this;
     "src/infrastructure/gas/generators/GasDiagramSlideGenerator.ts"() {
       init_SlideConfig();
       init_SlideUtils();
+      init_ColorUtils();
       GasDiagramSlideGenerator = class {
         constructor(creditImageBlob) {
           this.creditImageBlob = creditImageBlob;
@@ -1459,129 +1412,349 @@ var global = this;
           if (titlePlaceholder) {
             titlePlaceholder.asShape().getText().setText(data.title || "");
           }
-          if (data.subhead) {
-          }
           const type = (data.layout || data.type || "").toLowerCase();
           const bodyPlaceholder = slide.getPlaceholder(SlidesApp.PlaceholderType.BODY);
           const workArea = bodyPlaceholder ? { left: bodyPlaceholder.getLeft(), top: bodyPlaceholder.getTop(), width: bodyPlaceholder.getWidth(), height: bodyPlaceholder.getHeight() } : layout.getRect("contentSlide.body");
           if (type.includes("timeline")) {
-            this.drawTimeline(slide, data, workArea, settings);
+            this.drawTimeline(slide, data, workArea, settings, layout);
           } else if (type.includes("process")) {
-            this.drawProcess(slide, data, workArea, settings);
+            this.drawProcess(slide, data, workArea, settings, layout);
           } else if (type.includes("cycle")) {
-            this.drawCycle(slide, data, workArea, settings);
+            this.drawCycle(slide, data, workArea, settings, layout);
           } else if (type.includes("triangle") || type.includes("pyramid")) {
-            this.drawPyramid(slide, data, workArea, settings);
+            this.drawPyramid(slide, data, workArea, settings, layout);
           } else if (type.includes("compare") || type.includes("kaizen")) {
-            this.drawComparison(slide, data, workArea, settings);
+            this.drawComparison(slide, data, workArea, settings, layout);
           } else if (type.includes("stepup") || type.includes("stair")) {
-            this.drawStepUp(slide, data, workArea, settings);
+            this.drawStepUp(slide, data, workArea, settings, layout);
+          } else if (type.includes("flowchart")) {
+            this.drawFlowChart(slide, data, workArea, settings, layout);
+          } else if (type.includes("diagram")) {
+            this.drawLanes(slide, data, workArea, settings, layout);
           } else {
             Logger.log("Diagram logic not implemented for type: " + type);
           }
-          if (settings.showBottomBar) {
-            drawBottomBar(slide, layout, settings);
-          }
           addCucFooter(slide, layout, pageNum, settings, this.creditImageBlob);
         }
-        drawTimeline(slide, data, area, settings) {
+        drawTimeline(slide, data, area, settings, layout) {
           const milestones = data.milestones || data.items || [];
           if (!milestones.length) return;
-          const count = milestones.length;
-          const gap = 20;
-          const itemWidth = (area.width - gap * (count - 1)) / count;
-          const centerY = area.top + area.height / 2;
-          const line = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, area.left, centerY - 2, area.width, 4);
-          line.getBorder().setTransparent();
-          line.getFill().setSolidFill(CONFIG.COLORS.primary_color);
+          const inner = layout.pxToPt(80), baseY = area.top + area.height * 0.5;
+          const leftX = area.left + inner, rightX = area.left + area.width - inner;
+          const line = slide.insertLine(SlidesApp.LineCategory.STRAIGHT, leftX, baseY, rightX, baseY);
+          line.getLineFill().setSolidFill(CONFIG.COLORS.faint_gray);
+          line.setWeight(2);
+          const dotR = layout.pxToPt(10);
+          const gap = milestones.length > 1 ? (rightX - leftX) / (milestones.length - 1) : 0;
+          const cardW_pt = layout.pxToPt(180);
+          const vOffset = layout.pxToPt(40);
+          const headerHeight = layout.pxToPt(28);
+          const bodyHeight = layout.pxToPt(80);
+          const timelineColors = generateTimelineCardColors(settings.primaryColor, milestones.length);
           milestones.forEach((m, i) => {
-            const x = area.left + i * (itemWidth + gap);
-            const bubble = slide.insertShape(SlidesApp.ShapeType.ELLIPSE, x + itemWidth / 2 - 15, centerY - 15, 30, 30);
-            bubble.getFill().setSolidFill("#FFFFFF");
-            bubble.getBorder().getLineFill().setSolidFill(CONFIG.COLORS.primary_color);
-            bubble.getBorder().setWeight(2);
-            const dateBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x, centerY - 50, itemWidth, 30);
-            dateBox.getText().setText(m.date || m.label || "");
-            dateBox.getText().getParagraphStyle().setParagraphAlignment(SlidesApp.ParagraphAlignment.CENTER);
-            const descBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x, centerY + 20, itemWidth, 60);
-            descBox.getText().setText(m.state || m.description || "");
-            descBox.getText().getParagraphStyle().setParagraphAlignment(SlidesApp.ParagraphAlignment.CENTER);
-            descBox.getText().getTextStyle().setFontSize(10);
+            const x = leftX + gap * i;
+            const isAbove = i % 2 === 0;
+            const dateText = String(m.date || "");
+            const labelText = String(m.label || m.state || "");
+            const cardH_pt = headerHeight + bodyHeight;
+            const cardLeft = x - cardW_pt / 2;
+            const cardTop = isAbove ? baseY - vOffset - cardH_pt : baseY + vOffset;
+            const headerShape = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, cardLeft, cardTop, cardW_pt, headerHeight);
+            headerShape.getFill().setSolidFill(timelineColors[i]);
+            headerShape.getBorder().getLineFill().setSolidFill(timelineColors[i]);
+            const bodyShape = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, cardLeft, cardTop + headerHeight, cardW_pt, bodyHeight);
+            bodyShape.getFill().setSolidFill(CONFIG.COLORS.background_gray);
+            bodyShape.getBorder().getLineFill().setSolidFill(CONFIG.COLORS.card_border);
+            const connectorY_start = isAbove ? cardTop + cardH_pt : baseY;
+            const connectorY_end = isAbove ? baseY : cardTop;
+            const connector = slide.insertLine(SlidesApp.LineCategory.STRAIGHT, x, connectorY_start, x, connectorY_end);
+            connector.getLineFill().setSolidFill(CONFIG.COLORS.neutral_gray);
+            connector.setWeight(1);
+            const dot = slide.insertShape(SlidesApp.ShapeType.ELLIPSE, x - dotR / 2, baseY - dotR / 2, dotR, dotR);
+            dot.getFill().setSolidFill(timelineColors[i]);
+            dot.getBorder().setTransparent();
+            const headerTextShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, cardLeft, cardTop, cardW_pt, headerHeight);
+            setStyledText(headerTextShape, dateText, {
+              size: CONFIG.FONTS.sizes.body,
+              bold: true,
+              color: CONFIG.COLORS.background_gray,
+              align: SlidesApp.ParagraphAlignment.CENTER
+            });
+            try {
+              headerTextShape.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
+            } catch (e) {
+            }
+            let bodyFontSize = CONFIG.FONTS.sizes.body;
+            const textLength = labelText.length;
+            if (textLength > 40) bodyFontSize = 10;
+            else if (textLength > 30) bodyFontSize = 11;
+            else if (textLength > 20) bodyFontSize = 12;
+            const bodyTextShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, cardLeft, cardTop + headerHeight, cardW_pt, bodyHeight);
+            setStyledText(bodyTextShape, labelText, {
+              size: bodyFontSize,
+              align: SlidesApp.ParagraphAlignment.CENTER
+            });
+            try {
+              bodyTextShape.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
+            } catch (e) {
+            }
           });
         }
-        drawProcess(slide, data, area, settings) {
+        drawProcess(slide, data, area, settings, layout) {
           const steps = data.steps || data.items || [];
           if (!steps.length) return;
-          const count = steps.length;
-          const gap = 10;
-          const itemWidth = (area.width - gap * (count - 1)) / count;
-          let x = area.left;
-          const y = area.top + 50;
-          const h = 100;
-          const accentColor = CONFIG.COLORS.process_arrow || CONFIG.COLORS.primary_color;
-          steps.forEach((step, i) => {
-            const shape = slide.insertShape(SlidesApp.ShapeType.CHEVRON, x, y, itemWidth, h);
-            shape.getFill().setSolidFill(accentColor);
-            shape.getText().setText(typeof step === "string" ? step : step.label || step.title || "");
-            shape.getText().getTextStyle().setForegroundColor("#FFFFFF").setBold(true);
-            x += itemWidth + gap;
-          });
-        }
-        drawCycle(slide, data, area, settings) {
-          const items = data.items || [];
-          const centerX = area.left + area.width / 2;
-          const centerY = area.top + area.height / 2;
-          const radius = Math.min(area.width, area.height) / 3;
-          const secondaryColor = "#666666";
-          items.forEach((item, i) => {
-            const angle = 2 * Math.PI / items.length * i - Math.PI / 2;
-            const x = centerX + Math.cos(angle) * (radius * 1.5) - 60;
-            const y = centerY + Math.sin(angle) * (radius * 1.5) - 40;
-            const shape = slide.insertShape(SlidesApp.ShapeType.ROUND_RECTANGLE, x, y, 120, 80);
-            shape.getFill().setSolidFill(secondaryColor);
-            shape.getText().setText((item.label || item.title || "") + "\n" + (item.subLabel || item.desc || ""));
-            shape.getText().getTextStyle().setForegroundColor("#FFFFFF");
-          });
-          const core = slide.insertShape(SlidesApp.ShapeType.DONUT, centerX - radius, centerY - radius, radius * 2, radius * 2);
-          core.getFill().setSolidFill(CONFIG.COLORS.primary_color);
-          if (data.centerText) {
-            const coreText = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, centerX - 40, centerY - 20, 80, 40);
-            coreText.getText().setText(data.centerText);
-            coreText.getText().getParagraphStyle().setParagraphAlignment(SlidesApp.ParagraphAlignment.CENTER);
-            coreText.getText().getTextStyle().setBold(true).setFontSize(18).setForegroundColor("#FFFFFF");
+          const n = steps.length;
+          let boxHPx, arrowHPx, fontSize;
+          if (n <= 2) {
+            boxHPx = 100;
+            arrowHPx = 25;
+            fontSize = 16;
+          } else if (n === 3) {
+            boxHPx = 80;
+            arrowHPx = 20;
+            fontSize = 16;
+          } else {
+            boxHPx = 65;
+            arrowHPx = 15;
+            fontSize = 14;
+          }
+          const processColors = generateProcessColors(settings.primaryColor, n);
+          const startY = area.top + layout.pxToPt(10);
+          let currentY = startY;
+          const boxHPt = layout.pxToPt(boxHPx), arrowHPt = layout.pxToPt(arrowHPx);
+          const headerWPt = layout.pxToPt(120);
+          const bodyLeft = area.left + headerWPt;
+          const bodyWPt = area.width - headerWPt;
+          for (let i = 0; i < n; i++) {
+            const cleanText = String(steps[i] || "").replace(/^\s*\d+[\.\s]*/, "");
+            const header = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, area.left, currentY, headerWPt, boxHPt);
+            header.getFill().setSolidFill(processColors[i]);
+            header.getBorder().setTransparent();
+            setStyledText(header, `STEP ${i + 1}`, {
+              size: fontSize,
+              bold: true,
+              color: CONFIG.COLORS.background_gray,
+              align: SlidesApp.ParagraphAlignment.CENTER
+            });
+            try {
+              header.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
+            } catch (e) {
+            }
+            const body = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, bodyLeft, currentY, bodyWPt, boxHPt);
+            body.getFill().setSolidFill(CONFIG.COLORS.background_gray);
+            body.getBorder().setTransparent();
+            const textShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, bodyLeft + layout.pxToPt(20), currentY, bodyWPt - layout.pxToPt(40), boxHPt);
+            setStyledText(textShape, cleanText, { size: fontSize });
+            try {
+              textShape.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
+            } catch (e) {
+            }
+            currentY += boxHPt;
+            if (i < n - 1) {
+              const arrowLeft = area.left + headerWPt / 2 - layout.pxToPt(8);
+              const arrow = slide.insertShape(SlidesApp.ShapeType.DOWN_ARROW, arrowLeft, currentY, layout.pxToPt(16), arrowHPt);
+              arrow.getFill().setSolidFill(CONFIG.COLORS.process_arrow || CONFIG.COLORS.ghost_gray);
+              arrow.getBorder().setTransparent();
+              currentY += arrowHPt;
+            }
           }
         }
-        drawPyramid(slide, data, area, settings) {
-          const levels = data.levels || data.items || [];
-          const count = levels.length;
-          const stepHeight = Math.min(area.height, 400) / count;
-          const maxWidth = Math.min(area.width, 500);
+        drawCycle(slide, data, area, settings, layout) {
+          const items = data.items || [];
+          if (!items.length) return;
+          const textLengths = items.map((item) => {
+            const labelLength = (item.label || "").length;
+            const subLabelLength = (item.subLabel || "").length;
+            return labelLength + subLabelLength;
+          });
+          const maxLength = Math.max(...textLengths);
+          const avgLength = textLengths.reduce((sum, len) => sum + len, 0) / textLengths.length;
           const centerX = area.left + area.width / 2;
-          const topY = area.top + 20;
-          levels.forEach((lvl, i) => {
-            const currentWidth = maxWidth * ((i + 1) / count);
-            const y = topY + i * stepHeight;
-            const x = centerX - currentWidth / 2;
-            const rect = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, x, y, currentWidth, stepHeight - 5);
-            rect.getFill().setSolidFill(CONFIG.COLORS.primary_color, 1 - i * 0.15);
-            rect.getText().setText((lvl.title || lvl.label || "") + "\n" + (lvl.description || ""));
-            rect.getText().getTextStyle().setForegroundColor("#FFFFFF");
+          const centerY = area.top + area.height / 2;
+          const radiusX = area.width / 3.2;
+          const radiusY = area.height / 2.6;
+          const maxCardW = Math.min(layout.pxToPt(220), radiusX * 0.8);
+          const maxCardH = Math.min(layout.pxToPt(100), radiusY * 0.6);
+          let cardW, cardH, fontSize;
+          if (maxLength > 25 || avgLength > 18) {
+            cardW = Math.min(layout.pxToPt(230), maxCardW);
+            cardH = Math.min(layout.pxToPt(105), maxCardH);
+            fontSize = 13;
+          } else if (maxLength > 15 || avgLength > 10) {
+            cardW = Math.min(layout.pxToPt(215), maxCardW);
+            cardH = Math.min(layout.pxToPt(95), maxCardH);
+            fontSize = 14;
+          } else {
+            cardW = layout.pxToPt(200);
+            cardH = layout.pxToPt(90);
+            fontSize = 16;
+          }
+          if (data.centerText) {
+            const centerTextBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, centerX - layout.pxToPt(100), centerY - layout.pxToPt(50), layout.pxToPt(200), layout.pxToPt(100));
+            setStyledText(centerTextBox, data.centerText, { size: 20, bold: true, align: SlidesApp.ParagraphAlignment.CENTER, color: CONFIG.COLORS.text_primary });
+            try {
+              centerTextBox.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
+            } catch (e) {
+            }
+          }
+          const positions = [
+            { x: centerX + radiusX, y: centerY },
+            { x: centerX, y: centerY + radiusY },
+            { x: centerX - radiusX, y: centerY },
+            { x: centerX, y: centerY - radiusY }
+          ];
+          const itemsToDraw = items.slice(0, 4);
+          itemsToDraw.forEach((item, i) => {
+            const pos = positions[i];
+            const cardX = pos.x - cardW / 2;
+            const cardY = pos.y - cardH / 2;
+            const card = slide.insertShape(SlidesApp.ShapeType.ROUND_RECTANGLE, cardX, cardY, cardW, cardH);
+            card.getFill().setSolidFill(settings.primaryColor);
+            card.getBorder().setTransparent();
+            const subLabelText = item.subLabel || `${i + 1}\u756A\u76EE`;
+            const labelText = item.label || "";
+            setStyledText(card, `${subLabelText}
+${labelText}`, { size: fontSize, bold: true, color: CONFIG.COLORS.background_gray, align: SlidesApp.ParagraphAlignment.CENTER });
+            try {
+              card.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
+              const textRange = card.getText();
+              const subLabelEnd = subLabelText.length;
+              if (textRange.asString().length > subLabelEnd) {
+                textRange.getRange(0, subLabelEnd).getTextStyle().setFontSize(Math.max(10, fontSize - 2));
+              }
+            } catch (e) {
+            }
+          });
+          const arrowRadiusX = radiusX * 0.75;
+          const arrowRadiusY = radiusY * 0.8;
+          const arrowSize = layout.pxToPt(80);
+          const arrowPositions = [
+            { left: centerX + arrowRadiusX, top: centerY - arrowRadiusY, rotation: 90 },
+            { left: centerX + arrowRadiusX, top: centerY + arrowRadiusY, rotation: 180 },
+            { left: centerX - arrowRadiusX, top: centerY + arrowRadiusY, rotation: 270 },
+            { left: centerX - arrowRadiusX, top: centerY - arrowRadiusY, rotation: 0 }
+          ];
+          arrowPositions.slice(0, itemsToDraw.length).forEach((pos) => {
+            const arrow = slide.insertShape(SlidesApp.ShapeType.BENT_ARROW, pos.left - arrowSize / 2, pos.top - arrowSize / 2, arrowSize, arrowSize);
+            arrow.getFill().setSolidFill(CONFIG.COLORS.ghost_gray);
+            arrow.getBorder().setTransparent();
+            arrow.setRotation(pos.rotation);
           });
         }
-        drawComparison(slide, data, area, settings) {
+        drawPyramid(slide, data, area, settings, layout) {
+          const levels = data.levels || data.items || [];
+          if (!levels.length) return;
+          const levelsToDraw = levels.slice(0, 4);
+          const levelHeight = layout.pxToPt(70);
+          const levelGap = layout.pxToPt(2);
+          const totalHeight = levelHeight * levelsToDraw.length + levelGap * (levelsToDraw.length - 1);
+          const startY = area.top + (area.height - totalHeight) / 2;
+          const pyramidWidth = layout.pxToPt(480);
+          const textColumnWidth = layout.pxToPt(400);
+          const gap = layout.pxToPt(30);
+          const pyramidLeft = area.left;
+          const textColumnLeft = pyramidLeft + pyramidWidth + gap;
+          const pyramidColors = generatePyramidColors(settings.primaryColor, levelsToDraw.length);
+          const baseWidth = pyramidWidth;
+          const widthIncrement = baseWidth / levelsToDraw.length;
+          const centerX = pyramidLeft + pyramidWidth / 2;
+          levelsToDraw.forEach((level, index) => {
+            const levelWidth = baseWidth - widthIncrement * (levelsToDraw.length - 1 - index);
+            const levelX = centerX - levelWidth / 2;
+            const levelY = startY + index * (levelHeight + levelGap);
+            const levelBox = slide.insertShape(SlidesApp.ShapeType.ROUND_RECTANGLE, levelX, levelY, levelWidth, levelHeight);
+            levelBox.getFill().setSolidFill(pyramidColors[index]);
+            levelBox.getBorder().setTransparent();
+            const titleShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, levelX, levelY, levelWidth, levelHeight);
+            titleShape.getFill().setTransparent();
+            titleShape.getBorder().setTransparent();
+            const levelTitle = level.title || `\u30EC\u30D9\u30EB${index + 1}`;
+            setStyledText(titleShape, levelTitle, {
+              size: CONFIG.FONTS.sizes.body,
+              bold: true,
+              color: CONFIG.COLORS.background_gray,
+              align: SlidesApp.ParagraphAlignment.CENTER
+            });
+            try {
+              titleShape.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
+            } catch (e) {
+            }
+            const connectionStartX = levelX + levelWidth;
+            const connectionEndX = textColumnLeft;
+            const connectionY = levelY + levelHeight / 2;
+            if (connectionEndX > connectionStartX) {
+              const connectionLine = slide.insertLine(
+                SlidesApp.LineCategory.STRAIGHT,
+                connectionStartX,
+                connectionY,
+                connectionEndX,
+                connectionY
+              );
+              connectionLine.getLineFill().setSolidFill("#D0D7DE");
+              connectionLine.setWeight(1.5);
+            }
+            const textShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, textColumnLeft, levelY, textColumnWidth, levelHeight);
+            textShape.getFill().setTransparent();
+            textShape.getBorder().setTransparent();
+            const levelDesc = level.description || "";
+            let formattedText;
+            if (levelDesc.includes("\u2022") || levelDesc.includes("\u30FB")) {
+              formattedText = levelDesc;
+            } else if (levelDesc.includes("\n")) {
+              formattedText = levelDesc.split("\n").filter((l) => l.trim()).slice(0, 2).map((l) => `\u2022 ${l.trim()}`).join("\n");
+            } else {
+              formattedText = levelDesc;
+            }
+            setStyledText(textShape, formattedText, {
+              size: CONFIG.FONTS.sizes.body - 1,
+              align: SlidesApp.ParagraphAlignment.START,
+              // Fixed from LEFT
+              color: CONFIG.COLORS.text_primary,
+              bold: true
+            });
+            try {
+              textShape.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
+            } catch (e) {
+            }
+          });
+        }
+        drawComparison(slide, data, area, settings, layout) {
           const leftTitle = data.leftTitle || "Plan A";
           const rightTitle = data.rightTitle || "Plan B";
+          const leftItems = data.leftItems || [];
+          const rightItems = data.rightItems || [];
           const gap = 20;
           const colWidth = (area.width - gap) / 2;
-          const leftBox = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, area.left, area.top, colWidth, area.height - 50);
-          leftBox.getFill().setSolidFill("#F0F0F0");
-          leftBox.getText().setText(leftTitle + "\n\n" + (data.leftItems || []).join("\n"));
-          const rightBox = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, area.left + colWidth + gap, area.top, colWidth, area.height - 50);
-          rightBox.getFill().setSolidFill("#E0E0E0");
-          rightBox.getText().setText(rightTitle + "\n\n" + (data.rightItems || []).join("\n"));
+          const compareColors = generateCompareColors(settings.primaryColor);
+          const headerH = layout.pxToPt(40);
+          const leftHeader = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, area.left, area.top, colWidth, headerH);
+          leftHeader.getFill().setSolidFill(compareColors.left);
+          leftHeader.getBorder().setTransparent();
+          setStyledText(leftHeader, leftTitle, { size: 14, bold: true, color: CONFIG.COLORS.background_gray, align: SlidesApp.ParagraphAlignment.CENTER });
+          try {
+            leftHeader.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
+          } catch (e) {
+          }
+          const leftBox = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, area.left, area.top + headerH, colWidth, area.height - headerH);
+          leftBox.getFill().setSolidFill(CONFIG.COLORS.background_gray);
+          leftBox.getBorder().getLineFill().setSolidFill(CONFIG.COLORS.card_border);
+          setStyledText(leftBox, leftItems.join("\n\n"), { size: CONFIG.FONTS.sizes.body });
+          const rightHeader = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, area.left + colWidth + gap, area.top, colWidth, headerH);
+          rightHeader.getFill().setSolidFill(compareColors.right);
+          rightHeader.getBorder().setTransparent();
+          setStyledText(rightHeader, rightTitle, { size: 14, bold: true, color: CONFIG.COLORS.background_gray, align: SlidesApp.ParagraphAlignment.CENTER });
+          try {
+            rightHeader.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
+          } catch (e) {
+          }
+          const rightBox = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, area.left + colWidth + gap, area.top + headerH, colWidth, area.height - headerH);
+          rightBox.getFill().setSolidFill(CONFIG.COLORS.background_gray);
+          rightBox.getBorder().getLineFill().setSolidFill(CONFIG.COLORS.card_border);
+          setStyledText(rightBox, rightItems.join("\n\n"), { size: CONFIG.FONTS.sizes.body });
         }
-        drawStepUp(slide, data, area, settings) {
+        drawStepUp(slide, data, area, settings, layout) {
           const items = data.items || [];
+          if (!items.length) return;
           const count = items.length;
           const stepWidth = area.width / count;
           const stepHeight = area.height / count;
@@ -1589,12 +1762,98 @@ var global = this;
             const h = (i + 1) * stepHeight;
             const x = area.left + i * stepWidth;
             const y = area.top + (area.height - h);
-            const shape = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, x, y, stepWidth - 5, h);
-            shape.getFill().setSolidFill(CONFIG.COLORS.primary_color, 0.5 + i * 0.1);
-            const textBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x, y, stepWidth - 5, 50);
-            textBox.getText().setText(item.title || "");
-            textBox.getText().getParagraphStyle().setParagraphAlignment(SlidesApp.ParagraphAlignment.CENTER);
-            textBox.getText().getTextStyle().setForegroundColor("#FFFFFF").setBold(true);
+            const shape = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, x, y, stepWidth - layout.pxToPt(5), h);
+            shape.getFill().setSolidFill(settings.primaryColor, 0.5 + i * 0.1);
+            shape.getBorder().setTransparent();
+            const textBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x, y, stepWidth - layout.pxToPt(5), layout.pxToPt(50));
+            setStyledText(textBox, item.title || "", { color: "#FFFFFF", bold: true, align: SlidesApp.ParagraphAlignment.CENTER });
+          });
+        }
+        drawLanes(slide, data, area, settings, layout) {
+          const lanes = data.lanes || [];
+          const n = Math.max(1, lanes.length);
+          const { laneGap_px, lanePad_px, laneTitle_h_px, cardGap_px, cardMin_h_px, cardMax_h_px, arrow_h_px, arrowGap_px } = CONFIG.DIAGRAM;
+          const px = (p) => layout.pxToPt(p);
+          const laneW = (area.width - px(laneGap_px) * (n - 1)) / n;
+          const cardBoxes = [];
+          for (let j = 0; j < n; j++) {
+            const lane = lanes[j] || { title: "", items: [] };
+            const left = area.left + j * (laneW + px(laneGap_px));
+            const lt = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, left, area.top, laneW, px(laneTitle_h_px));
+            lt.getFill().setSolidFill(settings.primaryColor);
+            lt.getBorder().getLineFill().setSolidFill(settings.primaryColor);
+            setStyledText(lt, lane.title || "", { size: CONFIG.FONTS.sizes.laneTitle, bold: true, color: CONFIG.COLORS.background_gray, align: SlidesApp.ParagraphAlignment.CENTER });
+            try {
+              lt.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
+            } catch (e) {
+            }
+            const laneBodyTop = area.top + px(laneTitle_h_px);
+            const laneBodyHeight = area.height - px(laneTitle_h_px);
+            const laneBg = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, left, laneBodyTop, laneW, laneBodyHeight);
+            laneBg.getFill().setSolidFill(CONFIG.COLORS.background_gray);
+            laneBg.getBorder().getLineFill().setSolidFill(CONFIG.COLORS.lane_border);
+            const items = Array.isArray(lane.items) ? lane.items : [];
+            const rows = Math.max(1, items.length);
+            const availH = laneBodyHeight - px(lanePad_px) * 2;
+            const idealH = (availH - px(cardGap_px) * (rows - 1)) / rows;
+            const cardH = Math.max(px(cardMin_h_px), Math.min(px(cardMax_h_px), idealH));
+            const firstTop = laneBodyTop + px(lanePad_px) + Math.max(0, (availH - (cardH * rows + px(cardGap_px) * (rows - 1))) / 2);
+            cardBoxes[j] = [];
+            for (let i = 0; i < rows; i++) {
+              const cardTop = firstTop + i * (cardH + px(cardGap_px));
+              const card = slide.insertShape(SlidesApp.ShapeType.ROUND_RECTANGLE, left + px(lanePad_px), cardTop, laneW - px(lanePad_px) * 2, cardH);
+              card.getFill().setSolidFill(CONFIG.COLORS.background_gray);
+              card.getBorder().getLineFill().setSolidFill(CONFIG.COLORS.card_border);
+              setStyledText(card, items[i] || "", { size: CONFIG.FONTS.sizes.body });
+              try {
+                card.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
+              } catch (e) {
+              }
+              cardBoxes[j][i] = {
+                left: left + px(lanePad_px),
+                top: cardTop,
+                width: laneW - px(lanePad_px) * 2,
+                height: cardH
+              };
+            }
+          }
+          const maxRows = Math.max(0, ...cardBoxes.map((a) => a ? a.length : 0));
+          for (let j = 0; j < n - 1; j++) {
+            for (let i = 0; i < maxRows; i++) {
+              if (cardBoxes[j] && cardBoxes[j][i] && cardBoxes[j + 1] && cardBoxes[j + 1][i]) {
+                drawArrowBetweenRects(slide, cardBoxes[j][i], cardBoxes[j + 1][i], px(arrow_h_px), px(arrowGap_px), settings);
+              }
+            }
+          }
+        }
+        drawFlowChart(slide, data, area, settings, layout) {
+          const steps = data.steps || data.items || [];
+          if (!steps.length) return;
+          const count = steps.length;
+          const gap = 30;
+          const boxWidth = (area.width - gap * (count - 1)) / count;
+          const boxHeight = 80;
+          const y = area.top + (area.height - boxHeight) / 2;
+          steps.forEach((step, i) => {
+            const x = area.left + i * (boxWidth + gap);
+            const shape = slide.insertShape(SlidesApp.ShapeType.ROUND_RECTANGLE, x, y, boxWidth, boxHeight);
+            shape.getFill().setSolidFill(CONFIG.COLORS.background_gray);
+            shape.getBorder().getLineFill().setSolidFill(settings.primaryColor);
+            shape.getBorder().setWeight(2);
+            setStyledText(shape, typeof step === "string" ? step : step.label || "", { size: CONFIG.FONTS.sizes.body, align: SlidesApp.ParagraphAlignment.CENTER });
+            try {
+              shape.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
+            } catch (e) {
+            }
+            if (i < count - 1) {
+              const ax = x + boxWidth;
+              const ay = y + boxHeight / 2;
+              const bx = x + boxWidth + gap;
+              const by = ay;
+              const line = slide.insertLine(SlidesApp.LineCategory.STRAIGHT, ax, ay, bx, by);
+              line.setEndArrow(SlidesApp.ArrowStyle.FILL_ARROW);
+              line.getLineFill().setSolidFill(CONFIG.COLORS.neutral_gray);
+            }
           });
         }
       };

@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+
+# Build
+dist/
+*.tsbuildinfo
+
+# Test
+coverage/
+test-results/
+
+# Clasp / GAS
+.clasprc.json
+
+# Agent
+.agent/
+
+# Environment
+.env

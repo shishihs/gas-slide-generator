@@ -1,0 +1,14 @@
+# Dependencies
+node_modules/
+test-results/
+
+# Build & Test
+coverage/
+*.tsbuildinfo
+
+# Clasp / GAS
+.clasprc.json
+
+# Environment
+.env
+.env.local

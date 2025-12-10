@@ -3,12 +3,11 @@ import { ISlideGenerator } from '../../../domain/services/ISlideGenerator';
 import { LayoutManager } from '../../../common/utils/LayoutManager';
 import { CONFIG } from '../../../common/config/SlideConfig';
 import {
-    setBackgroundImageFromUrl,
     insertImageFromUrlOrFileId,
     setStyledText,
     adjustShapeText_External,
     addCucFooter,
-    drawBottomBar
+    // drawBottomBar removed
 } from '../../../common/utils/SlideUtils';
 
 export class GasSectionSlideGenerator implements ISlideGenerator {
@@ -17,18 +16,8 @@ export class GasSectionSlideGenerator implements ISlideGenerator {
     constructor(private creditImageBlob: GoogleAppsScript.Base.BlobSource | null) { }
 
     generate(slide: GoogleAppsScript.Slides.Slide, data: any, layout: LayoutManager, pageNum: number, settings: any, imageUpdateOption: string = 'update') {
-        const imageUrl = CONFIG.BACKGROUND_IMAGES.section || CONFIG.BACKGROUND_IMAGES.main || '';
-        let fallbackColor;
-        if (imageUrl) {
-            fallbackColor = CONFIG.COLORS.background_white;
-        } else {
-            if (CONFIG.COLORS.background_white.toUpperCase() !== '#FFFFFF') {
-                fallbackColor = CONFIG.COLORS.background_white;
-            } else {
-                fallbackColor = CONFIG.COLORS.background_gray;
-            }
-        }
-        setBackgroundImageFromUrl(slide, layout, imageUrl, fallbackColor, imageUpdateOption);
+        // Background modification logic removed
+        // setBackgroundImageFromUrl(slide, layout, imageUrl, fallbackColor, imageUpdateOption);
 
         // Handle Section Numbering (simplified for state)
         this.sectionCounter++;

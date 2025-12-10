@@ -26,6 +26,34 @@ Google ドキュメントの内容を Vertex AI で解析し、Google Slides を
 
 **Cloud Functions 不要！** GAS Library 連携でシンプルなアーキテクチャを実現。
 
+## セットアップ (Setup)
+
+本アドオンを実行するには、Google Cloud Platform (GCP) プロジェクトとの連携が必要です。
+
+### 1. GCP プロジェクトの作成と設定
+1. [Google Cloud Console](https://console.cloud.google.com/) で新しいプロジェクトを作成します（Standard Project）。
+2. **APIとサービス > ライブラリ** から以下のAPIを有効化します：
+   - **Vertex AI API** (AIによる生成機能用)
+   - **Google Slides API** (スライド生成用)
+   - **Google Drive API** (ファイル操作用)
+3. **OAuth 同意画面** を設定します（「内部」または「外部」のテストモード）。
+
+### 2. GAS プロジェクトとの連携
+1. `apps/doc-to-slide-addon` の GAS プロジェクトを開きます。
+2. **プロジェクトの設定** (歯車アイコン) > **Google Cloud Platform (GCP) プロジェクト** > **プロジェクトを変更** をクリックします。
+3. 作成した GCP プロジェクトの **プロジェクト番号** (Project Number) を入力して設定します。
+
+### 3. スクリプトプロパティの設定
+GAS エディタの **プロジェクトの設定** > **スクリプト プロパティ** に以下を追加します：
+
+| プロパティ名 | 値の例 | 説明 |
+|-------------|--------|------|
+| `GCP_PROJECT_ID` | `my-project-id` | 作成した GCP プロジェクトの ID |
+| `VERTEX_AI_LOCATION` | `asia-northeast1` | (任意) Vertex AI のリージョン。デフォルトは `asia-northeast1` |
+| `VERTEX_AI_MODEL` | `gemini-2.5-flash` | (任意) 使用するモデル。デフォルトは `gemini-2.5-flash` |
+
+> **Note**: 初回実行時に `setupScriptProperties()` 関数を手動実行することでも設定可能です。
+
 ## クイックスタート
 
 1. **Slide Generator > Create Template** - テンプレート生成

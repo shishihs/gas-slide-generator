@@ -182,18 +182,7 @@ export function applyStyleRanges(textRange: GoogleAppsScript.Slides.TextRange, r
     });
 }
 
-export function setBackgroundImageFromUrl(slide: GoogleAppsScript.Slides.Slide, layout: any, imageUrl: string, fallbackColor: string, imageUpdateOption: string = 'update') {
-    slide.getBackground().setSolidFill(fallbackColor);
-    if (imageUpdateOption === 'update') {
-        if (!imageUrl) return;
-        try {
-            const image = insertImageFromUrlOrFileId(imageUrl);
-            if (!image) return;
-            slide.insertImage(image).setWidth(layout.pageW_pt).setHeight(layout.pageH_pt).setLeft(0).setTop(0).sendToBack();
-        } catch (e) {
-        }
-    }
-}
+// function setBackgroundImageFromUrl removed
 
 export function insertImageFromUrlOrFileId(urlOrFileId: string): GoogleAppsScript.Base.BlobSource | null {
     if (!urlOrFileId) return null;
@@ -485,33 +474,9 @@ export function adjustShapeText_External(shape: GoogleAppsScript.Slides.Shape, p
     return { isOverflow: false, details: 'Simplified implementation in cleanup.' };
 }
 
-export function drawBottomBar(slide: GoogleAppsScript.Slides.Slide, layout: any, settings: any) {
-    const barRect = layout.getRect('bottomBar');
-    applyFill(slide, barRect.left, barRect.top, barRect.width, barRect.height, settings);
-}
+// function drawBottomBar removed
 
-export function drawCreditImage(slide: GoogleAppsScript.Slides.Slide, layout: any, creditImageBlob: GoogleAppsScript.Base.BlobSource | null, creditLink: string) {
-    try {
-        const creditPosPx = CONFIG.POS_PX.footer.creditImage;
-        if (!creditPosPx || !creditImageBlob) {
-            return;
-        }
-        const img = slide.insertImage(creditImageBlob);
-        const newHeight = layout.pxToPt(creditPosPx.height) * layout.scaleY;
-        const aspect = img.getWidth() / img.getHeight();
-        const newWidth = newHeight * aspect;
-        const rightMarginPt = layout.pxToPt(creditPosPx.right) * layout.scaleX;
-        const newLeft = (layout.pageW_pt - rightMarginPt) - newWidth;
-        const topPt = layout.pxToPt(creditPosPx.top) * layout.scaleY;
-        img.setLeft(newLeft)
-            .setTop(topPt)
-            .setWidth(newWidth)
-            .setHeight(newHeight)
-            // @ts-ignore
-            .setLinkUrl(creditLink);
-    } catch (e) {
-    }
-}
+// function drawCreditImage removed
 
 export function addCucFooter(slide: GoogleAppsScript.Slides.Slide, layout: any, pageNum: number, settings: any, creditImageBlob: GoogleAppsScript.Base.BlobSource | null) {
     const CREDIT_IMAGE_LINK = 'https://note.com/majin_108'; // Constant moved here or passed in
@@ -529,9 +494,7 @@ export function addCucFooter(slide: GoogleAppsScript.Slides.Slide, layout: any, 
             leftShape.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
         } catch (e) { }
     }
-    if (creditImageBlob) {
-        drawCreditImage(slide, layout, creditImageBlob, CREDIT_IMAGE_LINK);
-    }
+    // Credit image removed
     if (pageNum > 0 && settings && settings.showPageNumber) {
         const rightRect = layout.getRect('footer.rightPage');
         const rightShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, rightRect.left, rightRect.top, rightRect.width, rightRect.height);
@@ -582,20 +545,7 @@ export function estimateTextWidthPt(text: string, fontSize: number): number {
 }
 
 export function drawStandardTitleHeader(slide: GoogleAppsScript.Slides.Slide, layout: any, key: string, title: string, settings: any, preCalculatedWidthPt: number | null = null, imageUpdateOption: string = 'update') {
-    if (imageUpdateOption === 'update') {
-        const logoRect = safeGetRect(layout, `${key}.headerLogo`);
-        try {
-            if (CONFIG.LOGOS.header && logoRect) {
-                const imageData = insertImageFromUrlOrFileId(CONFIG.LOGOS.header);
-                if (imageData && typeof imageData !== 'string') {
-                    const logo = slide.insertImage(imageData as GoogleAppsScript.Base.BlobSource);
-                    const asp = logo.getHeight() / logo.getWidth();
-                    logo.setLeft(logoRect.left).setTop(logoRect.top).setWidth(logoRect.width).setHeight(logoRect.width * asp);
-                }
-            }
-        } catch (e) {
-        }
-    }
+    // Logo drawing removed
     const titleRect = safeGetRect(layout, `${key}.title`);
     if (!titleRect) {
         return;

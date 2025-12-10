@@ -1,7 +1,25 @@
 
 import { GasDiagramSlideGenerator } from './GasDiagramSlideGenerator';
+import { CONFIG } from '../../../common/config/SlideConfig';
 
-// Manual mocks for dependent calls
+// Mock Dependencies
+jest.mock('../../../common/utils/SlideUtils', () => ({
+    setStyledText: jest.fn(),
+    offsetRect: jest.fn(),
+    addCucFooter: jest.fn(),
+    drawArrowBetweenRects: jest.fn(),
+    setBoldTextSize: jest.fn()
+}));
+
+jest.mock('../../../common/utils/ColorUtils', () => ({
+    generateProcessColors: jest.fn().mockReturnValue(['#ff0000', '#00ff00', '#0000ff']),
+    generateTimelineCardColors: jest.fn().mockReturnValue(['#ff0000', '#00ff00', '#0000ff']),
+    generatePyramidColors: jest.fn().mockReturnValue(['#ff0000', '#00ff00', '#0000ff']),
+    generateCompareColors: jest.fn().mockReturnValue({ left: '#ff0000', right: '#0000ff' }),
+    generateTintedGray: jest.fn().mockReturnValue('#cccccc')
+}));
+
+// Manual mocks for GAS objects
 const mockSetSolidFill = jest.fn();
 const mockSetWeight = jest.fn();
 const mockSetTransparent = jest.fn();
@@ -13,20 +31,23 @@ const mockGetLineFill = jest.fn().mockReturnValue({
 const mockBorder = {
     getLineFill: mockGetLineFill,
     setWeight: mockSetWeight,
-    setTransparent: mockSetTransparent,
-    // For coverage of previous incorrect implementation attempts, we ensure these don't exist or we can mock them if we want to ensure they ARE NOT called.
-    // However, JS allows existing properties.
+    setTransparent: mockSetTransparent
 };
 
-// Shape Mock
 const mockShape = {
     getFill: jest.fn().mockReturnValue({
-        setSolidFill: jest.fn()
+        setSolidFill: jest.fn(),
+        setTransparent: jest.fn()
     }),
     getBorder: jest.fn().mockReturnValue(mockBorder),
-    insertShape: jest.fn(),
     getText: jest.fn().mockReturnValue({
         setText: jest.fn(),
+        asString: jest.fn().mockReturnValue(''),
+        getRange: jest.fn().mockReturnValue({
+            getTextStyle: jest.fn().mockReturnValue({
+                setFontSize: jest.fn()
+            })
+        }),
         getParagraphStyle: jest.fn().mockReturnValue({
             setParagraphAlignment: jest.fn()
         }),
@@ -36,17 +57,37 @@ const mockShape = {
             setBold: jest.fn().mockReturnThis(),
             setFontFamily: jest.fn().mockReturnThis()
         })
-    })
+    }),
+    setContentAlignment: jest.fn(),
+    setRotation: jest.fn(),
+    setEndArrow: jest.fn()
+};
+
+// Line Mock (different from Shape in some ways, but sharing similar methods for simplicity here)
+const mockLine = {
+    getLineFill: mockGetLineFill,
+    setWeight: mockSetWeight,
+    setEndArrow: jest.fn()
+};
+
+const mockPlaceholder = {
+    asShape: jest.fn().mockReturnValue(mockShape),
+    getLeft: jest.fn().mockReturnValue(0),
+    getTop: jest.fn().mockReturnValue(0),
+    getWidth: jest.fn().mockReturnValue(960),
+    getHeight: jest.fn().mockReturnValue(540)
 };
 
 const mockSlide = {
     insertShape: jest.fn().mockReturnValue(mockShape),
-    getPlaceholder: jest.fn().mockReturnValue(null),
+    insertLine: jest.fn().mockReturnValue(mockLine),
+    getPlaceholder: jest.fn().mockReturnValue(mockPlaceholder), // Return mockPlaceholder to avoid null checks failing if logic changes
     getBackground: jest.fn().mockReturnValue({ setSolidFill: jest.fn() })
 };
 
 const mockLayout = {
-    getRect: jest.fn().mockReturnValue({ left: 0, top: 0, width: 960, height: 540 })
+    getRect: jest.fn().mockReturnValue({ left: 0, top: 0, width: 960, height: 540 }),
+    pxToPt: jest.fn((px) => px * 0.75) // Simple mock conversion
 };
 
 describe('GasDiagramSlideGenerator', () => {
@@ -63,6 +104,14 @@ describe('GasDiagramSlideGenerator', () => {
                 ROUND_RECTANGLE: 'ROUND_RECTANGLE',
                 DONUT: 'DONUT',
                 TRAPEZOID: 'TRAPEZOID',
+                DOWN_ARROW: 'DOWN_ARROW',
+                BENT_ARROW: 'BENT_ARROW'
+            },
+            LineCategory: {
+                STRAIGHT: 'STRAIGHT'
+            },
+            ArrowStyle: {
+                FILL_ARROW: 'FILL_ARROW'
             },
             PlaceholderType: {
                 TITLE: 'TITLE',
@@ -70,7 +119,12 @@ describe('GasDiagramSlideGenerator', () => {
                 BODY: 'BODY'
             },
             ParagraphAlignment: {
-                CENTER: 'CENTER'
+                CENTER: 'CENTER',
+                START: 'START', // Fixed from LEFT
+                LEFT: 'LEFT' // Kept for backward compat if code still uses it anywhere else? No, strictly mocking.
+            },
+            ContentAlignment: {
+                MIDDLE: 'MIDDLE'
             }
         };
 
@@ -80,15 +134,15 @@ describe('GasDiagramSlideGenerator', () => {
         };
     });
 
-    it('drawTimeline should correctly set border color using getLineFill()', () => {
+    it('drawTimeline should correctly set border color using getLineFill() and use ColorUtils', () => {
         const generator = new GasDiagramSlideGenerator(null);
         const data = {
             type: 'timeline',
             milestones: [
-                { date: '2025', description: 'Test Milestone' }
+                { date: '2025', label: 'Test Milestone' }
             ]
         };
-        const settings = {};
+        const settings = { primaryColor: '#4285F4', showBottomBar: true };
 
         // Execute
         generator.generate(mockSlide as any, data, mockLayout as any, 1, settings);
@@ -96,11 +150,31 @@ describe('GasDiagramSlideGenerator', () => {
         // Verification
         expect(mockSlide.insertShape).toHaveBeenCalled();
 
-        // Check if getLineFill was accessed
+        // Ensure color generation was called
+        const { generateTimelineCardColors } = require('../../../common/utils/ColorUtils');
+        expect(generateTimelineCardColors).toHaveBeenCalledWith('#4285F4', 1);
+
+        // Check if getLineFill was accessed (border color setting)
+        // In the new implementation we set header shape border
         expect(mockGetLineFill).toHaveBeenCalled();
 
-        // Check if setSolidFill was called on the LineFill object
-        // We know CONFIG.COLORS.primary_color is '#4285F4'
-        expect(mockSetSolidFill).toHaveBeenCalledWith('#4285F4');
+        // Also verify usage of SlideUtils
+        const { setStyledText } = require('../../../common/utils/SlideUtils');
+        expect(setStyledText).toHaveBeenCalled();
+    });
+
+    it('drawProcess should generate process steps', () => {
+        const generator = new GasDiagramSlideGenerator(null);
+        const data = {
+            type: 'process',
+            steps: ['Step 1', 'Step 2']
+        };
+        const settings = { primaryColor: '#4285F4' };
+
+        generator.generate(mockSlide as any, data, mockLayout as any, 1, settings);
+
+        const { generateProcessColors } = require('../../../common/utils/ColorUtils');
+        expect(generateProcessColors).toHaveBeenCalledWith('#4285F4', 2);
+        expect(mockSlide.insertShape).toHaveBeenCalled();
     });
 });

@@ -3,13 +3,12 @@ import { ISlideGenerator } from '../../../domain/services/ISlideGenerator';
 import { LayoutManager } from '../../../common/utils/LayoutManager';
 import { CONFIG } from '../../../common/config/SlideConfig';
 import {
-    setBackgroundImageFromUrl,
     insertImageFromUrlOrFileId,
     setStyledText,
     adjustShapeText_External,
     applyTextStyle,
-    drawBottomBar,
-    drawCreditImage
+    // drawBottomBar removed
+    // drawCreditImage removed
 } from '../../../common/utils/SlideUtils';
 
 export class GasTitleSlideGenerator implements ISlideGenerator {
@@ -20,7 +19,7 @@ export class GasTitleSlideGenerator implements ISlideGenerator {
         // If the user wants to OVERRIDE the template background, we can keep it. 
         // For now, let's assume if a template is used, we respect it. 
         // But the previous code always set it. Let's comment it out or make it optional.
-        // setBackgroundImageFromUrl(slide, layout, CONFIG.BACKGROUND_IMAGES.title, CONFIG.COLORS.background_white, imageUpdateOption);
+        // setBackgroundImageFromUrl removed
 
         // Populate Title Placeholder
         const titlePlaceholder = slide.getPlaceholder(SlidesApp.PlaceholderType.TITLE) || slide.getPlaceholder(SlidesApp.PlaceholderType.CENTERED_TITLE);
@@ -50,28 +49,11 @@ export class GasTitleSlideGenerator implements ISlideGenerator {
         }
 
         // Handle Logo if it exists (previous code drew it manually).
-        if (imageUpdateOption === 'update' && CONFIG.LOGOS.header) {
-            const logoRect = layout.getRect('titleSlide.logo'); // This relies on hardcoded POS_PX.
-            try {
-                if (CONFIG.LOGOS.header) {
-                    const imageData = insertImageFromUrlOrFileId(CONFIG.LOGOS.header);
-                    if (imageData && typeof imageData !== 'string') {
-                        const logo = slide.insertImage(imageData as GoogleAppsScript.Base.BlobSource);
-                        const aspect = logo.getHeight() / logo.getWidth();
-                        logo.setLeft(logoRect.left).setTop(logoRect.top).setWidth(logoRect.width).setHeight(logoRect.width * aspect);
-                    }
-                }
-            } catch (e) { }
-        }
+        // Logo logic removed
 
         // Footer / Credit
-        if (settings.showBottomBar) {
-            drawBottomBar(slide, layout, settings);
-        }
-        if (this.creditImageBlob) {
-            const CREDIT_IMAGE_LINK = 'https://note.com/majin_108';
-            drawCreditImage(slide, layout, this.creditImageBlob, CREDIT_IMAGE_LINK);
-        }
+        // drawBottomBar removed
+        // drawCreditImage removed
 
     }
 }

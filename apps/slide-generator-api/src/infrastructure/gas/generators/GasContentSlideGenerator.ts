@@ -3,7 +3,6 @@ import { ISlideGenerator } from '../../../domain/services/ISlideGenerator';
 import { LayoutManager } from '../../../common/utils/LayoutManager';
 import { CONFIG } from '../../../common/config/SlideConfig';
 import {
-    setBackgroundImageFromUrl,
     insertImageFromUrlOrFileId,
     setStyledText,
     adjustShapeText_External,
@@ -14,7 +13,7 @@ import {
     createContentCushion,
     setBulletsWithInlineStyles,
     renderImagesInArea,
-    drawBottomBar,
+    // drawBottomBar removed
     normalizeImages,
     setBoldTextSize,
     adjustAreaForSubhead
@@ -25,7 +24,7 @@ export class GasContentSlideGenerator implements ISlideGenerator {
 
     generate(slide: GoogleAppsScript.Slides.Slide, data: any, layout: LayoutManager, pageNum: number, settings: any, imageUpdateOption: string = 'update') {
         // NOTE: Commented out manual background setting to respect template.
-        // setBackgroundImageFromUrl(slide, layout, CONFIG.BACKGROUND_IMAGES.main, CONFIG.COLORS.background_white, imageUpdateOption);
+        // setBackgroundImageFromUrl removed
 
         // Title Placeholder
         const titlePlaceholder = slide.getPlaceholder(SlidesApp.PlaceholderType.TITLE) || slide.getPlaceholder(SlidesApp.PlaceholderType.CENTERED_TITLE);
@@ -159,9 +158,7 @@ export class GasContentSlideGenerator implements ISlideGenerator {
             renderImagesInArea(slide, layout, area, normalizeImages(data.images), imageUpdateOption);
         }
 
-        if (settings.showBottomBar) {
-            drawBottomBar(slide, layout, settings);
-        }
+        // drawBottomBar removed
         addCucFooter(slide, layout, pageNum, settings, this.creditImageBlob);
     }
 }

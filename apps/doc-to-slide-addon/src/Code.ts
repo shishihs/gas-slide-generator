@@ -84,7 +84,7 @@ function setupScriptProperties() {
  */
 function onOpen() {
     DocumentApp.getUi()
-        .createMenu('Slide Generator')
+        .createMenu('スライド起草くん')
         .addItem('Generate Slide', 'showGenerateSlideSidebar')
         .addSeparator()
         .addItem('Create Template', 'createTemplateSlide')

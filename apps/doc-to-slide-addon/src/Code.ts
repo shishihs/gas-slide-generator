@@ -42,6 +42,13 @@ function getTemplateSlideId() {
 }
 
 /**
+ * Get the Gem URL for manual JSON generation advice
+ */
+function getGemUrl() {
+    return PropertiesService.getScriptProperties().getProperty('GEM_URL') || '';
+}
+
+/**
  * Extract Presentation ID from a URL or return as is
  * @param {string} urlOrId - The URL or ID string
  * @returns {string|null} - The extracted ID or original string
@@ -64,6 +71,7 @@ function setupScriptProperties() {
         'VERTEX_AI_LOCATION': 'asia-northeast1',
         'VERTEX_AI_MODEL': 'gemini-2.5-flash',
         'TEMPLATE_SLIDE_ID': 'YOUR_TEMPLATE_SLIDE_ID',
+        'GEM_URL': 'https://gemini.google.com/app/...'
     };
     PropertiesService.getScriptProperties().setProperties(props);
     Logger.log('Script Properties setup complete.');
@@ -373,24 +381,90 @@ function convertDocumentToJson() {
 
         doc.saveAndClose(); // Save pending changes
 
-        // 2. Call Vertex AI directly
+        // 2. Try to parse the document as a JSON directly (Manual JSON Mode)
+        let directJson = null;
+        try {
+            // Attempt to parse strictly or loosely
+            directJson = parseJsonFromResponse(documentText);
+        } catch (ignore) {
+            // Not a JSON, proceed to AI generation
+        }
+
+        // Validate if the parsed JSON looks like our schema
+        if (isValidSlideJson(directJson)) {
+            Logger.log('Valid JSON structure detected in document. Skipping Vertex AI.');
+            storeJsonData(directJson);
+            // ui.alert('Success', 'Document content identified as JSON. Slide data loaded directly.', ui.ButtonSet.OK);
+            return directJson;
+        }
+
+        // 3. Check for GCP Project ID BEFORE calling Vertex AI
+        // If missing, suggest Gem usage
+        const projectId = getGcpProjectId();
+        if (!projectId || projectId === 'YOUR_GCP_PROJECT_ID') {
+            const gemUrl = getGemUrl();
+            let msg = 'GCP Project ID not configured.\nTo generate slides without GCP:\n\n1. Use the "Gem" to generate the JSON structure.\n2. Paste the JSON into this document.\n3. Run "Convert to JSON" again.';
+
+            if (gemUrl) {
+                msg += `\n\nGem URL:\n${gemUrl}`;
+            }
+
+            ui.alert('Setup Required (or Manual Mode)', msg, ui.ButtonSet.OK);
+            throw new Error('GCP Project ID missing. Please configure Settings or paste valid JSON.');
+        }
+
+        // 4. Call Vertex AI directly (Standard Mode)
         const jsonResult = callVertexAI(documentText);
 
-        // 3. Store the result
+        // 5. Store the result
         storeJsonData(jsonResult);
 
         Logger.log('JSON Result: ' + JSON.stringify(jsonResult));
-
-        // 4. Sidebar update is handled by the client-side success handler
-        // showGenerateSlideSidebar();
 
         return jsonResult;
 
     } catch (error) {
         Logger.log('Error: ' + error.toString());
-        ui.alert('Error', 'Failed to convert document: ' + error.message, ui.ButtonSet.OK);
+        // Only show alert if it wasn't already handled (e.g. by our own throw)
+        if (error.message.indexOf('GCP Project ID missing') === -1) {
+            ui.alert('Error', 'Failed to convert document: ' + error.message, ui.ButtonSet.OK);
+        }
         throw error;
     }
+}
+
+/**
+ * Validate if the object has the minimum required structure for slides
+ * @param {any} data 
+ * @returns {boolean}
+ */
+function isValidSlideJson(data) {
+    if (!data || typeof data !== 'object') return false;
+
+    // Case 1: Standard wrapped structure { slides: [...] }
+    if (Array.isArray(data.slides)) {
+        // Must have at least one valid-looking slide or be an empty array
+        if (data.slides.length === 0) return true;
+
+        // Check first slide for minimal required fields
+        const first = data.slides[0];
+        if (first && (first.title || first.type || first.layout)) {
+            return true;
+        }
+    }
+
+    // Case 2: Array root [ ... ]
+    if (Array.isArray(data)) {
+        if (data.length === 0) return true;
+
+        const first = data[0];
+        // Check if elements look like slides (have title, type, or layout)
+        if (first && typeof first === 'object' && (first.title || first.type || first.layout)) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 /**
@@ -607,7 +681,9 @@ function callVertexAI(documentContent) {
     const model = getVertexAiModel();
 
     if (!projectId || projectId === 'YOUR_GCP_PROJECT_ID') {
-        throw new Error('GCP Project ID not configured. Please run Settings first.');
+        // This check is arguably redundant now if convertDocumentToJson handles it, 
+        // but kept for safety if called from elsewhere.
+        throw new Error('GCP Project ID not configured.');
     }
 
     // Get OAuth token for GCP API access
@@ -835,6 +911,7 @@ function getCurrentSettings() {
         vertexAiLocation: props.getProperty('VERTEX_AI_LOCATION') || 'asia-northeast1',
         vertexAiModel: props.getProperty('VERTEX_AI_MODEL') || 'gemini-1.5-flash',
         templateSlideId: props.getProperty('TEMPLATE_SLIDE_ID') || '',
+        gemUrl: props.getProperty('GEM_URL') || '',
         slideGeneratorApiUrl: props.getProperty('SLIDE_GENERATOR_API_URL') || '',
         useMockResponse: userProps.getProperty('USE_MOCK_RESPONSE') || 'false'
     };

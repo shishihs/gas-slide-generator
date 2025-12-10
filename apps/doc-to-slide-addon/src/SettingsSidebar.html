@@ -164,7 +164,8 @@
     <p>Configure the スライド起草くん add-on settings.</p>
 
     <div class="info-box">
-        ℹ️ GAS から Vertex AI に直接接続します。GCP プロジェクトへのリンクと適切な権限が必要です。
+        ℹ️ <b>Mode A (Auto):</b> Connects to Vertex AI (Requires GCP Project).<br>
+        ℹ️ <b>Mode B (Manual):</b> Use content from a Gem (No GCP required).
     </div>
 
     <div class="section">
@@ -210,6 +211,22 @@
     </div>
 
     <div class="section">
+        <div class="section-title">Manual Generation (No GCP)</div>
+
+        <div class="form-group">
+            <label for="gemUrl">Start Chat with Gem</label>
+            <input type="text" id="gemUrl" placeholder="https://gemini.google.com/app/...">
+            <div class="help-text">
+                URL of your custom Gem. The Add-on will suggest this link if GCP is not configured.
+            </div>
+            <div style="margin-top: 8px;">
+                <a href="#" onclick="openGemUrl(); return false;"
+                    style="font-size: 13px; color: var(--primary-color);">Open Gem ↗</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
         <div class="section-title">Slide Template</div>
 
         <div class="form-group">
@@ -240,6 +257,7 @@
                     document.getElementById('gcpProjectId').value = settings.gcpProjectId || '';
                     document.getElementById('vertexAiLocation').value = settings.vertexAiLocation || 'asia-northeast1';
                     document.getElementById('vertexAiModel').value = settings.vertexAiModel || 'gemini-2.5-flash';
+                    document.getElementById('gemUrl').value = settings.gemUrl || '';
 
                     if (document.getElementById('useMockResponse')) {
                         document.getElementById('useMockResponse').checked = settings.useMockResponse === 'true';
@@ -262,9 +280,14 @@
             const templateSlideId = document.getElementById('templateSlideId').value.trim();
             const statusDiv = document.getElementById('status');
 
-            if (!gcpProjectId) {
-                showStatus('error', '❌ GCP Project ID is required.');
-                return;
+            const gemUrl = document.getElementById('gemUrl').value.trim();
+            const statusDiv = document.getElementById('status');
+
+            // Validation: Relaxed. Allow saving even if GCP ID is empty (for Manual Mode)
+            if (!gcpProjectId && !gemUrl) {
+                // Only warn if BOTH are empty
+                // showStatus('error', '❌ Please configure either GCP Project ID or Gem URL.');
+                // Actually, let's allow saving partially to be flexible.
             }
 
             // Create properties object
@@ -273,7 +296,8 @@
                 'VERTEX_AI_LOCATION': vertexAiLocation,
                 'VERTEX_AI_MODEL': vertexAiModel,
                 'USE_MOCK_RESPONSE': useMockResponse.toString(),
-                'TEMPLATE_SLIDE_ID': templateSlideId
+                'TEMPLATE_SLIDE_ID': templateSlideId,
+                'GEM_URL': gemUrl
             };
 
             // Save using the GAS backend
@@ -291,6 +315,15 @@
             const status = document.getElementById('status');
             status.className = 'show ' + type;
             status.textContent = message;
+        }
+
+        function openGemUrl() {
+            const url = document.getElementById('gemUrl').value.trim();
+            if (url) {
+                window.open(url, '_blank');
+            } else {
+                showStatus('error', 'Please enter a Gem URL first.');
+            }
         }
     </script>
 </body>

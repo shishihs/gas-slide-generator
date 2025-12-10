@@ -33,9 +33,24 @@ Google Docs に紐付いた GAS プロジェクトとしてセットアップす
 
 ### 0. 前提条件 (Prerequisites)
 - **Google Workspace アカウント**（推奨）または個人の Gmail アカウント
-- **Google Cloud Platform (GCP) の利用権限**
-    - ※ Vertex AI を利用するため、GCP プロジェクトでの **課金設定（Billing）が必須** です。
-    - （無料トライアル期間や、低価格なモデル `gemini-2.5-flash` の無料枠内であれば費用は発生しませんが、クレジットカード等の登録が必要です）
+- **Google Cloud Platform (GCP)** (自動生成の場合)
+    - ※ 完全自動モード(自動生成)には GCP プロジェクトと課金設定が必要です。
+    - ※ **手動モード (Gem 連携)** では GCP 設定は不要です。
+
+### モード選択 (Choose your mode)
+本アドオンには2つのモードがあります。
+
+- **Mode A: 自動生成モード (Vertex AI)**
+    - GCP Project の設定が必要（中級者〜向け）
+    - ボタン一つでドキュメント解析から JSON 生成まで完了します。
+
+- **Mode B: 手動生成モード (Manual JSON / Gem)**
+    - GCP 設定不要（初心者向け）
+    - カスタム Gem（チャットボット）にドキュメントを読ませ、生成された JSON を手動で貼り付ける方式です。
+
+---
+
+## セットアップ手順 (自動生成モード)
 
 ### 1. GCP プロジェクトの作成
 GAS 標準のデフォルトプロジェクトではなく、機能制限のない **Standard GCP Project** を作成します。
@@ -72,15 +87,15 @@ Google Docs に紐付く GAS プロジェクトに対し、上記 GCP プロジ�
    - ※ プロジェクト ID (文字列) ではなく、**数字の番号** です。
 
 ### 5. 環境変数の設定 (Script Properties)
-GAS エディタの「**プロジェクトの設定** > **スクリプト プロパティ**」に、以下を設定します。
+GAS エディタの「**プロジェクトの設定** > **スクリプト プロパティ**」またはアドオンの `Settings` メニューから設定します。
 
-| プロパティ | 設定値の例 | 必須 | 説明 |
-|------------|------------|------|------|
-| `GCP_PROJECT_ID` | `slide-generator-12345` | **必須** | 作成した GCP プロジェクトの **ID** (文字列) |
-| `VERTEX_AI_LOCATION` | `asia-northeast1` | 推奨 | Vertex AI のリージョン（東京など） |
-| `VERTEX_AI_MODEL` | `gemini-2.5-flash` | 推奨 | 使用するモデル名 |
+| プロパティ | モード | 説明 |
+|------------|--------|------|
+| `GCP_PROJECT_ID` | 自動 | GCP プロジェクトの **ID** (文字列) |
+| `VERTEX_AI_LOCATION` | 自動 | Vertex AI のリージョン（例: `asia-northeast1`） |
+| `VERTEX_AI_MODEL` | 自動 | 使用するモデル（例: `gemini-2.5-flash`） |
+| `GEM_URL` | **手動** | JSON作成用に使用する Gem の URL |
 
-> **Tips**: 初回設定用関数 `setupScriptProperties()` を `src/Code.ts` に用意しています。値を書き換えて一度だけ実行することでも設定可能です。
 
 
 ## クイックスタート

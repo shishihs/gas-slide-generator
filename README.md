@@ -28,31 +28,60 @@ Google ドキュメントの内容を Vertex AI で解析し、Google Slides を
 
 ## セットアップ (Setup)
 
-本アドオンを実行するには、Google Cloud Platform (GCP) プロジェクトとの連携が必要です。
+本アドオンを動作させるために必要な、詳細な環境構築手順です。
+Google Docs に紐付いた GAS プロジェクトとしてセットアップすることを想定しています。
 
-### 1. GCP プロジェクトの作成と設定
-1. [Google Cloud Console](https://console.cloud.google.com/) で新しいプロジェクトを作成します（Standard Project）。
-2. **APIとサービス > ライブラリ** から以下のAPIを有効化します：
-   - **Vertex AI API** (AIによる生成機能用)
-   - **Google Slides API** (スライド生成用)
-   - **Google Drive API** (ファイル操作用)
-3. **OAuth 同意画面** を設定します（「内部」または「外部」のテストモード）。
+### 0. 前提条件 (Prerequisites)
+- **Google Workspace アカウント**（推奨）または個人の Gmail アカウント
+- **Google Cloud Platform (GCP) の利用権限**
+    - ※ Vertex AI を利用するため、GCP プロジェクトでの **課金設定（Billing）が必須** です。
+    - （無料トライアル期間や、低価格なモデル `gemini-2.5-flash` の無料枠内であれば費用は発生しませんが、クレジットカード等の登録が必要です）
 
-### 2. GAS プロジェクトとの連携
-1. `apps/doc-to-slide-addon` の GAS プロジェクトを開きます。
-2. **プロジェクトの設定** (歯車アイコン) > **Google Cloud Platform (GCP) プロジェクト** > **プロジェクトを変更** をクリックします。
-3. 作成した GCP プロジェクトの **プロジェクト番号** (Project Number) を入力して設定します。
+### 1. GCP プロジェクトの作成
+GAS 標準のデフォルトプロジェクトではなく、機能制限のない **Standard GCP Project** を作成します。
 
-### 3. スクリプトプロパティの設定
-GAS エディタの **プロジェクトの設定** > **スクリプト プロパティ** に以下を追加します：
+1. [Google Cloud Console](https://console.cloud.google.com/) にアクセス。
+2. 「**プロジェクトの作成**」から新規プロジェクトを作成（例: `slide-generator`）。
+3. **重要**: 作成したプロジェクトに **課金アカウント** を紐付けます。
 
-| プロパティ名 | 値の例 | 説明 |
-|-------------|--------|------|
-| `GCP_PROJECT_ID` | `my-project-id` | 作成した GCP プロジェクトの ID |
-| `VERTEX_AI_LOCATION` | `asia-northeast1` | (任意) Vertex AI のリージョン。デフォルトは `asia-northeast1` |
-| `VERTEX_AI_MODEL` | `gemini-2.5-flash` | (任意) 使用するモデル。デフォルトは `gemini-2.5-flash` |
+### 2. 必要な API の有効化
+作成した GCP プロジェクトで、以下の API を有効化してください。「**API とサービス > ライブラリ**」から検索できます。
 
-> **Note**: 初回実行時に `setupScriptProperties()` 関数を手動実行することでも設定可能です。
+| API 名 | 用途 |
+|--------|------|
+| **Vertex AI API** | AI によるスライド構成案（JSON）の生成 |
+| **Google Slides API** | スライドの作成、レイアウト操作 |
+| **Google Drive API** | テンプレートファイルのコピー、スライドの保存 |
+
+### 3. OAuth 同意画面の構成
+「**API とサービス > OAuth 同意画面**」を設定します。
+
+1. **User Type**:
+    - 組織内のみで使う場合: `内部 (Internal)`
+    - 個人の場合: `外部 (External)`
+2. アプリ情報（名前、メールアドレス）を入力して保存。
+3. （External の場合のみ）**テストユーザー** に自分のメールアドレスを追加。
+
+### 4. GAS プロジェクトへの紐付け
+Google Docs に紐付く GAS プロジェクトに対し、上記 GCP プロジェクトを設定します。
+
+1. 本リポジトリの `apps/doc-to-slide-addon` を、Google Docs の Apps Script としてデプロイ（または `clasp push`）します。
+2. GAS エディタを開き、左側メニューの「**プロジェクトの設定** (⚙️)」を開きます。
+3. 「**Google Cloud Platform (GCP) プロジェクト**」セクションの「**プロジェクトを変更**」をクリック。
+4. GCP コンソールで確認できる **プロジェクト番号 (Project Number)** を入力して設定します。
+   - ※ プロジェクト ID (文字列) ではなく、**数字の番号** です。
+
+### 5. 環境変数の設定 (Script Properties)
+GAS エディタの「**プロジェクトの設定** > **スクリプト プロパティ**」に、以下を設定します。
+
+| プロパティ | 設定値の例 | 必須 | 説明 |
+|------------|------------|------|------|
+| `GCP_PROJECT_ID` | `slide-generator-12345` | **必須** | 作成した GCP プロジェクトの **ID** (文字列) |
+| `VERTEX_AI_LOCATION` | `asia-northeast1` | 推奨 | Vertex AI のリージョン（東京など） |
+| `VERTEX_AI_MODEL` | `gemini-2.5-flash` | 推奨 | 使用するモデル名 |
+
+> **Tips**: 初回設定用関数 `setupScriptProperties()` を `src/Code.ts` に用意しています。値を書き換えて一度だけ実行することでも設定可能です。
+
 
 ## クイックスタート
 

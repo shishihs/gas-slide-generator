@@ -90,7 +90,14 @@ const mockSlide = {
 
 const mockLayout = {
     getRect: vi.fn().mockReturnValue({ left: 0, top: 0, width: 960, height: 540 }),
-    pxToPt: vi.fn((px) => px * 0.75) // Simple mock conversion
+    pxToPt: vi.fn((px) => px * 0.75), // Simple mock conversion
+    getTheme: vi.fn().mockReturnValue({
+        colors: {
+            primary: '#4285F4',
+            textPrimary: '#000000',
+            neutralGray: '#888888'
+        }
+    })
 };
 
 describe('GasDiagramSlideGenerator', () => {

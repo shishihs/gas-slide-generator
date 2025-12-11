@@ -13,8 +13,8 @@ describe('SlideTheme', () => {
             expect(DEFAULT_THEME.fonts.sizes.body).toBe(18);
 
             expect(DEFAULT_THEME.colors).toBeDefined();
-            expect(DEFAULT_THEME.colors.primary).toBe('#4A6C42');
-            expect(DEFAULT_THEME.colors.textPrimary).toBe('#212121');
+            expect(DEFAULT_THEME.colors.primary).toBe('#8FB130');
+            expect(DEFAULT_THEME.colors.textPrimary).toBe('#333333');
 
             expect(DEFAULT_THEME.diagram).toBeDefined();
             expect(DEFAULT_THEME.diagram.laneGapPx).toBe(30);

@@ -408,37 +408,15 @@ function convertDocumentToJson() {
             return directJson;
         }
 
-        // 3. Check for GCP Project ID BEFORE calling Vertex AI
-        // If missing, suggest Gem usage
-        // 3. Check for GCP Project ID BEFORE calling Vertex AI
-        // If missing, suggest Gem usage OR Settings configuration
         // 3. Check for GCP Project ID
-        // If missing, assume Manual Mode and show instructions
+        // If missing, show Manual Mode dialog and return special result
         const projectId = getGcpProjectId();
         if (!projectId || projectId === 'YOUR_GCP_PROJECT_ID') {
-            const ui = DocumentApp.getUi();
-            const gemUrl = getGemUrl();
+            // Show custom HTML dialog with clickable link
+            showManualModeDialog();
 
-            let msg = 'このドキュメント内に有効なスライド用 JSON が見つかりませんでした。\n\n' +
-                '【手順 (Manual Mode)】\n' +
-                '1. Gem (AI) を使って原稿から JSON を生成します。\n' +
-                '2. 生成された JSON をこのドキュメントに貼り付けます。\n' +
-                '3. 再度「スライド生成」を実行してください。\n';
-
-            if (gemUrl) {
-                msg += `\nGem URL:\n${gemUrl}\n`;
-            } else {
-                msg += `\n(設定画面で Gem の URL を保存しておくと、ここにリンクが表示されます)\n`;
-            }
-
-            msg += '\n------------------\n' +
-                '※ Vertex AI による自動生成を行いたい場合は、\n' +
-                '   設定画面で GCP Project ID を設定してください。';
-
-            ui.alert('スライド生成の準備', msg, ui.ButtonSet.OK);
-
-            // Graceful exit
-            throw new Error('設定された Gem を使用して JSON を作成し、貼り付けてください。');
+            // Return a special result to tell the sidebar to show JSON input
+            return { __manualModeRequired: true };
         }
 
         // 4. Call Vertex AI directly (Standard Mode)

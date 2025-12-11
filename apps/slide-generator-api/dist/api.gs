@@ -1500,11 +1500,24 @@ var global = this;
           } catch (e) {
             Logger.log(`ERROR in drawing ${type}: ${e}`);
           }
-          const newElements = slide.getPageElements().filter((e) => !elementsBefore.includes(e.getObjectId()));
+          const newElements = slide.getPageElements().filter((e) => {
+            if (elementsBefore.includes(e.getObjectId())) return false;
+            try {
+              const shape = e.asShape();
+              if (shape) {
+                const placeholderType = shape.getPlaceholderType();
+                if (placeholderType === SlidesApp.PlaceholderType.TITLE || placeholderType === SlidesApp.PlaceholderType.SUBTITLE || placeholderType === SlidesApp.PlaceholderType.CENTERED_TITLE) {
+                  return false;
+                }
+              }
+            } catch (e2) {
+            }
+            return true;
+          });
           if (newElements.length > 1) {
             try {
               slide.group(newElements);
-              Logger.log(`Grouped ${newElements.length} elements for ${type}`);
+              Logger.log(`Grouped ${newElements.length} content elements for ${type}`);
             } catch (e) {
               Logger.log(`Warning: Could not group elements: ${e}`);
             }

@@ -219,20 +219,20 @@ export const DEFAULT_THEME: SlideTheme = {
         }
     },
     colors: {
-        primary: "#4A6C42",     // Company Color (Deep Olive) - Reverted as requested
-        deepPrimary: "#2E3A45", // Slate Charcoal - Classic match for Olive
-        textPrimary: "#333333", // Soft Black - Kept for readability
-        textSmallFont: "#424242",
+        primary: "#8FB130",     // Brand Main (Vibrant Leaf Green)
+        deepPrimary: "#526717", // Brand Deep (Moss Green)
+        textPrimary: "#333333", // Soft Black
+        textSmallFont: "#545454", // Slightly warmer gray for text
         backgroundWhite: "#FFFFFF",
         cardBg: "#FFFFFF",
-        backgroundGray: "#F8F9FA", // Reverted to warmer/lighter gray
+        backgroundGray: "#F8F9FA", // Keep neutral background for logos
         faintGray: "#F8F9FA",
-        ghostGray: "#E0E0E0",
-        tableHeaderBg: "#E0E0E0",
-        laneBorder: "#EEEEEE",
+        ghostGray: "#E2E4E6",   // 
+        tableHeaderBg: "#E8EAE6", // Hint of green in gray
+        laneBorder: "#E0E0E0",
         cardBorder: "#E0E0E0",
         neutralGray: "#9E9E9E",
-        processArrow: "#4A6C42"
+        processArrow: "#526717" // Use Deep color for contrast
     },
     diagram: {
         laneGapPx: 30,          // Wider gaps

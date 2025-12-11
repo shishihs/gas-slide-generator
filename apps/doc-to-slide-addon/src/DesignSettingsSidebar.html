@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <base target="_top">
+    <style>
+        :root {
+            --primary-color: #8FB130;
+            --primary-hover: #526717;
+            --background-color: #f8f9fa;
+            --border-color: #dadce0;
+            --text-primary: #333333;
+            --text-secondary: #5f6368;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Google Sans', Roboto, Arial, sans-serif;
+            padding: 16px;
+            margin: 0;
+            background-color: var(--background-color);
+            color: var(--text-primary);
+        }
+
+        h3 {
+            margin: 0 0 8px 0;
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        p {
+            margin: 0 0 16px 0;
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .section {
+            background: white;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border-color);
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 500;
+            margin-bottom: 4px;
+            color: var(--text-secondary);
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="color"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .color-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .color-input-wrapper input[type="color"] {
+            width: 40px;
+            padding: 2px;
+            height: 36px;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-primary:disabled {
+            background-color: #dadce0;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+
+<body>
+    <h3>🎨 カラー設定</h3>
+    <p>スライドに使用する基本カラーをカスタマイズできます。</p>
+
+    <div class="section">
+        <div class="form-group">
+            <label>メインカラー (Primary)</label>
+            <div class="color-input-wrapper">
+                <input type="color" id="colorMain" value="#8FB130" onchange="updateHex('colorMain', 'hexMain')">
+                <input type="text" id="hexMain" value="#8FB130" onchange="updateColor('colorMain', 'hexMain')">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>ディープカラー (Deep / Hover)</label>
+            <div class="color-input-wrapper">
+                <input type="color" id="colorDeep" value="#526717" onchange="updateHex('colorDeep', 'hexDeep')">
+                <input type="text" id="hexDeep" value="#526717" onchange="updateColor('colorDeep', 'hexDeep')">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>テキスト (Black)</label>
+            <div class="color-input-wrapper">
+                <input type="color" id="colorText" value="#333333" onchange="updateHex('colorText', 'hexText')">
+                <input type="text" id="hexText" value="#333333" onchange="updateColor('colorText', 'hexText')">
+            </div>
+        </div>
+
+        <button class="btn-primary" onclick="saveColors()">設定を保存</button>
+    </div>
+
+    <script>
+        function updateHex(colorId, hexId) {
+            document.getElementById(hexId).value = document.getElementById(colorId).value.toUpperCase();
+        }
+
+        function updateColor(colorId, hexId) {
+            var hex = document.getElementById(hexId).value;
+            if (/^#[0-9A-F]{6}$/i.test(hex)) {
+                document.getElementById(colorId).value = hex;
+            }
+        }
+
+        function saveColors() {
+            var colors = {
+                primary: document.getElementById('hexMain').value,
+                deep: document.getElementById('hexDeep').value,
+                text: document.getElementById('hexText').value
+            };
+
+            var btn = document.querySelector('.btn-primary');
+            var originalText = btn.innerText;
+            btn.innerText = '保存中...';
+            btn.disabled = true;
+
+            google.script.run
+                .withSuccessHandler(function () {
+                    btn.innerText = '✅ 保存完了';
+                    btn.disabled = false;
+                    setTimeout(() => { btn.innerText = originalText; }, 2000);
+
+                    document.documentElement.style.setProperty('--primary-color', colors.primary);
+                    document.documentElement.style.setProperty('--primary-hover', colors.deep);
+                })
+                .withFailureHandler(function (e) {
+                    btn.innerText = 'エラー';
+                    alert('保存に失敗しました: ' + e.message);
+                    btn.disabled = false;
+                })
+                .saveUserColors(colors);
+        }
+
+        function loadColors() {
+            google.script.run
+                .withSuccessHandler(function (colors) {
+                    if (colors) {
+                        if (colors.primary) {
+                            document.getElementById('hexMain').value = colors.primary;
+                            document.getElementById('colorMain').value = colors.primary;
+                            document.documentElement.style.setProperty('--primary-color', colors.primary);
+                        }
+                        if (colors.deep) {
+                            document.getElementById('hexDeep').value = colors.deep;
+                            document.getElementById('colorDeep').value = colors.deep;
+                            document.documentElement.style.setProperty('--primary-hover', colors.deep);
+                        }
+                        if (colors.text) {
+                            document.getElementById('hexText').value = colors.text;
+                            document.getElementById('colorText').value = colors.text;
+                        }
+                    }
+                })
+                .getUserColors();
+        }
+
+        window.onload = function () {
+            loadColors();
+        };
+    </script>
+</body>
+
+</html>

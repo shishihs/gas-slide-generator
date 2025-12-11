@@ -312,13 +312,8 @@
 </head>
 
 <body>
-  <div class="tabs">
-    <div class="tab active" onclick="switchTab('generate')">作成</div>
-    <div class="tab" onclick="switchTab('design')">デザイン設定</div>
-  </div>
-
-  <!-- Generate Tab -->
-  <div id="tab-generate" class="tab-content active">
+  <!-- Generate Section -->
+  <div id="result-wrapper">
     <h3>🎨 スライド生成</h3>
     <p>ドキュメントの内容を、見た目の整ったGoogleスライドに自動変換します。</p>
 
@@ -359,41 +354,7 @@
         <button class="btn-secondary" onclick="startGeneration()">もう一度作成する</button>
       </div>
     </div>
-  </div><!-- End Generate Tab -->
-
-  <!-- Design Tab -->
-  <div id="tab-design" class="tab-content">
-    <h3>🎨 カラー設定</h3>
-    <p>スライドに使用する基本カラーをカスタマイズできます。</p>
-
-    <div class="section">
-      <div class="form-group">
-        <label>メインカラー (Primary)</label>
-        <div class="color-input-wrapper">
-          <input type="color" id="colorMain" value="#8FB130" onchange="updateHex('colorMain', 'hexMain')">
-          <input type="text" id="hexMain" value="#8FB130" onchange="updateColor('colorMain', 'hexMain')">
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label>ディープカラー (Deep / Hover)</label>
-        <div class="color-input-wrapper">
-          <input type="color" id="colorDeep" value="#526717" onchange="updateHex('colorDeep', 'hexDeep')">
-          <input type="text" id="hexDeep" value="#526717" onchange="updateColor('colorDeep', 'hexDeep')">
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label>テキスト (Black)</label>
-        <div class="color-input-wrapper">
-          <input type="color" id="colorText" value="#333333" onchange="updateHex('colorText', 'hexText')">
-          <input type="text" id="hexText" value="#333333" onchange="updateColor('colorText', 'hexText')">
-        </div>
-      </div>
-
-      <button class="btn-primary" onclick="saveColors()">設定を保存</button>
-    </div>
-  </div>
+  </div><!-- End Generate Section -->
 
   <script>
     /**
@@ -518,59 +479,7 @@
       status.innerHTML = message;
     }
 
-    /* Tab Functions */
-    function switchTab(tabName) {
-      // Update Tab UI
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      document.querySelector(`.tab[onclick="switchTab('${tabName}')"]`).classList.add('active');
 
-      // Show Content
-      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-      document.getElementById(`tab-${tabName}`).classList.add('active');
-    }
-
-    /* Color Form Functions */
-    function updateHex(colorId, hexId) {
-      document.getElementById(hexId).value = document.getElementById(colorId).value.toUpperCase();
-    }
-
-    function updateColor(colorId, hexId) {
-      var hex = document.getElementById(hexId).value;
-      if (/^#[0-9A-F]{6}$/i.test(hex)) {
-        document.getElementById(colorId).value = hex;
-      }
-    }
-
-    function saveColors() {
-      var colors = {
-        primary: document.getElementById('hexMain').value,
-        deep: document.getElementById('hexDeep').value,
-        text: document.getElementById('hexText').value
-      };
-
-      // Show temporary loading in the button or status
-      var btn = document.querySelector('#tab-design .btn-primary');
-      var originalText = btn.innerText;
-      btn.innerText = '保存中...';
-      btn.disabled = true;
-
-      google.script.run
-        .withSuccessHandler(function () {
-          btn.innerText = '✅ 保存完了';
-          btn.disabled = false;
-          setTimeout(() => { btn.innerText = originalText; }, 2000);
-
-          // Update CSS vars locally
-          document.documentElement.style.setProperty('--primary-color', colors.primary);
-          document.documentElement.style.setProperty('--primary-hover', colors.deep);
-        })
-        .withFailureHandler(function (e) {
-          btn.innerText = 'エラー';
-          alert('保存に失敗しました: ' + e.message);
-          btn.disabled = false;
-        })
-        .saveUserColors(colors);
-    }
 
     // Load colors when tab is switched or on load?
     // Let's load on init
@@ -579,18 +488,15 @@
         .withSuccessHandler(function (colors) {
           if (colors) {
             if (colors.primary) {
-              document.getElementById('hexMain').value = colors.primary;
-              document.getElementById('colorMain').value = colors.primary;
               document.documentElement.style.setProperty('--primary-color', colors.primary);
             }
             if (colors.deep) {
-              document.getElementById('hexDeep').value = colors.deep;
-              document.getElementById('colorDeep').value = colors.deep;
               document.documentElement.style.setProperty('--primary-hover', colors.deep);
             }
+            // Text color is used for body, but we might not need to set it dynamically here if CSS var usage is limited
+            // But let's set available ones
             if (colors.text) {
-              document.getElementById('hexText').value = colors.text;
-              document.getElementById('colorText').value = colors.text;
+              document.documentElement.style.setProperty('--text-primary', colors.text);
             }
           }
         })

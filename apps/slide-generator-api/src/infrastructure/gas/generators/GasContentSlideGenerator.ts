@@ -29,12 +29,16 @@ export class GasContentSlideGenerator implements ISlideGenerator {
         // Title Placeholder
         const titlePlaceholder = slide.getPlaceholder(SlidesApp.PlaceholderType.TITLE) || slide.getPlaceholder(SlidesApp.PlaceholderType.CENTERED_TITLE);
         if (titlePlaceholder) {
-            // Using simple setText to respect template style
-            titlePlaceholder.asShape().getText().setText(data.title || '');
-        } else {
-            // Fallback to manual if no placeholder (e.g. wrong layout)
-            // But avoiding hardcoded drawStandardTitleHeader if possible.
-            // Let's rely on standard fallback being minimal.
+            if (data.title) {
+                // Using simple setText to respect template style
+                try {
+                    titlePlaceholder.asShape().getText().setText(data.title);
+                } catch (e) {
+                    Logger.log(`Warning: Content Title placeholder found but text could not be set. ${e}`);
+                }
+            } else {
+                titlePlaceholder.remove();
+            }
         }
 
         const subheadWidthPt = (data && typeof data._subhead_widthPt === 'number') ?
@@ -47,8 +51,14 @@ export class GasContentSlideGenerator implements ISlideGenerator {
 
         let points = Array.isArray(data.points) ? data.points.slice(0) : [];
         const isAgenda = /(agenda|アジェンダ|目次|本日お伝えすること)/i.test(String(data.title || ''));
-        if (isAgenda && points.length === 0) {
-            points = ['本日の目的', '進め方', '次のアクション'];
+
+        if (isAgenda) {
+            // Force white background for Agenda
+            slide.getBackground().setSolidFill('#FFFFFF');
+
+            if (points.length === 0) {
+                points = ['本日の目的', '進め方', '次のアクション'];
+            }
         }
 
         const hasImages = Array.isArray(data.images) && data.images.length > 0;

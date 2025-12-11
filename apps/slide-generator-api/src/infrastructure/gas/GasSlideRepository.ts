@@ -136,7 +136,14 @@ export class GasSlideRepository implements ISlideRepository {
                 rawType.includes('diagram') ||
                 rawType.includes('compare') ||
                 rawType.includes('stepup') ||
-                rawType.includes('flowchart')
+                rawType.includes('flowchart') ||
+                rawType.includes('cards') ||
+                rawType.includes('kpi') ||
+                rawType.includes('table') ||
+                rawType.includes('faq') ||
+                rawType.includes('progress') ||
+                rawType.includes('quote') ||
+                rawType.includes('imagetext')
             ) {
                 // Use Diagram Generator for visual types
                 diagramGenerator.generate(slide, commonData, layoutManager, index + 1, settings);
@@ -147,8 +154,12 @@ export class GasSlideRepository implements ISlideRepository {
 
             // Also add speaker notes if present (Global handling)
             if (slideModel.notes) {
-                const notesPage = slide.getNotesPage();
-                notesPage.getSpeakerNotesShape().getText().setText(slideModel.notes);
+                try {
+                    const notesPage = slide.getNotesPage();
+                    notesPage.getSpeakerNotesShape().getText().setText(slideModel.notes);
+                } catch (e) {
+                    Logger.log(`Warning: Could not set speaker notes. ${e}`);
+                }
             }
         });
 

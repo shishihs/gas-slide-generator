@@ -6,7 +6,8 @@ import {
     offsetRect,
     addCucFooter,
     drawArrowBetweenRects,
-    setBoldTextSize
+    setBoldTextSize,
+    insertImageFromUrlOrFileId
 } from '../../../common/utils/SlideUtils';
 import {
     generateProcessColors,
@@ -25,7 +26,11 @@ export class GasDiagramSlideGenerator implements ISlideGenerator {
         // Set Title
         const titlePlaceholder = slide.getPlaceholder(SlidesApp.PlaceholderType.TITLE) || slide.getPlaceholder(SlidesApp.PlaceholderType.CENTERED_TITLE);
         if (titlePlaceholder) {
-            titlePlaceholder.asShape().getText().setText(data.title || '');
+            try {
+                titlePlaceholder.asShape().getText().setText(data.title || '');
+            } catch (e) {
+                Logger.log(`Warning: Title placeholder found but text could not be set. ${e}`);
+            }
         }
 
         const type = (data.layout || data.type || '').toLowerCase();
@@ -42,8 +47,14 @@ export class GasDiagramSlideGenerator implements ISlideGenerator {
             this.drawProcess(slide, data, workArea, settings, layout);
         } else if (type.includes('cycle')) {
             this.drawCycle(slide, data, workArea, settings, layout);
-        } else if (type.includes('triangle') || type.includes('pyramid')) {
+        } else if (type.includes('pyramid')) {
             this.drawPyramid(slide, data, workArea, settings, layout);
+        } else if (type.includes('triangle')) {
+            this.drawTriangle(slide, data, workArea, settings, layout);
+        } else if (type.includes('statscompare')) {
+            this.drawStatsCompare(slide, data, workArea, settings, layout);
+        } else if (type.includes('barcompare')) {
+            this.drawBarCompare(slide, data, workArea, settings, layout);
         } else if (type.includes('compare') || type.includes('kaizen')) {
             this.drawComparison(slide, data, workArea, settings, layout);
         } else if (type.includes('stepup') || type.includes('stair')) {
@@ -52,6 +63,20 @@ export class GasDiagramSlideGenerator implements ISlideGenerator {
             this.drawFlowChart(slide, data, workArea, settings, layout);
         } else if (type.includes('diagram')) { // Lane diagram
             this.drawLanes(slide, data, workArea, settings, layout);
+        } else if (type.includes('cards') || type.includes('headercards')) {
+            this.drawCards(slide, data, workArea, settings, layout);
+        } else if (type.includes('kpi')) {
+            this.drawKPI(slide, data, workArea, settings, layout);
+        } else if (type.includes('table')) {
+            this.drawTable(slide, data, workArea, settings, layout);
+        } else if (type.includes('faq')) {
+            this.drawFAQ(slide, data, workArea, settings, layout);
+        } else if (type.includes('progress')) {
+            this.drawProgress(slide, data, workArea, settings, layout);
+        } else if (type.includes('quote')) {
+            this.drawQuote(slide, data, workArea, settings, layout);
+        } else if (type.includes('imagetext')) {
+            this.drawImageText(slide, data, workArea, settings, layout);
         } else {
             // Fallback
             Logger.log('Diagram logic not implemented for type: ' + type);
@@ -374,8 +399,8 @@ export class GasDiagramSlideGenerator implements ISlideGenerator {
     }
 
     private drawComparison(slide: GoogleAppsScript.Slides.Slide, data: any, area: any, settings: any, layout: LayoutManager) {
-        const leftTitle = data.leftTitle || 'Plan A';
-        const rightTitle = data.rightTitle || 'Plan B';
+        const leftTitle = data.leftTitle || 'プランA';
+        const rightTitle = data.rightTitle || 'プランB';
         const leftItems = data.leftItems || [];
         const rightItems = data.rightItems || [];
 
@@ -408,6 +433,242 @@ export class GasDiagramSlideGenerator implements ISlideGenerator {
         rightBox.getFill().setSolidFill(CONFIG.COLORS.background_gray);
         rightBox.getBorder().getLineFill().setSolidFill(CONFIG.COLORS.card_border);
         setStyledText(rightBox, rightItems.join('\n\n'), { size: CONFIG.FONTS.sizes.body });
+    }
+
+    private drawStatsCompare(slide: GoogleAppsScript.Slides.Slide, data: any, area: any, settings: any, layout: LayoutManager) {
+        const leftTitle = data.leftTitle || '導入前';
+        const rightTitle = data.rightTitle || '導入後';
+        const stats = data.stats || [];
+        if (!stats.length) return;
+
+        const compareColors = generateCompareColors(settings.primaryColor);
+
+        // Header row
+        const headerH = layout.pxToPt(45);
+        const labelColW = area.width * 0.35;  // Label column width
+        const valueColW = (area.width - labelColW) / 2;  // Each value column width
+
+        // Left Title Header
+        const leftHeaderX = area.left + labelColW;
+        const leftHeader = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, leftHeaderX, area.top, valueColW, headerH);
+        leftHeader.getFill().setSolidFill(compareColors.left);
+        leftHeader.getBorder().setTransparent();
+        setStyledText(leftHeader, leftTitle, { size: 14, bold: true, color: CONFIG.COLORS.background_gray, align: SlidesApp.ParagraphAlignment.CENTER });
+        try { leftHeader.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
+
+        // Right Title Header
+        const rightHeaderX = area.left + labelColW + valueColW;
+        const rightHeader = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, rightHeaderX, area.top, valueColW, headerH);
+        rightHeader.getFill().setSolidFill(compareColors.right);
+        rightHeader.getBorder().setTransparent();
+        setStyledText(rightHeader, rightTitle, { size: 14, bold: true, color: CONFIG.COLORS.background_gray, align: SlidesApp.ParagraphAlignment.CENTER });
+        try { rightHeader.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
+
+        // Data rows
+        const availableHeight = area.height - headerH;
+        const rowHeight = Math.min(layout.pxToPt(60), availableHeight / stats.length);
+        let currentY = area.top + headerH;
+
+        stats.forEach((stat: any, index: number) => {
+            const label = stat.label || '';
+            const leftValue = stat.leftValue || '';
+            const rightValue = stat.rightValue || '';
+            const trend = stat.trend || null;
+
+            // Alternate row background
+            const rowBg = index % 2 === 0 ? CONFIG.COLORS.background_gray : '#FFFFFF';
+
+            // Label cell
+            const labelCell = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, area.left, currentY, labelColW, rowHeight);
+            labelCell.getFill().setSolidFill(rowBg);
+            labelCell.getBorder().getLineFill().setSolidFill(CONFIG.COLORS.faint_gray);
+            setStyledText(labelCell, label, { size: CONFIG.FONTS.sizes.body, bold: true, align: SlidesApp.ParagraphAlignment.START });
+            try { labelCell.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
+
+            // Left value cell
+            const leftCell = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, leftHeaderX, currentY, valueColW, rowHeight);
+            leftCell.getFill().setSolidFill(rowBg);
+            leftCell.getBorder().getLineFill().setSolidFill(CONFIG.COLORS.faint_gray);
+            setStyledText(leftCell, leftValue, { size: CONFIG.FONTS.sizes.body, align: SlidesApp.ParagraphAlignment.CENTER, color: compareColors.left });
+            try { leftCell.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
+
+            // Right value cell
+            const rightCell = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, rightHeaderX, currentY, valueColW - (trend ? layout.pxToPt(40) : 0), rowHeight);
+            rightCell.getFill().setSolidFill(rowBg);
+            rightCell.getBorder().getLineFill().setSolidFill(CONFIG.COLORS.faint_gray);
+            setStyledText(rightCell, rightValue, { size: CONFIG.FONTS.sizes.body, align: SlidesApp.ParagraphAlignment.CENTER, color: compareColors.right });
+            try { rightCell.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
+
+            // Trend indicator (optional)
+            if (trend) {
+                const trendX = rightHeaderX + valueColW - layout.pxToPt(35);
+                const trendShape = slide.insertShape(SlidesApp.ShapeType.ELLIPSE, trendX, currentY + rowHeight / 4, layout.pxToPt(25), layout.pxToPt(25));
+                const isUp = trend.toLowerCase() === 'up';
+                const trendColor = isUp ? '#28a745' : '#dc3545';  // Green for up, Red for down
+                trendShape.getFill().setSolidFill(trendColor);
+                trendShape.getBorder().setTransparent();
+                setStyledText(trendShape, isUp ? '↑' : '↓', { size: 12, color: '#FFFFFF', bold: true, align: SlidesApp.ParagraphAlignment.CENTER });
+                try { trendShape.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
+            }
+
+            currentY += rowHeight;
+        });
+    }
+
+    private drawBarCompare(slide: GoogleAppsScript.Slides.Slide, data: any, area: any, settings: any, layout: LayoutManager) {
+        const leftTitle = data.leftTitle || '導入前';
+        const rightTitle = data.rightTitle || '導入後';
+        const stats = data.stats || [];
+        if (!stats.length) return;
+
+        const compareColors = generateCompareColors(settings.primaryColor);
+
+        // Find max value for scaling
+        let maxValue = 0;
+        stats.forEach((stat: any) => {
+            const leftNum = parseFloat(String(stat.leftValue || '0').replace(/[^0-9.]/g, '')) || 0;
+            const rightNum = parseFloat(String(stat.rightValue || '0').replace(/[^0-9.]/g, '')) || 0;
+            maxValue = Math.max(maxValue, leftNum, rightNum);
+        });
+        if (maxValue === 0) maxValue = 100;  // Fallback
+
+        // Layout
+        const labelColW = area.width * 0.2;
+        const barAreaW = area.width * 0.6;
+        const valueColW = area.width * 0.1;
+        const trendColW = area.width * 0.1;
+
+        const rowHeight = Math.min(layout.pxToPt(80), area.height / stats.length);
+        const barHeight = layout.pxToPt(18);
+        const barGap = layout.pxToPt(4);
+        let currentY = area.top;
+
+        stats.forEach((stat: any, index: number) => {
+            const label = stat.label || '';
+            const leftValue = stat.leftValue || '';
+            const rightValue = stat.rightValue || '';
+            const trend = stat.trend || null;
+
+            const leftNum = parseFloat(String(leftValue).replace(/[^0-9.]/g, '')) || 0;
+            const rightNum = parseFloat(String(rightValue).replace(/[^0-9.]/g, '')) || 0;
+
+            // Label
+            const labelShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, area.left, currentY, labelColW, rowHeight);
+            setStyledText(labelShape, label, { size: CONFIG.FONTS.sizes.body, bold: true, align: SlidesApp.ParagraphAlignment.START });
+            try { labelShape.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
+
+            // Bar area
+            const barLeft = area.left + labelColW;
+            const barTop = currentY + (rowHeight - (barHeight * 2 + barGap)) / 2;
+
+            // Left bar (Before)
+            const leftBarWidth = (leftNum / maxValue) * barAreaW;
+            if (leftBarWidth > 0) {
+                const leftBar = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, barLeft, barTop, leftBarWidth, barHeight);
+                leftBar.getFill().setSolidFill(compareColors.left);
+                leftBar.getBorder().setTransparent();
+            }
+            // Left label
+            const leftLabel = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, barLeft + leftBarWidth + layout.pxToPt(5), barTop, layout.pxToPt(60), barHeight);
+            setStyledText(leftLabel, leftValue, { size: 10, color: compareColors.left });
+
+            // Right bar (After)
+            const rightBarWidth = (rightNum / maxValue) * barAreaW;
+            if (rightBarWidth > 0) {
+                const rightBar = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, barLeft, barTop + barHeight + barGap, rightBarWidth, barHeight);
+                rightBar.getFill().setSolidFill(compareColors.right);
+                rightBar.getBorder().setTransparent();
+            }
+            // Right label
+            const rightLabel = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, barLeft + rightBarWidth + layout.pxToPt(5), barTop + barHeight + barGap, layout.pxToPt(60), barHeight);
+            setStyledText(rightLabel, rightValue, { size: 10, color: compareColors.right });
+
+            // Trend indicator (optional)
+            if (trend) {
+                const trendX = area.left + area.width - trendColW;
+                const trendShape = slide.insertShape(SlidesApp.ShapeType.ELLIPSE, trendX, currentY + rowHeight / 2 - layout.pxToPt(12), layout.pxToPt(24), layout.pxToPt(24));
+                const isUp = trend.toLowerCase() === 'up';
+                const trendColor = isUp ? '#28a745' : '#dc3545';
+                trendShape.getFill().setSolidFill(trendColor);
+                trendShape.getBorder().setTransparent();
+                setStyledText(trendShape, isUp ? '↑' : '↓', { size: 12, color: '#FFFFFF', bold: true, align: SlidesApp.ParagraphAlignment.CENTER });
+                try { trendShape.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
+            }
+
+            // Separator line
+            if (index < stats.length - 1) {
+                const lineY = currentY + rowHeight;
+                const line = slide.insertLine(SlidesApp.LineCategory.STRAIGHT, area.left, lineY, area.left + area.width, lineY);
+                line.getLineFill().setSolidFill(CONFIG.COLORS.faint_gray);
+                line.setWeight(1);
+            }
+
+            currentY += rowHeight;
+        });
+    }
+
+    private drawTriangle(slide: GoogleAppsScript.Slides.Slide, data: any, area: any, settings: any, layout: LayoutManager) {
+        const items = data.items || [];
+        if (!items.length) return;
+
+        const itemsToDraw = items.slice(0, 3);
+
+        const centerX = area.left + area.width / 2;
+        const centerY = area.top + area.height / 2;
+        // 少し小さめに
+        const radius = Math.min(area.width, area.height) / 3.2;
+
+        // 三角形の頂点配置 (上、右下、左下)
+        const positions = [
+            { x: centerX, y: centerY - radius },
+            { x: centerX + radius * 0.866, y: centerY + radius * 0.5 },
+            { x: centerX - radius * 0.866, y: centerY + radius * 0.5 }
+        ];
+
+        // 各要素の円のサイズ
+        const circleSize = layout.pxToPt(160); // 直径
+
+        // 中央の三角形（飾り）
+        const trianglePath = slide.insertShape(SlidesApp.ShapeType.TRIANGLE, centerX - radius / 2, centerY - radius / 2, radius, radius);
+        trianglePath.setRotation(0); // 正三角形の向きに
+        // 実際にはシェイプの頂点は矩形内配置なので微調整が必要だが、一旦シンプルに
+        // 背景の三角形は薄く
+        trianglePath.getFill().setSolidFill(CONFIG.COLORS.faint_gray);
+        trianglePath.getBorder().setTransparent();
+
+        // Send manually to back (GAS doesn't have z-index easily, relying on insertion order - insert first = back)
+        // Adjust: insert shape first
+
+        positions.slice(0, itemsToDraw.length).forEach((pos, i) => {
+            const item = itemsToDraw[i];
+            const title = item.title || item.label || '';
+            const desc = item.desc || item.subLabel || '';
+
+            const x = pos.x - circleSize / 2;
+            const y = pos.y - circleSize / 2;
+
+            // Circle Shape
+            const circle = slide.insertShape(SlidesApp.ShapeType.ELLIPSE, x, y, circleSize, circleSize);
+            circle.getFill().setSolidFill(settings.primaryColor);
+            circle.getBorder().setTransparent();
+
+            // Text
+            setStyledText(circle, `${title}\n${desc}`, {
+                size: 14,
+                bold: true,
+                color: CONFIG.COLORS.background_gray,
+                align: SlidesApp.ParagraphAlignment.CENTER
+            });
+            try {
+                circle.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
+                // タイトルと説明のフォントサイズを変える
+                const textRange = circle.getText();
+                if (title.length > 0 && desc.length > 0) {
+                    // 1行目がタイトルと仮定
+                    // 改行位置を探すのは手間なので一律サイズ設定でシンプルに
+                }
+            } catch (e) { }
+        });
     }
 
     private drawStepUp(slide: GoogleAppsScript.Slides.Slide, data: any, area: any, settings: any, layout: LayoutManager) {
@@ -535,4 +796,363 @@ export class GasDiagramSlideGenerator implements ISlideGenerator {
             }
         });
     }
+
+    private drawCards(slide: GoogleAppsScript.Slides.Slide, data: any, area: any, settings: any, layout: LayoutManager) {
+        const items = data.items || [];
+        if (!items.length) return;
+        const type = (data.type || '').toLowerCase();
+        const hasHeader = type.includes('headercards');
+
+        const cols = data.columns || 3;
+        const rows = Math.ceil(items.length / cols);
+
+        const gap = layout.pxToPt(20);
+        const cardW = (area.width - (gap * (cols - 1))) / cols;
+        const cardH = (area.height - (gap * (rows - 1))) / rows;
+
+        items.forEach((item: any, i: number) => {
+            const r = Math.floor(i / cols);
+            const c = i % cols;
+            const x = area.left + c * (cardW + gap);
+            const y = area.top + r * (cardH + gap);
+
+            const title = item.title || item.label || '';
+            const desc = item.desc || item.description || item.text || '';
+
+            if (hasHeader) {
+                // Headered Card
+                const headerH = layout.pxToPt(36);
+                const header = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, x, y, cardW, headerH);
+                header.getFill().setSolidFill(settings.primaryColor);
+                header.getBorder().setTransparent();
+                setStyledText(header, title, { size: 14, bold: true, color: '#FFFFFF', align: SlidesApp.ParagraphAlignment.CENTER });
+                try { header.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
+
+                const body = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, x, y + headerH, cardW, cardH - headerH);
+                body.getFill().setSolidFill('#FFFFFF');
+                body.getBorder().getLineFill().setSolidFill(CONFIG.COLORS.card_border);
+
+                const textArea = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x + layout.pxToPt(10), y + headerH + layout.pxToPt(10), cardW - layout.pxToPt(20), cardH - headerH - layout.pxToPt(20));
+                setStyledText(textArea, desc, { size: 12, align: SlidesApp.ParagraphAlignment.START, color: CONFIG.COLORS.text_small_font });
+            } else {
+                // Modern Clean Card
+                const card = slide.insertShape(SlidesApp.ShapeType.ROUND_RECTANGLE, x, y, cardW, cardH);
+                card.getFill().setSolidFill('#FFFFFF');
+                card.getBorder().getLineFill().setSolidFill(CONFIG.COLORS.card_border);
+
+                // Accent Strip on Left
+                const strip = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, x, y + cardH * 0.1, layout.pxToPt(6), cardH * 0.8);
+                strip.getFill().setSolidFill(settings.primaryColor);
+                strip.getBorder().setTransparent();
+
+                // Content
+                const contentX = x + layout.pxToPt(20);
+                const contentW = cardW - layout.pxToPt(30);
+
+                // Title
+                const titleBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, contentX, y + layout.pxToPt(10), contentW, layout.pxToPt(30));
+                setStyledText(titleBox, title, { size: 16, bold: true, color: CONFIG.COLORS.text_primary });
+
+                // Desc
+                const descBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, contentX, y + layout.pxToPt(40), contentW, cardH - layout.pxToPt(50));
+                setStyledText(descBox, desc, { size: 12, color: CONFIG.COLORS.text_small_font });
+                try {
+                    descBox.setContentAlignment(SlidesApp.ContentAlignment.TOP);
+                } catch (e) { }
+            }
+        });
+    }
+
+    private drawKPI(slide: GoogleAppsScript.Slides.Slide, data: any, area: any, settings: any, layout: LayoutManager) {
+        const items = data.items || [];
+        if (!items.length) return;
+
+        const cols = items.length > 4 ? 4 : (items.length || 1);
+        const gap = layout.pxToPt(20);
+        const cardW = (area.width - (gap * (cols - 1))) / cols;
+        const cardH = layout.pxToPt(160);
+        const y = area.top + (area.height - cardH) / 2;
+
+        items.forEach((item: any, i: number) => {
+            const x = area.left + i * (cardW + gap);
+
+            // Card BG
+            const card = slide.insertShape(SlidesApp.ShapeType.ROUND_RECTANGLE, x, y, cardW, cardH);
+            card.getFill().setSolidFill('#FFFFFF');
+            card.getBorder().getLineFill().setSolidFill(CONFIG.COLORS.card_border);
+            // card.setShadow equivalent not avail, but we can add a bottom lip if we want depth?
+            // Simulating shadow with offset shape underneath is possible but maybe too heavy. 
+            // Stick to clean flat design.
+
+            const padding = layout.pxToPt(10);
+
+            // Label (Top)
+            const labelH = layout.pxToPt(30);
+            const labelBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x + padding, y + padding, cardW - padding * 2, labelH);
+            setStyledText(labelBox, item.label || 'Metric', { size: 14, color: CONFIG.COLORS.neutral_gray, align: SlidesApp.ParagraphAlignment.CENTER });
+
+            // Value (Middle - Large)
+            const valueH = layout.pxToPt(70);
+            const valueBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x + padding, y + labelH + padding, cardW - padding * 2, valueH);
+            const valStr = String(item.value || '0');
+            // Adaptive font size
+            let fontSize = 48;
+            if (valStr.length > 6) fontSize = 36;
+            if (valStr.length > 10) fontSize = 28;
+
+            setStyledText(valueBox, valStr, { size: fontSize, bold: true, color: settings.primaryColor, align: SlidesApp.ParagraphAlignment.CENTER });
+
+            // Change/Status (Bottom)
+            if (item.change || item.status) {
+                const statusH = layout.pxToPt(30);
+                const statusBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x + padding, y + labelH + valueH + padding, cardW - padding * 2, statusH);
+
+                let color = CONFIG.COLORS.neutral_gray;
+                let prefix = '';
+                if (item.status === 'good') { color = '#28a745'; prefix = '▲ '; }
+                if (item.status === 'bad') { color = '#dc3545'; prefix = '▼ '; }
+
+                setStyledText(statusBox, prefix + (item.change || ''), { size: 14, bold: true, color: color, align: SlidesApp.ParagraphAlignment.CENTER });
+            }
+        });
+    }
+
+    private drawTable(slide: GoogleAppsScript.Slides.Slide, data: any, area: any, settings: any, layout: LayoutManager) {
+        const headers = data.headers || [];
+        const rows = data.rows || [];
+        const numRows = rows.length + (headers.length ? 1 : 0);
+        const numCols = headers.length || (rows[0] ? rows[0].length : 1);
+        if (numRows === 0 || numCols === 0) return;
+
+        const table = slide.insertTable(numRows, numCols);
+        table.setLeft(area.left);
+        table.setTop(area.top);
+        table.setWidth(area.width);
+
+        let rowIndex = 0;
+        // Header
+        if (headers.length) {
+            for (let c = 0; c < numCols; c++) {
+                const cell = table.getCell(0, c);
+                cell.getFill().setSolidFill(settings.primaryColor); // Header Color
+                cell.getText().setText(headers[c] || '');
+                const style = cell.getText().getTextStyle();
+                style.setBold(true).setFontSize(14).setForegroundColor('#FFFFFF');
+                cell.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
+
+                // Borders not easily customizable per cell in this GAS version context without complex handling.
+                // Relying on background colors for structure.
+            }
+            rowIndex++;
+        }
+
+        // Rows
+        rows.forEach((row: any[], rIdx: number) => {
+            const isAlt = rIdx % 2 !== 0; // Alternating
+            const rowColor = isAlt ? CONFIG.COLORS.faint_gray : '#FFFFFF';
+
+            for (let c = 0; c < numCols; c++) {
+                const cell = table.getCell(rowIndex, c);
+                cell.getFill().setSolidFill(rowColor);
+                cell.getText().setText(String(row[c] || ''));
+                cell.getText().getTextStyle().setFontSize(12).setForegroundColor(CONFIG.COLORS.text_primary);
+                cell.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
+
+                // Subtle gray borders not applied to avoid type errors
+                // const borderColor = CONFIG.COLORS.lane_border;
+                // cell.getBorderBottom().getLineFill().setSolidFill(borderColor);
+                // cell.getBorderTop().getLineFill().setSolidFill(borderColor);
+                // cell.getBorderLeft().setTransparent();
+                // cell.getBorderRight().setTransparent();
+            }
+            rowIndex++;
+        });
+    }
+
+    private drawFAQ(slide: GoogleAppsScript.Slides.Slide, data: any, area: any, settings: any, layout: LayoutManager) {
+        const items = data.items || data.points || [];
+        // Support points as strings ("Q:...", "A:...") or objects
+        const parsedItems: any[] = [];
+        if (items.length && typeof items[0] === 'string') {
+            let currentQ = '';
+            items.forEach((str: string) => {
+                if (str.startsWith('Q:') || str.startsWith('Q.')) currentQ = str;
+                else if (str.startsWith('A:') || str.startsWith('A.')) parsedItems.push({ q: currentQ, a: str });
+            });
+        } else {
+            items.forEach((it: any) => parsedItems.push(it));
+        }
+        if (!parsedItems.length) return;
+
+        const gap = layout.pxToPt(20);
+        const itemH = (area.height - (gap * (parsedItems.length - 1))) / parsedItems.length;
+
+        parsedItems.forEach((item, i) => {
+            const y = area.top + i * (itemH + gap);
+            const iconSize = layout.pxToPt(40);
+
+            // Q Circle
+            const qCircle = slide.insertShape(SlidesApp.ShapeType.ELLIPSE, area.left, y + (itemH - iconSize) / 2, iconSize, iconSize);
+            qCircle.getFill().setSolidFill(settings.primaryColor);
+            qCircle.getBorder().setTransparent();
+            setStyledText(qCircle, 'Q', { size: 18, bold: true, color: '#FFFFFF', align: SlidesApp.ParagraphAlignment.CENTER });
+            try { qCircle.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
+
+            // Content Box
+            const boxLeft = area.left + iconSize + layout.pxToPt(15);
+            const boxW = area.width - (iconSize + layout.pxToPt(15));
+            const box = slide.insertShape(SlidesApp.ShapeType.ROUND_RECTANGLE, boxLeft, y, boxW, itemH);
+            box.getFill().setSolidFill('#FFFFFF');
+            box.getBorder().getLineFill().setSolidFill(CONFIG.COLORS.card_border);
+
+            const qText = (item.q || '').replace(/^[QA][:. ]+/, '');
+            const aText = (item.a || '').replace(/^[QA][:. ]+/, '');
+
+            setStyledText(box, `Q. ${qText}\n\nA. ${aText}`, { size: 12, color: CONFIG.COLORS.text_primary });
+
+            // Style the A part? simple styling only.
+            // A visual separator line inside?
+            // Actually, let's keep it simple.
+        });
+    }
+
+    private drawQuote(slide: GoogleAppsScript.Slides.Slide, data: any, area: any, settings: any, layout: LayoutManager) {
+        const text = data.text || (data.points && data.points[0]) || '';
+        const author = data.author || (data.points && data.points[1]) || '';
+
+        // Background Cushion
+        const bg = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, area.left, area.top, area.width, area.height);
+        bg.getFill().setSolidFill(CONFIG.COLORS.faint_gray);
+        bg.getBorder().setTransparent();
+
+        // Big Quote Marks
+        const quoteMark = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, area.left, area.top - layout.pxToPt(20), layout.pxToPt(100), layout.pxToPt(100));
+        setStyledText(quoteMark, '“', { size: 120, color: CONFIG.COLORS.ghost_gray, font: 'Georgia' });
+
+        const contentW = area.width * 0.8;
+        const contentX = area.left + (area.width - contentW) / 2;
+
+        const quoteBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, contentX, area.top, contentW, area.height - layout.pxToPt(60));
+        setStyledText(quoteBox, text, { size: 28, bold: true, color: settings.primaryColor, align: SlidesApp.ParagraphAlignment.CENTER, font: 'Serif' }); // Usage of Serif if available, else standard
+        try { quoteBox.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
+
+        if (author) {
+            const authorBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, contentX, area.top + area.height - layout.pxToPt(60), contentW, layout.pxToPt(40));
+            setStyledText(authorBox, `— ${author}`, { size: 16, align: SlidesApp.ParagraphAlignment.END, color: CONFIG.COLORS.neutral_gray });
+        }
+    }
+
+    private drawProgress(slide: GoogleAppsScript.Slides.Slide, data: any, area: any, settings: any, layout: LayoutManager) {
+        const items = data.items || [];
+        if (!items.length) return;
+
+        const rowH = layout.pxToPt(50);
+        const gap = layout.pxToPt(15);
+        const startY = area.top + (area.height - (items.length * (rowH + gap))) / 2;
+
+        items.forEach((item: any, i: number) => {
+            const y = startY + i * (rowH + gap);
+            const labelW = layout.pxToPt(150);
+            const barAreaW = area.width - labelW - layout.pxToPt(60);
+
+            // Label
+            const labelBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, area.left, y, labelW, rowH);
+            setStyledText(labelBox, item.label || '', { size: 14, bold: true, align: SlidesApp.ParagraphAlignment.END });
+            try { labelBox.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
+
+            // Bar BG
+            const barBg = slide.insertShape(SlidesApp.ShapeType.ROUND_RECTANGLE, area.left + labelW + layout.pxToPt(20), y + rowH / 3, barAreaW, rowH / 3);
+            barBg.getFill().setSolidFill(CONFIG.COLORS.ghost_gray);
+            barBg.getBorder().setTransparent();
+
+            // Bar FG
+            const percent = Math.min(100, Math.max(0, parseInt(item.percent || 0)));
+            if (percent > 0) {
+                const barFg = slide.insertShape(SlidesApp.ShapeType.ROUND_RECTANGLE, area.left + labelW + layout.pxToPt(20), y + rowH / 3, barAreaW * (percent / 100), rowH / 3);
+                barFg.getFill().setSolidFill(settings.primaryColor);
+                barFg.getBorder().setTransparent();
+            }
+
+            // Value
+            const valBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, area.left + labelW + barAreaW + layout.pxToPt(30), y, layout.pxToPt(50), rowH);
+            setStyledText(valBox, `${percent}%`, { size: 14, color: CONFIG.COLORS.neutral_gray });
+            try { valBox.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
+        });
+    }
+
+    private drawImageText(slide: GoogleAppsScript.Slides.Slide, data: any, area: any, settings: any, layout: LayoutManager) {
+        const imageUrl = data.image;
+        const points = data.points || []; // Text content
+
+        // Define areas
+        const gap = layout.pxToPt(20);
+        const halfW = (area.width - gap) / 2;
+
+        const isImageLeft = data.imagePosition !== 'right';
+        const imgX = isImageLeft ? area.left : area.left + halfW + gap;
+        const txtX = isImageLeft ? area.left + halfW + gap : area.left;
+
+        // Draw Image
+        if (imageUrl) {
+            // We use a helper from SlideUtils. But wait, existing code didn't import Utils fully.
+            // I added standard imports at top.
+            try {
+                // using helper to get blob or null
+                const blob = insertImageFromUrlOrFileId(imageUrl);
+                let img;
+                if (blob) {
+                    img = slide.insertImage(blob);
+                } else if (imageUrl.startsWith('http')) {
+                    // Fallback to URL direct insert
+                    img = slide.insertImage(imageUrl);
+                }
+
+                if (img) {
+                    img.setLeft(imgX).setTop(area.top).setWidth(halfW).setHeight(area.height);
+                    // crop or Aspect fit? 
+                    // Simple aspect fit in center of rect usually better, but for now Stretch or Fit.
+                    // Let's do Center Fit logic:
+                    /*
+                    const ratio = img.getWidth() / img.getHeight();
+                    const targetRatio = halfW / area.height;
+                    if (ratio > targetRatio) {
+                        // Image is wider, fit to width
+                        img.setWidth(halfW);
+                        const h = halfW / ratio;
+                        img.setHeight(h);
+                        img.setTop(area.top + (area.height - h)/2);
+                    } else {
+                        // Image is taller, fit to height
+                         img.setHeight(area.height);
+                         const w = area.height * ratio;
+                         img.setWidth(w);
+                         img.setLeft(imgX + (halfW - w)/2);
+                    }
+                    */
+                    // But user might want it to fill the side. Let's just setWidth/Height for now (stretch) or use the logic from SlideUtils.renderImagesInArea
+                    // For now, simple stretch to fill layout area as requested by layout
+                    // img.setWidth(halfW).setHeight(area.height); -- this stretches.
+                    // Let's do fit logic simply:
+                    const scale = Math.min(halfW / img.getWidth(), area.height / img.getHeight());
+                    const w = img.getWidth() * scale;
+                    const h = img.getHeight() * scale;
+                    img.setWidth(w).setHeight(h).setLeft(imgX + (halfW - w) / 2).setTop(area.top + (area.height - h) / 2);
+                } else {
+                    throw new Error("Image insert failed");
+                }
+            } catch (e) {
+                Logger.log('Image insert failed: ' + e);
+                // Placeholder
+                const ph = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, imgX, area.top, halfW, area.height);
+                ph.getFill().setSolidFill(CONFIG.COLORS.ghost_gray);
+                setStyledText(ph, 'Image Placeholder', { align: SlidesApp.ParagraphAlignment.CENTER });
+            }
+        }
+
+        // Draw Text
+        const textBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, txtX, area.top, halfW, area.height);
+        const textContent = points.join('\n');
+        setStyledText(textBox, textContent, { size: CONFIG.FONTS.sizes.body });
+    }
 }
+

@@ -208,15 +208,15 @@
 </head>
 
 <body>
-  <h3>🎨 Generate Slide</h3>
-  <p>Convert your document content into beautifully formatted Google Slides.</p>
+  <h3>🎨 スライド生成</h3>
+  <p>ドキュメントの内容を、見た目の整ったGoogleスライドに自動変換します。</p>
 
   <!-- Retry Action (Only visible on error) -->
   <div class="section" id="retrySection" style="display: none;">
-    <div class="section-title">⚠️ Error Occurred</div>
-    <p style="margin-bottom: 12px;">The generation process encountered an error.</p>
+    <div class="section-title">⚠️ エラーが発生しました</div>
+    <p style="margin-bottom: 12px;">生成プロセス中にエラーが発生しました。</p>
     <button class="btn-primary" onclick="startGeneration()">
-      Retry
+      再試行
     </button>
   </div>
 
@@ -225,12 +225,12 @@
 
   <!-- Result -->
   <div id="resultSection" class="section" style="display: none;">
-    <div class="section-title">✅ Slides Generated!</div>
-    <p>Your presentation has been created successfully.</p>
-    <a id="slideLink" href="#" target="_blank" class="link">Open Presentation →</a>
+    <div class="section-title">✅ スライド生成完了！</div>
+    <p>プレゼンテーションが正常に作成されました。</p>
+    <a id="slideLink" href="#" target="_blank" class="link">プレゼンテーションを開く →</a>
 
     <div style="margin-top: 16px; border-top: 1px solid #eee; padding-top: 12px;">
-      <button class="btn-secondary" onclick="startGeneration()">Create Another</button>
+      <button class="btn-secondary" onclick="startGeneration()">もう一度作成する</button>
     </div>
   </div>
 
@@ -245,7 +245,7 @@
       document.getElementById('retrySection').style.display = 'none';
       document.getElementById('resultSection').style.display = 'none';
 
-      showStatus('loading', '<span class="spinner"></span>Step 1/2: Analyzing document content...');
+      showStatus('loading', '<span class="spinner"></span>ステップ 1/2: ドキュメントの内容を分析中...');
 
       google.script.run
         .withSuccessHandler(onJsonSuccess)
@@ -259,11 +259,11 @@
      */
     function onJsonSuccess(jsonResult) {
       if (!jsonResult) {
-        onError(new Error('No data returned from analysis.'));
+        onError(new Error('分析結果からデータが返されませんでした。'));
         return;
       }
 
-      showStatus('loading', '<span class="spinner"></span>Step 2/2: Generating slides... (This may take a minute)');
+      showStatus('loading', '<span class="spinner"></span>ステップ 2/2: スライドを生成中... (数分かかる場合があります)');
 
       google.script.run
         .withSuccessHandler(onSlideSuccess)
@@ -276,7 +276,7 @@
      */
     function onSlideSuccess(result) {
       if (result.success) {
-        showStatus('success', '✅ All steps completed successfully!');
+        showStatus('success', '✅ 全てのステップが完了しました！');
         const resultSection = document.getElementById('resultSection');
         resultSection.style.display = 'block';
         document.getElementById('slideLink').href = result.slideUrl;
@@ -290,7 +290,7 @@
      */
     function onError(error) {
       document.getElementById('retrySection').style.display = 'block';
-      showStatus('error', '❌ Error: ' + error.message);
+      showStatus('error', '❌ エラー: ' + error.message);
     }
 
     /**

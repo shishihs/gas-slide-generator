@@ -160,19 +160,19 @@
 </head>
 
 <body>
-    <h3>⚙️ Settings</h3>
-    <p>Configure the スライド起草くん add-on settings.</p>
+    <h3>⚙️ 設定</h3>
+    <p>スライド起草くんのアドオン設定を行います。</p>
 
     <div class="info-box">
-        ℹ️ <b>Mode A (Auto):</b> Connects to Vertex AI (Requires GCP Project).<br>
-        ℹ️ <b>Mode B (Manual):</b> Use content from a Gem (No GCP required).
+        ℹ️ <b>モード A (自動):</b> Vertex AI に接続します (GCP プロジェクトが必要です)。<br>
+        ℹ️ <b>モード B (手動):</b> Gem のコンテンツを使用します (GCP 不要)。
     </div>
 
     <div class="section">
-        <div class="section-title">GCP Configuration</div>
+        <div class="section-title">GCP 設定</div>
 
         <div class="form-group">
-            <label for="gcpProjectId">GCP Project ID</label>
+            <label for="gcpProjectId">GCP プロジェクト ID</label>
             <input type="text" id="gcpProjectId" placeholder="your-project-id">
             <div class="help-text">
                 Vertex AI API が有効化されている GCP プロジェクトの ID
@@ -180,61 +180,69 @@
         </div>
 
         <div class="form-group">
-            <label for="vertexAiLocation">Vertex AI Location</label>
+            <label for="vertexAiLocation">Vertex AI リージョン</label>
             <select id="vertexAiLocation">
-                <option value="asia-northeast1">asia-northeast1 (Tokyo)</option>
-                <option value="us-central1">us-central1 (Iowa)</option>
-                <option value="europe-west1">europe-west1 (Belgium)</option>
+                <option value="asia-northeast1">asia-northeast1 (東京)</option>
+                <option value="us-central1">us-central1 (アイオワ)</option>
+                <option value="europe-west1">europe-west1 (ベルギー)</option>
             </select>
         </div>
 
         <div class="form-group">
-            <label for="vertexAiModel">AI Model</label>
-            <input type="text" id="vertexAiModel" list="modelOptions" placeholder="Type or select a model">
+            <label for="vertexAiModel">AI モデル</label>
+            <input type="text" id="vertexAiModel" list="modelOptions" placeholder="モデルを選択または入力">
             <datalist id="modelOptions">
-                <option value="gemini-2.5-flash">Gemini 2.5 Flash (Recommended)</option>
-                <option value="gemini-2.5-pro">Gemini 2.5 Pro (High Capability)</option>
-                <option value="gemini-3-pro">Gemini 3 Pro (Preview)</option>
+                <option value="gemini-2.5-flash">Gemini 2.5 Flash (推奨)</option>
+                <option value="gemini-2.5-pro">Gemini 2.5 Pro (高性能)</option>
+                <option value="gemini-3-pro">Gemini 3 Pro (プレビュー)</option>
             </datalist>
             <div class="help-text">
-                Select a model or type a custom model name (e.g. gemini-3.0-flash)
+                モデルを選択するか、カスタムモデル名を入力してください (例: gemini-3.0-flash)
             </div>
         </div>
 
         <div class="form-group">
             <label style="display:flex; align-items:center;">
                 <input type="checkbox" id="useMockResponse" style="width:auto; margin-right:8px;">
-                Use Mock Vertex AI Response (Testing)
+                Mock レスポンスを使用する (テスト用)
             </label>
         </div>
     </div>
     </div>
 
     <div class="section">
-        <div class="section-title">Manual Generation (No GCP)</div>
+        <div class="section-title">手動生成 (GCP 不要)</div>
 
         <div class="form-group">
-            <label for="gemUrl">Start Chat with Gem</label>
+            <label for="gemUrl">Gem とチャットを開始</label>
             <input type="text" id="gemUrl" placeholder="https://gemini.google.com/app/...">
             <div class="help-text">
-                URL of your custom Gem. The Add-on will suggest this link if GCP is not configured.
+                カスタム Gem の URL。GCP が設定されていない場合、アドオンはこのリンクを提示します。
             </div>
             <div style="margin-top: 8px;">
                 <a href="#" onclick="openGemUrl(); return false;"
-                    style="font-size: 13px; color: var(--primary-color);">Open Gem ↗</a>
+                    style="font-size: 13px; color: var(--primary-color);">Gem を開く ↗</a>
             </div>
         </div>
     </div>
 
     <div class="section">
-        <div class="section-title">Slide Template</div>
+        <div class="section-title">スライドテンプレート</div>
 
         <div class="form-group">
-            <label for="templateSlideId">Template Slide URL or ID</label>
+            <label for="templateSlideId">テンプレートスライドの URL または ID</label>
             <input type="text" id="templateSlideId" placeholder="https://docs.google.com/presentation/d/...">
             <div class="help-text">
                 テンプレートとなる Google Slides の URL または ID を入力してください。<br>
                 (例: <code>https://docs.google.com/presentation/d/xxxxx/edit</code>)
+            </div>
+            <div style="margin-top: 12px;">
+                <button type="button" onclick="createTemplate()" style="background-color: #ea4335; color: white;">
+                    テンプレートを新規作成
+                </button>
+                <div class="help-text" style="margin-top:4px;">
+                    ※ 新しいテンプレートスライドを作成し、上記のIDを自動更新します。
+                </div>
             </div>
         </div>
     </div>
@@ -243,7 +251,7 @@
 
     <div style="display: flex; gap: 10px; margin-top: 10px;">
         <button class="btn-primary" onclick="saveSettings()">
-            Save Settings
+            設定を保存
         </button>
     </div>
 
@@ -251,7 +259,7 @@
         // Load current settings on page load
         window.onload = function () {
             const statusDiv = document.getElementById('status');
-            statusDiv.textContent = 'Loading settings...';
+            statusDiv.textContent = '設定を読み込み中...';
             google.script.run.withSuccessHandler(function (settings) {
                 if (settings) {
                     document.getElementById('gcpProjectId').value = settings.gcpProjectId || '';
@@ -266,7 +274,7 @@
                 }
                 statusDiv.textContent = '';
             }).withFailureHandler(function (err) {
-                statusDiv.textContent = 'Error loading settings: ' + err;
+                statusDiv.textContent = '設定の読み込みエラー: ' + err;
                 statusDiv.style.backgroundColor = '#fce8e6';
                 statusDiv.style.color = '#c5221f';
             }).getCurrentSettings();
@@ -281,7 +289,7 @@
             const statusDiv = document.getElementById('status');
 
             const gemUrl = document.getElementById('gemUrl').value.trim();
-            const statusDiv = document.getElementById('status');
+            const statusDivRef = document.getElementById('status');
 
             // Validation: Relaxed. Allow saving even if GCP ID is empty (for Manual Mode)
             if (!gcpProjectId && !gemUrl) {
@@ -303,10 +311,10 @@
             // Save using the GAS backend
             google.script.run
                 .withSuccessHandler(function () {
-                    showStatus('success', '✅ Settings saved successfully!');
+                    showStatus('success', '✅ 設定が正常に保存されました！');
                 })
                 .withFailureHandler(function (error) {
-                    showStatus('error', '❌ Error: ' + error.message);
+                    showStatus('error', '❌ エラー: ' + error.message);
                 })
                 .saveScriptProperties(props);
         }
@@ -322,7 +330,7 @@
             if (url) {
                 window.open(url, '_blank');
             } else {
-                showStatus('error', 'Please enter a Gem URL first.');
+                showStatus('error', '先に Gem の URL を入力してください。');
             }
         }
     </script>

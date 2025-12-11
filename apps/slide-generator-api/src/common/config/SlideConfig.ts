@@ -639,5 +639,5 @@ export const CONFIG = {
         header: '',
         closing: ''
     },
-    FOOTER_TEXT: `© ${new Date().getFullYear()} Your Company`
+    FOOTER_TEXT: ``
 };

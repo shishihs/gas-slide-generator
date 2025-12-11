@@ -93,12 +93,11 @@ function setupScriptProperties() {
 function onOpen() {
     DocumentApp.getUi()
         .createMenu('スライド起草くん')
-        .addItem('Generate Slide', 'showGenerateSlideSidebar')
+        .addItem('スライド生成', 'showGenerateSlideSidebar')
+        .addItem('設定', 'showSettingsSidebar')
         .addSeparator()
-        .addItem('Create Template', 'createTemplateSlide')
-        .addItem('Settings', 'showSettingsSidebar')
-        .addSeparator()
-        .addItem('Debug Info', 'debugTest')
+        .addItem('ヘルプ', 'showHelpSidebar')
+        .addItem('デバッグ情報', 'debugTest')
         .addToUi();
 }
 
@@ -338,7 +337,7 @@ function createTemplatePresentation() {
  */
 function showGenerateSlideSidebar() {
     const html = HtmlService.createHtmlOutputFromFile('GenerateSlideSidebar')
-        .setTitle('Generate Slide');
+        .setTitle('スライド生成');
     DocumentApp.getUi().showSidebar(html);
 }
 
@@ -347,7 +346,16 @@ function showGenerateSlideSidebar() {
  */
 function showSettingsSidebar() {
     const html = HtmlService.createHtmlOutputFromFile('SettingsSidebar')
-        .setTitle('Settings');
+        .setTitle('設定');
+    DocumentApp.getUi().showSidebar(html);
+}
+
+/**
+ * Show the Help sidebar
+ */
+function showHelpSidebar() {
+    const html = HtmlService.createHtmlOutputFromFile('HelpSidebar')
+        .setTitle('ヘルプ & ガイド');
     DocumentApp.getUi().showSidebar(html);
 }
 
@@ -375,7 +383,7 @@ function convertDocumentToJson() {
         const documentText = body.getText();
 
         if (!documentText.trim()) {
-            ui.alert('Error', 'Document is empty. Please add content before converting.', ui.ButtonSet.OK);
+            ui.alert('エラー', 'ドキュメントが空です。コンテンツを追加してから変換してください。', ui.ButtonSet.OK);
             return null;
         }
 
@@ -400,17 +408,35 @@ function convertDocumentToJson() {
 
         // 3. Check for GCP Project ID BEFORE calling Vertex AI
         // If missing, suggest Gem usage
+        // 3. Check for GCP Project ID BEFORE calling Vertex AI
+        // If missing, suggest Gem usage OR Settings configuration
+        // 3. Check for GCP Project ID
+        // If missing, assume Manual Mode and show instructions
         const projectId = getGcpProjectId();
         if (!projectId || projectId === 'YOUR_GCP_PROJECT_ID') {
+            const ui = DocumentApp.getUi();
             const gemUrl = getGemUrl();
-            let msg = 'GCP Project ID not configured.\nTo generate slides without GCP:\n\n1. Use the "Gem" to generate the JSON structure.\n2. Paste the JSON into this document.\n3. Run "Convert to JSON" again.';
+
+            let msg = 'このドキュメント内に有効なスライド用 JSON が見つかりませんでした。\n\n' +
+                '【手順 (Manual Mode)】\n' +
+                '1. Gem (AI) を使って原稿から JSON を生成します。\n' +
+                '2. 生成された JSON をこのドキュメントに貼り付けます。\n' +
+                '3. 再度「スライド生成」を実行してください。\n';
 
             if (gemUrl) {
-                msg += `\n\nGem URL:\n${gemUrl}`;
+                msg += `\nGem URL:\n${gemUrl}\n`;
+            } else {
+                msg += `\n(設定画面で Gem の URL を保存しておくと、ここにリンクが表示されます)\n`;
             }
 
-            ui.alert('Setup Required (or Manual Mode)', msg, ui.ButtonSet.OK);
-            throw new Error('GCP Project ID missing. Please configure Settings or paste valid JSON.');
+            msg += '\n------------------\n' +
+                '※ Vertex AI による自動生成を行いたい場合は、\n' +
+                '   設定画面で GCP Project ID を設定してください。';
+
+            ui.alert('スライド生成の準備', msg, ui.ButtonSet.OK);
+
+            // Graceful exit
+            throw new Error('設定された Gem を使用して JSON を作成し、貼り付けてください。');
         }
 
         // 4. Call Vertex AI directly (Standard Mode)
@@ -427,7 +453,7 @@ function convertDocumentToJson() {
         Logger.log('Error: ' + error.toString());
         // Only show alert if it wasn't already handled (e.g. by our own throw)
         if (error.message.indexOf('GCP Project ID missing') === -1) {
-            ui.alert('Error', 'Failed to convert document: ' + error.message, ui.ButtonSet.OK);
+            ui.alert('エラー', 'ドキュメントの変換に失敗しました: ' + error.message, ui.ButtonSet.OK);
         }
         throw error;
     }
@@ -639,39 +665,141 @@ function callVertexAI(documentContent) {
     if (useMock) {
         Logger.log('Using Mock Vertex AI Response - Comprehensive Test Data');
         // Comprehensive test data covering all slide types and chart types
+        // Comprehensive test data: 'Project Phoenix' DX Strategy Scenario
         return [
-            { "type": "title", "title": "包括的動作確認テスト用スライドデータ", "date": "2025.12.09", "notes": "これはタイトルスライドのスピーカーノートです。プレーンテキストのみ使用可能です。" },
-            { "type": "agenda", "title": "本日のアジェンダ", "subhead": "全機能の動作確認を行います", "items": ["基本スライドタイプの確認", "比較系パターンのテスト", "プロセス・タイムライン系パターン", "データビジュアライゼーション", "グラフ描画機能の検証"], "notes": "本日は5つの章に分けて、すべてのスライドパターンとグラフ機能をテストします。" },
-            { "type": "section", "title": "第1章：基本スライドタイプ", "sectionNo": 1, "notes": "まずは基本的なスライドタイプから確認していきましょう。" },
-            { "type": "content", "title": "1カラムコンテンツスライド", "subhead": "基本的な箇条書きレイアウト", "points": ["第1ポイント：基本的なテキスト表示", "第2ポイント：**太字テキスト**のテスト", "第3ポイント：[[重要語]]の強調表示テスト", "第4ポイント：**太字**と[[強調語]]の組み合わせ"], "notes": "1カラムレイアウトの基本的な使い方を説明します。" },
-            { "type": "content", "title": "2カラムコンテンツスライド", "subhead": "左右に分割されたレイアウト", "twoColumn": true, "columns": [["左カラム項目1", "左カラム項目2", "左カラム項目3"], ["右カラム項目1", "右カラム項目2", "右カラム項目3"]], "notes": "2カラムレイアウトでは、情報を左右に分けて表示できます。" },
-            { "type": "cards", "title": "シンプルカード（文字列配列）", "subhead": "最もシンプルなカード表示", "columns": 3, "items": ["カードA", "カードB", "カードC", "カードD", "カードE", "カードF"], "notes": "6枚のシンプルカードを3列×2行で表示します。" },
-            { "type": "headerCards", "title": "ヘッダー付きカード（3列）", "subhead": "色付きヘッダーのカード表示", "columns": 3, "items": [{ "title": "ヘッダー1", "desc": "カード1の説明文。ヘッダーは白文字で表示されます" }, { "title": "ヘッダー2", "desc": "カード2の説明文" }, { "title": "ヘッダー3", "desc": "カード3の説明文" }], "notes": "ヘッダーカードは色付きの背景に白文字で表示されます。" },
-            { "type": "bulletCards", "title": "箇条書きカード（最大3枚）", "subhead": "詳細な説明を含むカード", "items": [{ "title": "ポイント1", "desc": "第1ポイントの詳細な説明文。[[重要な部分]]を強調できます" }, { "title": "ポイント2", "desc": "第2ポイントの詳細な説明文。**太字**も使用可能" }, { "title": "ポイント3", "desc": "第3ポイントの詳細な説明文" }], "notes": "箇条書きカードは最大3枚まで配置可能です。" },
-            { "type": "table", "title": "テーブルスライド", "subhead": "表形式でのデータ表示", "headers": ["項目", "値", "備考"], "rows": [["項目A", "100", "正常"], ["項目B", "200", "注意"], ["項目C", "300", "警告"]], "notes": "テーブル形式でデータを整理して表示します。" },
-            { "type": "section", "title": "第2章：比較系パターン", "sectionNo": 2 },
-            { "type": "compare", "title": "左右比較スライド", "subhead": "2つの選択肢を比較", "leftTitle": "プランA", "rightTitle": "プランB", "leftItems": ["コスト効率が高い", "導入が容易", "サポート体制が充実"], "rightItems": ["機能が豊富", "拡張性が高い", "カスタマイズ可能"], "notes": "プランAとプランBを直接比較しています。" },
-            { "type": "statsCompare", "title": "数値比較（テーブル形式）", "subhead": "Before/Afterの数値比較", "leftTitle": "導入前", "rightTitle": "導入後", "stats": [{ "label": "処理時間", "leftValue": "4時間", "rightValue": "30分", "trend": "down" }, { "label": "エラー率", "leftValue": "5.2%", "rightValue": "0.3%", "trend": "down" }, { "label": "満足度", "leftValue": "62%", "rightValue": "94%", "trend": "up" }], "notes": "導入前後の主要指標を比較しています。" },
-            { "type": "barCompare", "title": "棒グラフ比較", "subhead": "視覚的な数値比較", "stats": [{ "label": "売上", "leftValue": "120", "rightValue": "150", "trend": "up" }, { "label": "利益", "leftValue": "30", "rightValue": "45", "trend": "up" }], "showTrends": true, "notes": "横棒グラフで視覚的に比較を表示します。" },
-            { "type": "section", "title": "第3章：プロセス・タイムライン系", "sectionNo": 3 },
-            { "type": "process", "title": "プロセススライド（視覚的形式）", "subhead": "最大4ステップの工程表示", "steps": ["要件定義", "設計", "実装", "テスト"], "notes": "ソフトウェア開発の基本的なプロセスを4ステップで示しています。" },
-            { "type": "processList", "title": "プロセスリスト（リスト形式）", "subhead": "詳細な手順リスト", "steps": ["アカウントを作成する", "必要情報を入力する", "本人確認書類をアップロードする", "審査結果を待つ", "承認後、サービスを利用開始する"], "notes": "5つのステップでサービス利用開始までの流れを説明します。" },
-            { "type": "timeline", "title": "タイムラインスライド", "subhead": "プロジェクトの進捗状況", "milestones": [{ "label": "企画立案完了", "date": "2024年1月", "state": "done" }, { "label": "設計フェーズ終了", "date": "2024年3月", "state": "done" }, { "label": "開発フェーズ", "date": "2024年6月", "state": "next" }, { "label": "リリース", "date": "2024年12月", "state": "todo" }], "notes": "現在、開発フェーズに入っています。" },
-            { "type": "flowChart", "title": "フローチャート（2行）", "subhead": "複雑なフローを2行で表現", "flows": [{ "steps": ["企画", "設計", "開発", "テスト"] }, { "steps": ["デプロイ", "監視", "改善"] }] },
-            { "type": "stepUp", "title": "ステップアップ（成長・進化）", "subhead": "段階的な成長を視覚化", "items": [{ "title": "初級", "desc": "基礎知識の習得" }, { "title": "中級", "desc": "応用力の向上" }, { "title": "上級", "desc": "専門性の確立" }, { "title": "マスター", "desc": "業界トップレベル" }], "notes": "4段階のスキルレベルを階段状に表示します。" },
-            { "type": "section", "title": "第4章：図解系パターン", "sectionNo": 4 },
-            { "type": "diagram", "title": "レーン図（スイムレーン）", "subhead": "役割別の作業分担を表示", "lanes": [{ "title": "営業部", "items": ["顧客訪問", "提案書作成", "契約締結"] }, { "title": "開発部", "items": ["要件定義", "システム開発", "テスト実施"] }], "notes": "2つの部署それぞれの担当業務を示しています。" },
-            { "type": "cycle", "title": "サイクル図（4項目固定）", "subhead": "PDCAサイクルの例", "items": [{ "label": "Plan", "subLabel": "計画" }, { "label": "Do", "subLabel": "実行" }, { "label": "Check", "subLabel": "評価" }, { "label": "Act", "subLabel": "改善" }], "centerText": "PDCA", "notes": "PDCAサイクルを循環図で表現しています。" },
-            { "type": "triangle", "title": "トライアングル図（3項目固定）", "subhead": "3つの要素の関係性を視覚化", "items": [{ "title": "品質", "desc": "高品質な成果物" }, { "title": "コスト", "desc": "予算内での実現" }, { "title": "納期", "desc": "期限内の完了" }], "notes": "プロジェクト管理の3つの制約を三角形で表現しています。" },
-            { "type": "pyramid", "title": "ピラミッド図（階層構造）", "subhead": "マズローの欲求階層説", "levels": [{ "title": "自己実現", "description": "自己の可能性を最大限に発揮" }, { "title": "承認欲求", "description": "他者からの評価や尊敬" }, { "title": "社会的欲求", "description": "所属や愛情への欲求" }], "notes": "人間の欲求を3段階のピラミッドで表現しています。" },
-            { "type": "section", "title": "第5章：データ・指標系パターン", "sectionNo": 5 },
-            { "type": "kpi", "title": "KPIダッシュボード", "subhead": "主要業績評価指標", "columns": 4, "items": [{ "label": "売上高", "value": "12.5億円", "change": "+15%", "status": "good" }, { "label": "利益率", "value": "8.2%", "change": "-2%", "status": "bad" }, { "label": "顧客数", "value": "1,250", "change": "+120", "status": "good" }, { "label": "解約率", "value": "2.1%", "change": "±0%", "status": "neutral" }], "notes": "4つの主要KPIを表示しています。" },
-            { "type": "progress", "title": "進捗状況", "subhead": "プロジェクト各フェーズの進捗", "items": [{ "label": "要件定義", "percent": 100 }, { "label": "設計", "percent": 100 }, { "label": "開発", "percent": 75 }, { "label": "テスト", "percent": 30 }], "notes": "開発フェーズは75%完了。" },
-            { "type": "quote", "title": "引用スライド", "subhead": "著名人の言葉", "text": "Stay hungry, stay foolish.", "author": "Steve Jobs", "notes": "スティーブ・ジョブズの有名なスピーチからの引用です。" },
-            { "type": "faq", "title": "よくある質問", "subhead": "お客様からのご質問", "items": [{ "q": "料金はいくらですか？", "a": "月額5,000円からご利用いただけます" }, { "q": "無料トライアルはありますか？", "a": "14日間の無料トライアルをご用意しています" }, { "q": "解約は簡単にできますか？", "a": "いつでもオンラインで即時解約可能です" }], "notes": "よくある3つの質問とその回答を掲載しています。" },
-            { "type": "imageText", "title": "チャート表示テスト（折れ線）", "subhead": "グラフを画像として表示", "image": { "chartType": "line", "data": { "title": "月間売上推移", "subtitle": "（2024年度）", "source": "社内データ", "yAxisUnitLabel": "（万円）", "items": [{ "label": "4月", "value": 120 }, { "label": "5月", "value": 135 }, { "label": "6月", "value": 150 }, { "label": "7月", "value": 145 }, { "label": "8月", "value": 160 }], "color": { "start": "#e68a9c", "end": "#b469b8", "line": "#b469b8", "label": "#8c4fc8" }, "layout": { "width": 600, "height": 465, "marginTop": 100, "marginBottom": 85, "marginLeft": 75, "marginRight": 25 }, "yAxis": { "max": 200, "min": 0, "tickCount": 4 }, "lineOptions": { "markerRadius": 5, "dataLabelOffsetY": 15, "horizontalPadding": 30 } } }, "points": ["単一系列の折れ線グラフ", "グラデーション付きエリア表示", "データラベル表示対応"], "notes": "月間売上の推移を折れ線グラフで表示しています。" },
-            { "type": "imageText", "title": "ドーナツグラフ", "image": { "chartType": "donut", "data": { "title": "市場シェア", "subtitle": "2024年度", "source": "業界レポート", "centerLabel": "シェア", "colors": [{ "id": "A", "start": "#e68a9c", "end": "#d96d8f" }, { "id": "B", "start": "#b469b8", "end": "#a656ad" }, { "id": "C", "start": "#9f63d0", "end": "#8c4fc8" }, { "id": "D", "start": "#7c6ce8", "end": "#6b5ce0" }], "items": [{ "label": "A社", "value": 35, "id": "A" }, { "label": "B社", "value": 25, "id": "B" }, { "label": "C社", "value": 20, "id": "C" }, { "label": "その他", "value": 20, "id": "D" }] } }, "points": ["円グラフの変形版", "中央に合計値を表示", "最大5項目を推奨"] },
-            { "type": "closing", "notes": "ご清聴ありがとうございました。ご質問があればお気軽にどうぞ。" }
+            { "type": "title", "title": "全社DX推進プロジェクト 'Project Phoenix'\n中期経営計画 2025-2027", "subtitle": "持続可能な成長に向けたデジタル変革の青写真", "date": "2025年12月11日", "notes": "本日は全社DXプロジェクトの概要、特にこれからの3カ年のロードマップについてご説明します。" },
+
+            { "type": "agenda", "title": "本日のアジェンダ", "subhead": "戦略的変革の5つの柱", "items": ["市場環境とDXの必要性", "新システム導入ロードマップ", "組織改革と人材育成プラン", "投資対効果とKPI目標", "リスク管理と今後のステップ"], "notes": "全体の構成は5つのパートに分かれています。質疑応答は最後にまとめて行います。" },
+
+            { "type": "section", "title": "Part 1: 市場環境分析", "sectionNo": 1, "notes": "まずは外部環境の変化と、なぜ今DXが必要なのかについて共有します。" },
+
+            {
+                "type": "content", "title": "市場急変：デジタルの波", "subhead": "3つの主要な外部要因", "points": [
+                    "消費者のデジタルシフト：\nオンラインでの購買行動が全体の60%を超え、実店舗のみのビジネスモデルが限界を迎えている。",
+                    "競合他社の動向：\nAIを活用したダイナミックプライシングやパーソナライズ広告により、競合A社は昨対比120%の成長を記録。",
+                    "労働力不足の深刻化：\n2030年問題を見据え、一人当たりの生産性を現在の1.5倍に引き上げる必要がある。"
+                ],
+                "notes": "特に2点目の競合動向は脅威です。データを活用した意思決定基盤の構築が急務です。"
+            },
+
+            {
+                "type": "cards", "title": "競合ベンチマーク分析", "subhead": "主要プレイヤーのDX取り組み状況", "columns": 3, "items": [
+                    "A社: AI活用\n顧客データのAI解析によりLTVが20%向上。サブスクリプションモデルへの転換に成功。",
+                    "B社: SCM最適化\nサプライチェーン全体の可視化により在庫ロスを半減。リードタイムも3日短縮。",
+                    "C社: UI/UX刷新\nアプリのUXを抜本的に改善し、MAUが急増。若年層の取り込みに成功。",
+                    "自社: 現状維持\nレガシーシステムへの依存度が高く、データのサイロ化が課題。意思決定に時間を要している。",
+                    "市場平均\n多くの企業がクラウド移行を完了し、データ活用のフェーズに入っている。",
+                    "新規参入D社\nデジタルネイティブな組織構造で、圧倒的なスピード感でシェアを拡大中。"
+                ],
+                "notes": "自社は技術的負債の解消が遅れており、これが競争力低下の直接的な原因となっています。"
+            },
+
+            {
+                "type": "headerCards", "title": "DX推進の3つの基本方針", "subhead": "変革を支える指針", "columns": 3, "items": [
+                    { "title": "顧客中心", "desc": "すべてのデジタル施策は、顧客体験(CX)の向上を起点とする。\n技術ありきではなく、課題解決型の導入を徹底する。" },
+                    { "title": "データドリブン", "desc": "勘と経験への依存から脱却し、事実とデータに基づいた迅速な意思決定プロセスを確立する。" },
+                    { "title": "アジャイル", "desc": "完璧を求めず、まずは小さく始めて改善を繰り返す。\n変化に柔軟に対応できる組織文化を醸成する。" }
+                ], "notes": "これら3つの方針が、すべての判断基準となります。"
+            },
+
+            { "type": "section", "title": "Part 2: 戦略とロードマップ", "sectionNo": 2 },
+
+            {
+                "type": "timeline", "title": "3カ年変革ロードマップ", "subhead": "フェーズごとの重点施策", "milestones": [
+                    { "label": "基盤構築フェーズ\nクラウド移行とデータ統合", "date": "2025年", "state": "current" },
+                    { "label": "活用展開フェーズ\nBIツール導入とAI実証実験", "date": "2026年", "state": "future" },
+                    { "label": "価値創出フェーズ\n新規デジタルサービスの立ち上げ", "date": "2027年", "state": "future" }
+                ],
+                "notes": "最初の1年は「守りのDX」、つまり基盤整備に集中します。2年目から「攻めのDX」へと転じます。"
+            },
+
+            {
+                "type": "process", "title": "システム刷新プロセス", "subhead": "確実な移行を実現する4ステップ", "steps": [
+                    "現状分析 (AS-IS)\n業務フローの棚卸しと課題抽出\nレガシー資産の調査",
+                    "要件定義 (TO-BE)\n新業務フローの策定\nRFP作成とベンダー選定",
+                    "開発・移行\nアジャイル開発による段階的リリース\n旧システムからのデータ移行",
+                    "定着化・改善\nユーザートレーニング\n利用状況モニタリングと機能改善"
+                ],
+                "notes": "特に「要件定義」のフェーズで現場の声を十分に反映させることが、後の定着化の鍵となります。"
+            },
+
+            { "type": "section", "title": "Part 3: 定量目標と効果", "sectionNo": 3 },
+
+            {
+                "type": "statsCompare", "title": "主要KPI改善目標", "subhead": "システム導入による業務効率化効果", "leftTitle": "現状 (2025)", "rightTitle": "導入後 (2027)", "stats": [
+                    { "label": "月次決算リードタイム", "leftValue": "15営業日", "rightValue": "5営業日", "trend": "down" },
+                    { "label": "在庫回転率", "leftValue": "4.5回/年", "rightValue": "8.0回/年", "trend": "up" },
+                    { "label": "顧客問い合わせ対応時間", "leftValue": "平均24時間", "rightValue": "平均2時間", "trend": "down" },
+                    { "label": "従業員エンゲージメント", "leftValue": "58点", "rightValue": "75点", "trend": "up" }
+                ],
+                "notes": "定型業務の自動化により、決算業務の大幅な短縮が見込まれます。また、CS向上にも直結します。"
+            },
+
+            {
+                "type": "barCompare", "title": "売上高・営業利益シミュレーション", "subhead": "DX投資による収益構造の変革", "leftTitle": "従来予測", "rightTitle": "DX推進後", "stats": [
+                    { "label": "売上高 (2027)", "leftValue": "500億円", "rightValue": "650億円", "trend": "up" },
+                    { "label": "営業利益 (2027)", "leftValue": "40億円", "rightValue": "85億円", "trend": "up" },
+                    { "label": "販管費比率", "leftValue": "25%", "rightValue": "18%", "trend": "down" }
+                ]
+            },
+
+            { "type": "section", "title": "Part 4: 組織と業務フロー", "sectionNo": 4 },
+
+            {
+                "type": "diagram", "title": "新・業務プロセスフロー", "subhead": "部門間の連携強化とデータ一元化", "lanes": [
+                    { "title": "営業部門", "items": ["リード獲得(MA)", "商談管理(SFA)", "受注登録(CRM)"] },
+                    { "title": "製造・物流", "items": ["需要予測連動", "生産計画自動立案", "在庫最適化"] },
+                    { "title": "経営管理", "items": ["リアルタイム売上把握", "予実管理ダッシュボード", "投資判断"] }
+                ],
+                "notes": "データが各部門をシームレスに流れることで、製造部門は営業の受注状況をリアルタイムに把握し、生産計画に反映できます。"
+            },
+
+            {
+                "type": "pyramid", "title": "DX人材育成ピラミッド", "subhead": "全社員のデジタルリテラシー向上", "levels": [
+                    { "title": "ビジネスアーキテクト", "description": "DX戦略の立案と推進をリードする変革リーダー層 (TOP 5%)" },
+                    { "title": "データサイエンティスト/エンジニア", "description": "高度な分析とシステム構築を担う専門技術者層 (15%)" },
+                    { "title": "デジタル活用人材", "description": "ツールを活用し業務改善を推進する現場リーダー層 (30%)" },
+                    { "title": "デジタル基礎人材", "description": "ITの基礎知識を持ち、安全にシステムを利用できる全社員 (50%)" }
+                ]
+            },
+
+            {
+                "type": "triangle", "title": "PJ成功の3要素 (QCD)", "subhead": "バランスの取れたプロジェクト管理", "items": [
+                    { "title": "Quality", "desc": "ユーザー体験重視\nバグゼロ基準" },
+                    { "title": "Cost", "desc": "クラウド活用による\nTCO削減" },
+                    { "title": "Delivery", "desc": "アジャイルによる\n早期リリース" }
+                ]
+            },
+
+            {
+                "type": "cycle", "title": "継続的な改善プロセス", "subhead": "アジャイルな開発サイクル", "items": [
+                    { "label": "Plan", "subLabel": "バックログ作成" },
+                    { "label": "Do", "subLabel": "スプリント開発" },
+                    { "label": "Check", "subLabel": "レビュー会" },
+                    { "label": "Act", "subLabel": "改善反映" }
+                ], "centerText": "Scrum", "notes": "2週間単位のスプリントを回し、常に変化するビジネス要件に対応します。"
+            },
+
+            { "type": "section", "title": "Part 5: まとめ", "sectionNo": 5 },
+
+            {
+                "type": "table", "title": "想定リスクと対策", "subhead": "プロジェクト阻害要因への対応策", "headers": ["リスク項目", "影響度", "発生確率", "対応策"], "rows": [
+                    ["現場の抵抗", "高", "中", "早期からのキーマン巻き込みと十分な説明会の実施"],
+                    ["要件の肥大化", "中", "高", "MVP（実用最小限の製品）アプローチの徹底とスコープ管理"],
+                    ["ベンダーロックイン", "中", "低", "オープンソース技術の活用と標準仕様の採用"],
+                    ["セキュリティ事故", "甚大", "低", "ゼロトラストアーキテクチャの採用と定期的な監査"]
+                ]
+            },
+
+            {
+                "type": "content", "title": "Project Phoenix が目指す未来", "subhead": "テクノロジーの力で、人と企業の可能性を最大化する", "points": [
+                    "全ての従業員がクリエイティブな業務に注力できる環境",
+                    "顧客一人ひとりに寄り添ったパーソナライズされた体験の提供",
+                    "変化に即応し、進化し続ける強靭な企業体質"
+                ]
+            },
+
+            { "type": "closing", "notes": "ご清聴ありがとうございました。DXは終わりなき旅ですが、最初の一歩を共に踏み出しましょう。" }
         ];
     }
     // =============================
@@ -756,21 +884,21 @@ function callVertexAI(documentContent) {
  */
 function buildSlideGenerationPrompt(documentContent) {
     return `
-You are a professional presentation designer. Your task is to convert the following document content into a structured JSON format for Google Slides.
+あなたはプロのプレゼンテーションデザイナーです。以下のドキュメント内容を、Google Slides用の構造化JSON形式に変換してください。
 
-Target Audience: Business professionals
-Tone: Professional, Clear, Concise
+ターゲット層: ビジネスプロフェッショナル
+トーン: プロフェッショナル、明確、簡潔
 
-Document Content:
+ドキュメント内容:
 ---
 ${documentContent}
 ---
 
-Create a presentation structure with 5-12 slides depending on the content length.
-The output MUST be a valid JSON object following this strict schema:
+コンテンツの長さに応じて、5〜12枚のスライド構成を作成してください。
+出力は以下の厳格なスキーマに従った有効なJSONオブジェクトでなければなりません:
 
 {
-  "theme": "modern", // Suggested theme keyword (e.g., modern, corporate, creative)
+  "theme": "modern", // 推奨テーマ (例: modern, corporate, creative)
   "metada": {
     "estimatedDuration": "10 min",
     "audience": "General"
@@ -778,42 +906,43 @@ The output MUST be a valid JSON object following this strict schema:
   "slides": [
     {
       "type": "TITLE",
-      "title": "Main Presentation Title",
-      "subtitle": "Subtitle or Presenter Name",
-      "notes": "Speaker notes for the title slide"
+      "title": "プレゼンテーションのタイトル",
+      "subtitle": "サブタイトルまたは発表者名",
+      "notes": "タイトルスライドのスピーカーノート"
     },
     {
       "type": "AGENDA",
-      "title": "Agenda",
-      "items": ["Topic 1", "Topic 2", "Topic 3"]
+      "title": "アジェンダ",
+      "items": ["トピック1", "トピック2", "トピック3"]
     },
     {
       "type": "CONTENT",
-      "title": "Slide Title",
+      "title": "スライドのタイトル",
       "body": {
-        "text": "Main paragraph text if any",
-        "bullets": ["Key point 1", "Key point 2", "Key point 3"]
+        "text": "本文テキスト（ある場合）",
+        "bullets": ["キーポイント1", "キーポイント2", "キーポイント3"]
       },
-      "notes": "Speaker notes explaining the content"
+      "notes": "内容を説明するスピーカーノート"
     },
     {
       "type": "SECTION",
-      "title": "Section Title",
-      "subtitle": "Brief description of the section"
+      "title": "セクションタイトル",
+      "subtitle": "セクションの簡単な説明"
     },
     {
       "type": "CONCLUSION",
-      "title": "Summary / Key Takeaways",
-      "points": ["Takeaway 1", "Takeaway 2"]
+      "title": "まとめ / 重要なポイント",
+      "points": ["ポイント1", "ポイント2"]
     }
   ]
 }
 
-Rules:
-1. **Summarize**: Do not just copy text. Summarize long paragraphs into concise bullet points.
-2. **Structure**: logical flow (Title -> Agenda -> Content -> Conclusion).
-3. **Content**: Each slide should have 3-5 bullet points max for readability.
-4. **JSON Only**: Output pure JSON. No markdown formatting (like \`\`\`json), no introductory text.
+ルール:
+1. **要約**: テキストをそのままコピーしないでください。長い段落は簡潔な箇条書きに要約してください。
+2. **構造**: 論理的な流れ (タイトル -> アジェンダ -> コンテンツ -> まとめ) にしてください。
+3. **コンテンツ**: 各スライドの箇条書きは読みやすさのため最大3〜5項目にしてください。
+4. **JSONのみ**: 純粋なJSONを出力してください。マークダウン形式 (\`\`\`json) や冒頭のテキストは含めないでください。
+5. **言語**: 出力は必ず日本語で行ってください。
 `;
 }
 

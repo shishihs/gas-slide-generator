@@ -34,7 +34,7 @@ function generateSlides(data: any): SlideGenerationResponse {
         Logger.log('Library Call: generateSlides with data: ' + JSON.stringify(data));
 
         const request: CreatePresentationRequest = {
-            title: data.title || 'Untitled Presentation',
+            title: data.title || '無題のプレゼンテーション',
             templateId: data.templateId, // Optional ID for template
             destinationId: data.destinationId, // Optional ID for existing destination
             slides: data.slides.map((s: any) => ({

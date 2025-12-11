@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <base target="_top">
+    <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
+    <style>
+        body {
+            padding: 12px;
+            font-family: 'Google Sans', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        h1,
+        h2,
+        h3 {
+            margin-top: 24px;
+            margin-bottom: 12px;
+            font-weight: 500;
+            color: #202124;
+        }
+
+        h1 {
+            font-size: 24px;
+            border-bottom: 2px solid #aaa;
+            padding-bottom: 8px;
+        }
+
+        h2 {
+            font-size: 18px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 6px;
+        }
+
+        h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        p {
+            margin-bottom: 16px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        code {
+            background-color: #f1f3f4;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 0.9em;
+            color: #d93025;
+        }
+
+        .icon {
+            margin-right: 8px;
+        }
+
+        blockquote {
+            background-color: #e8f0fe;
+            border-left: 4px solid #4285f4;
+            margin: 0 0 16px 0;
+            padding: 12px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        .header-logo {
+            font-size: 32px;
+            margin-bottom: 10px;
+            display: block;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <span class="header-logo">🤖📄➡️🎨</span>
+    <h1>ユーザーガイド</h1>
+    <p>このアドオンは、Google ドキュメントの原稿から、AI を活用してその場で Google Slides を自動生成するツールです。</p>
+
+    <h2>✨ 主な機能</h2>
+    <ul>
+        <li><strong>テンプレート自動生成</strong>: 最初に一度だけ、デザインのベースとなるスライドを作成します。</li>
+        <li><strong>AI 解析 (Convert to JSON)</strong>: ドキュメントの文章を読み取り、スライド構成案を自動で作ります。</li>
+        <li><strong>スライド生成 (Generate Slide)</strong>: 構成案を元に、実際の Google Slides を生成します。</li>
+    </ul>
+
+    <h2>🚀 はじめ方 (Quick Start)</h2>
+
+    <h3>Step 1: テンプレートの準備</h3>
+    <ol>
+        <li>メニューから <code>テンプレート作成</code> をクリック。</li>
+        <li>作成されたスライドのテーマを変更してデザインを決定します。</li>
+        <li>URL をコピーして、設定画面 (<code>設定</code>) の「テンプレートスライドの URL」に貼り付けて保存します。</li>
+    </ol>
+
+    <h3>Step 2: JSON の準備 (Manual Mode)</h3>
+    <p>推奨されるデフォルトの使い方です。専用の Gem (チャットボット) を使用します。</p>
+    <ol>
+        <li><a href="https://gemini.google.com/app/" target="_blank">Google Gemini</a> (または指定の Gem URL) を開きます。</li>
+        <li>原稿を渡し、「スライドジェネレーター用のJSONを作って」と依頼します。</li>
+        <li>生成された JSON コードをコピーします。</li>
+    </ol>
+
+    <h3>Step 3: ドキュメントに貼り付け</h3>
+    <ol>
+        <li>この Google ドキュメントに、コピーした JSON をそのまま貼り付けます。<br><small>※ 元の原稿は残していても構いませんが、JSON
+                全体が正しく貼られていることを確認してください。</small></li>
+    </ol>
+
+    <h3>Step 4: スライド生成</h3>
+    <ol>
+        <li>メニューから <code>スライド生成</code> をクリック。</li>
+        <li>ドキュメント内の JSON が読み込まれ、スライドが自動生成されます。</li>
+    </ol>
+
+    <hr>
+
+    <h3>💡 自動生成モード (Advanced)</h3>
+    <p>GCP プロジェクトをお持ちの方は、Vertex AI と連携してドキュメントから直接スライド生成が可能です。</p>
+    <ol>
+        <li>メニューから <code>設定</code> を開き、<code>GCP Project ID</code> などを入力します。</li>
+        <li>ドキュメントに原稿 (文章) を入力します。</li>
+        <li><code>スライド生成</code> メニューを実行すると、AI が自動で JSON 変換〜スライド生成を行います。</li>
+    </ol>
+
+    <h2>⚙️ 設定について (Settings)</h2>
+    <p><code>Slide Generator &gt; Settings</code> から各種設定を行えます。</p>
+    <ul>
+        <li><strong>GCP Project ID</strong>: AI 機能を使うための Google Cloud プロジェクト ID。</li>
+        <li><strong>Region</strong>: AI のデータセンター場所 (例: <code>asia-northeast1</code>)。</li>
+    </ul>
+
+    <blockquote>
+        <p>💡 <strong>ヒント</strong>: 「手動モード」で利用する場合は、設定は不要です。Gem 等のチャットボットで作った JSON を直接ドキュメントに貼り付けて利用します。</p>
+    </blockquote>
+
+    <h2>❓ よくある質問</h2>
+    <p><strong>Q. エラーが表示されます</strong><br>
+        A. 設定画面で <code>GCP Project ID</code> が正しく入力されているか確認してください。</p>
+
+    <p><strong>Q. デザインを変えたい</strong><br>
+        A. Step 1 で作成したテンプレートスライドのデザインを変更してください。</p>
+</body>
+
+</html>

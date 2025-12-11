@@ -25,9 +25,15 @@ export class GasTitleSlideGenerator implements ISlideGenerator {
         const titlePlaceholder = slide.getPlaceholder(SlidesApp.PlaceholderType.TITLE) || slide.getPlaceholder(SlidesApp.PlaceholderType.CENTERED_TITLE);
 
         if (titlePlaceholder) {
-            Logger.log(`Title Slide: Found Title Placeholder`);
-            const shape = titlePlaceholder.asShape();
-            shape.getText().setText(data.title || '');
+            if (data.title) {
+                try {
+                    titlePlaceholder.asShape().getText().setText(data.title);
+                } catch (e) {
+                    Logger.log(`Warning: Title placeholder found but text could not be set. ${e}`);
+                }
+            } else {
+                titlePlaceholder.remove();
+            }
         } else {
             Logger.log('Title Slide: WARNING - No Title Placeholder found on this layout.');
         }
@@ -36,15 +42,21 @@ export class GasTitleSlideGenerator implements ISlideGenerator {
         const subtitlePlaceholder = slide.getPlaceholder(SlidesApp.PlaceholderType.SUBTITLE);
         if (subtitlePlaceholder) {
             if (data.date) {
-                subtitlePlaceholder.asShape().getText().setText(data.date);
+                try {
+                    subtitlePlaceholder.asShape().getText().setText(data.date);
+                } catch (e) { }
             } else {
-                subtitlePlaceholder.asShape().getText().setText('');
+                try {
+                    subtitlePlaceholder.asShape().getText().setText('');
+                } catch (e) { }
             }
         } else {
             // If template has 'Body' placeholder instead (some title slides do), check that.
             const bodyPlaceholder = slide.getPlaceholder(SlidesApp.PlaceholderType.BODY);
             if (bodyPlaceholder && data.date) {
-                bodyPlaceholder.asShape().getText().setText(data.date);
+                try {
+                    bodyPlaceholder.asShape().getText().setText(data.date);
+                } catch (e) { }
             }
         }
 

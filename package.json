@@ -1,0 +1,21 @@
+{
+    "name": "gas-slide-generator-monorepo",
+    "version": "1.0.0",
+    "private": true,
+    "workspaces": [
+        "apps/*"
+    ],
+    "scripts": {
+        "lint": "npm run lint --workspaces --if-present",
+        "format": "prettier --write \"**/*.{ts,js,json,md}\"",
+        "test": "npm run test --workspaces --if-present",
+        "build": "npm run build --workspaces --if-present"
+    },
+    "devDependencies": {
+        "eslint": "^8.56.0",
+        "eslint-config-prettier": "^9.1.0",
+        "@typescript-eslint/parser": "^6.18.0",
+        "@typescript-eslint/eslint-plugin": "^6.18.0",
+        "prettier": "^3.1.1"
+    }
+}

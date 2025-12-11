@@ -1279,6 +1279,7 @@ var global = this;
                   const w = imgWidth * scale;
                   const h = imgHeight * scale;
                   ghostImage.setWidth(w).setHeight(h).setLeft(ghostRect.left + (ghostRect.width - w) / 2).setTop(ghostRect.top + (ghostRect.height - h) / 2);
+                  ghostImage.sendToBack();
                   ghostImageInserted = true;
                 }
               } catch (e) {
@@ -1299,6 +1300,7 @@ var global = this;
               ghost.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
             } catch (e) {
             }
+            ghost.sendToBack();
           }
           const titlePlaceholder = slide.getPlaceholder(SlidesApp.PlaceholderType.TITLE) || slide.getPlaceholder(SlidesApp.PlaceholderType.CENTERED_TITLE);
           if (titlePlaceholder) {
@@ -2255,6 +2257,12 @@ ${desc}`, {
           const numRows = rows.length + (headers.length ? 1 : 0);
           const numCols = headers.length || (rows[0] ? rows[0].length : 1);
           if (numRows === 0 || numCols === 0) return;
+
+          // Color safety defaults
+          const primaryColor = settings.primaryColor || "#4285F4";
+          const textPrimary = (CONFIG.COLORS && CONFIG.COLORS.text_primary) ? CONFIG.COLORS.text_primary : "#000000";
+          const faintGray = (CONFIG.COLORS && CONFIG.COLORS.faint_gray) ? CONFIG.COLORS.faint_gray : "#F3F3F3";
+
           const table = slide.insertTable(numRows, numCols);
           table.setLeft(area.left);
           table.setTop(area.top);
@@ -2263,7 +2271,7 @@ ${desc}`, {
           if (headers.length) {
             for (let c = 0; c < numCols; c++) {
               const cell = table.getCell(0, c);
-              cell.getFill().setSolidFill(settings.primaryColor);
+              cell.getFill().setSolidFill(primaryColor);
               cell.getText().setText(headers[c] || "");
               const style = cell.getText().getTextStyle();
               style.setBold(true);
@@ -2278,14 +2286,14 @@ ${desc}`, {
           }
           rows.forEach((row, rIdx) => {
             const isAlt = rIdx % 2 !== 0;
-            const rowColor = isAlt ? CONFIG.COLORS.faint_gray : "#FFFFFF";
+            const rowColor = isAlt ? faintGray : "#FFFFFF";
             for (let c = 0; c < numCols; c++) {
               const cell = table.getCell(rowIndex, c);
               cell.getFill().setSolidFill(rowColor);
               cell.getText().setText(String(row[c] || ""));
               const rowStyle = cell.getText().getTextStyle();
               rowStyle.setFontSize(12);
-              rowStyle.setForegroundColor(CONFIG.COLORS.text_primary);
+              rowStyle.setForegroundColor(textPrimary);
               try {
                 cell.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
               } catch (e) {

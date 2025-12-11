@@ -5,7 +5,7 @@ import { GasTitleSlideGenerator } from './generators/GasTitleSlideGenerator';
 import { GasSectionSlideGenerator } from './generators/GasSectionSlideGenerator';
 import { GasContentSlideGenerator } from './generators/GasContentSlideGenerator';
 import { GasDiagramSlideGenerator } from './generators/GasDiagramSlideGenerator';
-import { CONFIG } from '../../common/config/SlideConfig';
+import { DEFAULT_THEME } from '../../common/config/DefaultTheme';
 
 // This class acts as an Anti-Corruption Layer (ACL) adaptation
 // It translates Domain objects into GAS API calls.
@@ -58,14 +58,19 @@ export class GasSlideRepository implements ISlideRepository {
         const diagramGenerator = new GasDiagramSlideGenerator(null);
 
         // Settings (Mock/Default for now. Should interact with UserProperties or Request)
+        const theme = layoutManager.getTheme();
         const settings = {
-            primaryColor: CONFIG.COLORS.primary_color,
+            primaryColor: theme.colors.primary,
             enableGradient: false,
             showTitleUnderline: true,
             showBottomBar: true,
             showDateColumn: true,
             showPageNumber: true,
-            ...CONFIG.COLORS,
+            primary_color: theme.colors.primary,
+            text_primary: theme.colors.textPrimary,
+            background_gray: theme.colors.backgroundGray,
+            card_bg: theme.colors.cardBg,
+            ghost_gray: theme.colors.ghostGray,
             ...(settingsOverride && settingsOverride.colors ? {
                 primaryColor: settingsOverride.colors.primary,
                 primary_color: settingsOverride.colors.primary,

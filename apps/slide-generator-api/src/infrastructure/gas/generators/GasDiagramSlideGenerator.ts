@@ -1,6 +1,7 @@
 import { ISlideGenerator } from '../../../domain/services/ISlideGenerator';
 import { LayoutManager } from '../../../common/utils/LayoutManager';
-import { CONFIG } from '../../../common/config/SlideConfig';
+import { SlideTheme } from '../../../common/config/SlideTheme';
+import { DEFAULT_THEME } from '../../../common/config/DefaultTheme';
 import {
     setStyledText,
     offsetRect,
@@ -169,7 +170,7 @@ export class GasDiagramSlideGenerator implements ISlideGenerator {
 
         // Draw Line
         const line = slide.insertLine(SlidesApp.LineCategory.STRAIGHT, leftX, baseY, rightX, baseY);
-        line.getLineFill().setSolidFill(CONFIG.COLORS.faint_gray);
+        line.getLineFill().setSolidFill(DEFAULT_THEME.colors.faintGray);
         line.setWeight(2);
 
         const dotR = layout.pxToPt(10);
@@ -199,14 +200,14 @@ export class GasDiagramSlideGenerator implements ISlideGenerator {
 
             // Body
             const bodyShape = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, cardLeft, cardTop + headerHeight, cardW_pt, bodyHeight);
-            bodyShape.getFill().setSolidFill(CONFIG.COLORS.background_gray);
-            bodyShape.getBorder().getLineFill().setSolidFill(CONFIG.COLORS.card_border);
+            bodyShape.getFill().setSolidFill(DEFAULT_THEME.colors.backgroundGray);
+            bodyShape.getBorder().getLineFill().setSolidFill(DEFAULT_THEME.colors.cardBorder);
 
             // Connector
             const connectorY_start = isAbove ? (cardTop + cardH_pt) : baseY;
             const connectorY_end = isAbove ? baseY : cardTop;
             const connector = slide.insertLine(SlidesApp.LineCategory.STRAIGHT, x, connectorY_start, x, connectorY_end);
-            connector.getLineFill().setSolidFill(CONFIG.COLORS.neutral_gray);
+            connector.getLineFill().setSolidFill(DEFAULT_THEME.colors.neutralGray);
             connector.setWeight(1);
 
             // Dot
@@ -217,9 +218,9 @@ export class GasDiagramSlideGenerator implements ISlideGenerator {
             // Header Text
             const headerTextShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, cardLeft, cardTop, cardW_pt, headerHeight);
             setStyledText(headerTextShape, dateText, {
-                size: CONFIG.FONTS.sizes.body,
+                size: DEFAULT_THEME.fonts.sizes.body,
                 bold: true,
-                color: CONFIG.COLORS.background_gray,
+                color: DEFAULT_THEME.colors.backgroundGray,
                 align: SlidesApp.ParagraphAlignment.CENTER
             });
             try {
@@ -227,7 +228,7 @@ export class GasDiagramSlideGenerator implements ISlideGenerator {
             } catch (e) { }
 
             // Body Text
-            let bodyFontSize = CONFIG.FONTS.sizes.body;
+            let bodyFontSize = DEFAULT_THEME.fonts.sizes.body;
             const textLength = labelText.length;
             if (textLength > 40) bodyFontSize = 10;
             else if (textLength > 30) bodyFontSize = 11;
@@ -277,14 +278,14 @@ export class GasDiagramSlideGenerator implements ISlideGenerator {
             setStyledText(header, `STEP ${i + 1}`, {
                 size: fontSize,
                 bold: true,
-                color: CONFIG.COLORS.background_gray,
+                color: DEFAULT_THEME.colors.backgroundGray,
                 align: SlidesApp.ParagraphAlignment.CENTER
             });
             try { header.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
 
             // Body
             const body = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, bodyLeft, currentY, bodyWPt, boxHPt);
-            body.getFill().setSolidFill(CONFIG.COLORS.background_gray);
+            body.getFill().setSolidFill(DEFAULT_THEME.colors.backgroundGray);
             body.getBorder().setTransparent();
 
             // Body Text
@@ -296,7 +297,7 @@ export class GasDiagramSlideGenerator implements ISlideGenerator {
             if (i < n - 1) {
                 const arrowLeft = area.left + headerWPt / 2 - layout.pxToPt(8);
                 const arrow = slide.insertShape(SlidesApp.ShapeType.DOWN_ARROW, arrowLeft, currentY, layout.pxToPt(16), arrowHPt);
-                arrow.getFill().setSolidFill(CONFIG.COLORS.process_arrow || CONFIG.COLORS.ghost_gray);
+                arrow.getFill().setSolidFill(DEFAULT_THEME.colors.processArrow || DEFAULT_THEME.colors.ghostGray);
                 arrow.getBorder().setTransparent();
                 currentY += arrowHPt;
             }
@@ -334,7 +335,7 @@ export class GasDiagramSlideGenerator implements ISlideGenerator {
 
         if (data.centerText) {
             const centerTextBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, centerX - layout.pxToPt(100), centerY - layout.pxToPt(50), layout.pxToPt(200), layout.pxToPt(100));
-            setStyledText(centerTextBox, data.centerText, { size: 20, bold: true, align: SlidesApp.ParagraphAlignment.CENTER, color: CONFIG.COLORS.text_primary });
+            setStyledText(centerTextBox, data.centerText, { size: 20, bold: true, align: SlidesApp.ParagraphAlignment.CENTER, color: DEFAULT_THEME.colors.textPrimary });
             try { centerTextBox.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
         }
 
@@ -359,7 +360,7 @@ export class GasDiagramSlideGenerator implements ISlideGenerator {
 
             const subLabelText = item.subLabel || `${i + 1}番目`;
             const labelText = item.label || '';
-            setStyledText(card, `${subLabelText}\n${labelText}`, { size: fontSize, bold: true, color: CONFIG.COLORS.background_gray, align: SlidesApp.ParagraphAlignment.CENTER });
+            setStyledText(card, `${subLabelText}\n${labelText}`, { size: fontSize, bold: true, color: DEFAULT_THEME.colors.backgroundGray, align: SlidesApp.ParagraphAlignment.CENTER });
 
             try {
                 card.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
@@ -384,7 +385,7 @@ export class GasDiagramSlideGenerator implements ISlideGenerator {
 
         arrowPositions.slice(0, itemsToDraw.length).forEach(pos => {
             const arrow = slide.insertShape(SlidesApp.ShapeType.BENT_ARROW, pos.left - arrowSize / 2, pos.top - arrowSize / 2, arrowSize, arrowSize);
-            arrow.getFill().setSolidFill(CONFIG.COLORS.ghost_gray);
+            arrow.getFill().setSolidFill(DEFAULT_THEME.colors.ghostGray);
             arrow.getBorder().setTransparent();
             arrow.setRotation(pos.rotation);
         });
@@ -428,9 +429,9 @@ export class GasDiagramSlideGenerator implements ISlideGenerator {
             titleShape.getBorder().setTransparent();
             const levelTitle = level.title || `レベル${index + 1}`;
             setStyledText(titleShape, levelTitle, {
-                size: CONFIG.FONTS.sizes.body,
+                size: DEFAULT_THEME.fonts.sizes.body,
                 bold: true,
-                color: CONFIG.COLORS.background_gray,
+                color: DEFAULT_THEME.colors.backgroundGray,
                 align: SlidesApp.ParagraphAlignment.CENTER
             });
             try { titleShape.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
@@ -462,9 +463,9 @@ export class GasDiagramSlideGenerator implements ISlideGenerator {
                 formattedText = levelDesc;
             }
             setStyledText(textShape, formattedText, {
-                size: CONFIG.FONTS.sizes.body - 1,
+                size: DEFAULT_THEME.fonts.sizes.body - 1,
                 align: SlidesApp.ParagraphAlignment.START, // Fixed from LEFT
-                color: CONFIG.COLORS.text_primary,
+                color: DEFAULT_THEME.colors.textPrimary,
                 bold: true
             });
             try { textShape.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
@@ -487,25 +488,25 @@ export class GasDiagramSlideGenerator implements ISlideGenerator {
         const leftHeader = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, area.left, area.top, colWidth, headerH);
         leftHeader.getFill().setSolidFill(compareColors.left);
         leftHeader.getBorder().setTransparent();
-        setStyledText(leftHeader, leftTitle, { size: 14, bold: true, color: CONFIG.COLORS.background_gray, align: SlidesApp.ParagraphAlignment.CENTER });
+        setStyledText(leftHeader, leftTitle, { size: 14, bold: true, color: DEFAULT_THEME.colors.backgroundGray, align: SlidesApp.ParagraphAlignment.CENTER });
         try { leftHeader.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
 
         const leftBox = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, area.left, area.top + headerH, colWidth, area.height - headerH);
-        leftBox.getFill().setSolidFill(CONFIG.COLORS.background_gray); // Use light gray instead of F0F0F0 for consistency
-        leftBox.getBorder().getLineFill().setSolidFill(CONFIG.COLORS.card_border);
-        setStyledText(leftBox, leftItems.join('\n\n'), { size: CONFIG.FONTS.sizes.body });
+        leftBox.getFill().setSolidFill(DEFAULT_THEME.colors.backgroundGray); // Use light gray instead of F0F0F0 for consistency
+        leftBox.getBorder().getLineFill().setSolidFill(DEFAULT_THEME.colors.cardBorder);
+        setStyledText(leftBox, leftItems.join('\n\n'), { size: DEFAULT_THEME.fonts.sizes.body });
 
         // Right
         const rightHeader = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, area.left + colWidth + gap, area.top, colWidth, headerH);
         rightHeader.getFill().setSolidFill(compareColors.right);
         rightHeader.getBorder().setTransparent();
-        setStyledText(rightHeader, rightTitle, { size: 14, bold: true, color: CONFIG.COLORS.background_gray, align: SlidesApp.ParagraphAlignment.CENTER });
+        setStyledText(rightHeader, rightTitle, { size: 14, bold: true, color: DEFAULT_THEME.colors.backgroundGray, align: SlidesApp.ParagraphAlignment.CENTER });
         try { rightHeader.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
 
         const rightBox = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, area.left + colWidth + gap, area.top + headerH, colWidth, area.height - headerH);
-        rightBox.getFill().setSolidFill(CONFIG.COLORS.background_gray);
-        rightBox.getBorder().getLineFill().setSolidFill(CONFIG.COLORS.card_border);
-        setStyledText(rightBox, rightItems.join('\n\n'), { size: CONFIG.FONTS.sizes.body });
+        rightBox.getFill().setSolidFill(DEFAULT_THEME.colors.backgroundGray);
+        rightBox.getBorder().getLineFill().setSolidFill(DEFAULT_THEME.colors.cardBorder);
+        setStyledText(rightBox, rightItems.join('\n\n'), { size: DEFAULT_THEME.fonts.sizes.body });
     }
 
     private drawStatsCompare(slide: GoogleAppsScript.Slides.Slide, data: any, area: any, settings: any, layout: LayoutManager) {
@@ -526,7 +527,7 @@ export class GasDiagramSlideGenerator implements ISlideGenerator {
         const leftHeader = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, leftHeaderX, area.top, valueColW, headerH);
         leftHeader.getFill().setSolidFill(compareColors.left);
         leftHeader.getBorder().setTransparent();
-        setStyledText(leftHeader, leftTitle, { size: 14, bold: true, color: CONFIG.COLORS.background_gray, align: SlidesApp.ParagraphAlignment.CENTER });
+        setStyledText(leftHeader, leftTitle, { size: 14, bold: true, color: DEFAULT_THEME.colors.backgroundGray, align: SlidesApp.ParagraphAlignment.CENTER });
         try { leftHeader.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
 
         // Right Title Header
@@ -534,7 +535,7 @@ export class GasDiagramSlideGenerator implements ISlideGenerator {
         const rightHeader = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, rightHeaderX, area.top, valueColW, headerH);
         rightHeader.getFill().setSolidFill(compareColors.right);
         rightHeader.getBorder().setTransparent();
-        setStyledText(rightHeader, rightTitle, { size: 14, bold: true, color: CONFIG.COLORS.background_gray, align: SlidesApp.ParagraphAlignment.CENTER });
+        setStyledText(rightHeader, rightTitle, { size: 14, bold: true, color: DEFAULT_THEME.colors.backgroundGray, align: SlidesApp.ParagraphAlignment.CENTER });
         try { rightHeader.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
 
         // Data rows
@@ -549,27 +550,27 @@ export class GasDiagramSlideGenerator implements ISlideGenerator {
             const trend = stat.trend || null;
 
             // Alternate row background
-            const rowBg = index % 2 === 0 ? CONFIG.COLORS.background_gray : '#FFFFFF';
+            const rowBg = index % 2 === 0 ? DEFAULT_THEME.colors.backgroundGray : '#FFFFFF';
 
             // Label cell
             const labelCell = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, area.left, currentY, labelColW, rowHeight);
             labelCell.getFill().setSolidFill(rowBg);
-            labelCell.getBorder().getLineFill().setSolidFill(CONFIG.COLORS.faint_gray);
-            setStyledText(labelCell, label, { size: CONFIG.FONTS.sizes.body, bold: true, align: SlidesApp.ParagraphAlignment.START });
+            labelCell.getBorder().getLineFill().setSolidFill(DEFAULT_THEME.colors.faintGray);
+            setStyledText(labelCell, label, { size: DEFAULT_THEME.fonts.sizes.body, bold: true, align: SlidesApp.ParagraphAlignment.START });
             try { labelCell.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
 
             // Left value cell
             const leftCell = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, leftHeaderX, currentY, valueColW, rowHeight);
             leftCell.getFill().setSolidFill(rowBg);
-            leftCell.getBorder().getLineFill().setSolidFill(CONFIG.COLORS.faint_gray);
-            setStyledText(leftCell, leftValue, { size: CONFIG.FONTS.sizes.body, align: SlidesApp.ParagraphAlignment.CENTER, color: compareColors.left });
+            leftCell.getBorder().getLineFill().setSolidFill(DEFAULT_THEME.colors.faintGray);
+            setStyledText(leftCell, leftValue, { size: DEFAULT_THEME.fonts.sizes.body, align: SlidesApp.ParagraphAlignment.CENTER, color: compareColors.left });
             try { leftCell.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
 
             // Right value cell
             const rightCell = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, rightHeaderX, currentY, valueColW - (trend ? layout.pxToPt(40) : 0), rowHeight);
             rightCell.getFill().setSolidFill(rowBg);
-            rightCell.getBorder().getLineFill().setSolidFill(CONFIG.COLORS.faint_gray);
-            setStyledText(rightCell, rightValue, { size: CONFIG.FONTS.sizes.body, align: SlidesApp.ParagraphAlignment.CENTER, color: compareColors.right });
+            rightCell.getBorder().getLineFill().setSolidFill(DEFAULT_THEME.colors.faintGray);
+            setStyledText(rightCell, rightValue, { size: DEFAULT_THEME.fonts.sizes.body, align: SlidesApp.ParagraphAlignment.CENTER, color: compareColors.right });
             try { rightCell.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
 
             // Trend indicator (optional)
@@ -627,7 +628,7 @@ export class GasDiagramSlideGenerator implements ISlideGenerator {
 
             // Label
             const labelShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, area.left, currentY, labelColW, rowHeight);
-            setStyledText(labelShape, label, { size: CONFIG.FONTS.sizes.body, bold: true, align: SlidesApp.ParagraphAlignment.START });
+            setStyledText(labelShape, label, { size: DEFAULT_THEME.fonts.sizes.body, bold: true, align: SlidesApp.ParagraphAlignment.START });
             try { labelShape.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
 
             // Bar area
@@ -672,7 +673,7 @@ export class GasDiagramSlideGenerator implements ISlideGenerator {
             if (index < stats.length - 1) {
                 const lineY = currentY + rowHeight;
                 const line = slide.insertLine(SlidesApp.LineCategory.STRAIGHT, area.left, lineY, area.left + area.width, lineY);
-                line.getLineFill().setSolidFill(CONFIG.COLORS.faint_gray);
+                line.getLineFill().setSolidFill(DEFAULT_THEME.colors.faintGray);
                 line.setWeight(1);
             }
 
@@ -706,7 +707,7 @@ export class GasDiagramSlideGenerator implements ISlideGenerator {
         trianglePath.setRotation(0); // 正三角形の向きに
         // 実際にはシェイプの頂点は矩形内配置なので微調整が必要だが、一旦シンプルに
         // 背景の三角形は薄く
-        trianglePath.getFill().setSolidFill(CONFIG.COLORS.faint_gray);
+        trianglePath.getFill().setSolidFill(DEFAULT_THEME.colors.faintGray);
         trianglePath.getBorder().setTransparent();
 
         // Send manually to back (GAS doesn't have z-index easily, relying on insertion order - insert first = back)
@@ -729,7 +730,7 @@ export class GasDiagramSlideGenerator implements ISlideGenerator {
             setStyledText(circle, `${title}\n${desc}`, {
                 size: 14,
                 bold: true,
-                color: CONFIG.COLORS.background_gray,
+                color: DEFAULT_THEME.colors.backgroundGray,
                 align: SlidesApp.ParagraphAlignment.CENTER
             });
             try {
@@ -774,7 +775,7 @@ export class GasDiagramSlideGenerator implements ISlideGenerator {
     private drawLanes(slide: GoogleAppsScript.Slides.Slide, data: any, area: any, settings: any, layout: LayoutManager) {
         const lanes = data.lanes || [];
         const n = Math.max(1, lanes.length);
-        const { laneGap_px, lanePad_px, laneTitle_h_px, cardGap_px, cardMin_h_px, cardMax_h_px, arrow_h_px, arrowGap_px } = CONFIG.DIAGRAM;
+        const { laneGap_px, lanePad_px, laneTitle_h_px, cardGap_px, cardMin_h_px, cardMax_h_px, arrow_h_px, arrowGap_px } = DEFAULT_THEME.diagram;
         const px = (p: number) => layout.pxToPt(p);
 
         const laneW = (area.width - px(laneGap_px) * (n - 1)) / n;
@@ -788,15 +789,15 @@ export class GasDiagramSlideGenerator implements ISlideGenerator {
             const lt = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, left, area.top, laneW, px(laneTitle_h_px));
             lt.getFill().setSolidFill(settings.primaryColor);
             lt.getBorder().getLineFill().setSolidFill(settings.primaryColor);
-            setStyledText(lt, lane.title || '', { size: CONFIG.FONTS.sizes.laneTitle, bold: true, color: CONFIG.COLORS.background_gray, align: SlidesApp.ParagraphAlignment.CENTER });
+            setStyledText(lt, lane.title || '', { size: DEFAULT_THEME.fonts.sizes.laneTitle, bold: true, color: DEFAULT_THEME.colors.backgroundGray, align: SlidesApp.ParagraphAlignment.CENTER });
             try { lt.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
 
             // Lane Body
             const laneBodyTop = area.top + px(laneTitle_h_px);
             const laneBodyHeight = area.height - px(laneTitle_h_px);
             const laneBg = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, left, laneBodyTop, laneW, laneBodyHeight);
-            laneBg.getFill().setSolidFill(CONFIG.COLORS.background_gray);
-            laneBg.getBorder().getLineFill().setSolidFill(CONFIG.COLORS.lane_border);
+            laneBg.getFill().setSolidFill(DEFAULT_THEME.colors.backgroundGray);
+            laneBg.getBorder().getLineFill().setSolidFill(DEFAULT_THEME.colors.laneBorder);
 
             const items = Array.isArray(lane.items) ? lane.items : [];
             const rows = Math.max(1, items.length);
@@ -809,9 +810,9 @@ export class GasDiagramSlideGenerator implements ISlideGenerator {
             for (let i = 0; i < rows; i++) {
                 const cardTop = firstTop + i * (cardH + px(cardGap_px));
                 const card = slide.insertShape(SlidesApp.ShapeType.ROUND_RECTANGLE, left + px(lanePad_px), cardTop, laneW - px(lanePad_px) * 2, cardH);
-                card.getFill().setSolidFill(CONFIG.COLORS.background_gray);
-                card.getBorder().getLineFill().setSolidFill(CONFIG.COLORS.card_border);
-                setStyledText(card, items[i] || '', { size: CONFIG.FONTS.sizes.body });
+                card.getFill().setSolidFill(DEFAULT_THEME.colors.backgroundGray);
+                card.getBorder().getLineFill().setSolidFill(DEFAULT_THEME.colors.cardBorder);
+                setStyledText(card, items[i] || '', { size: DEFAULT_THEME.fonts.sizes.body });
                 try { card.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
 
                 cardBoxes[j][i] = {
@@ -851,10 +852,10 @@ export class GasDiagramSlideGenerator implements ISlideGenerator {
         steps.forEach((step: any, i: number) => {
             const x = area.left + i * (boxWidth + gap);
             const shape = slide.insertShape(SlidesApp.ShapeType.ROUND_RECTANGLE, x, y, boxWidth, boxHeight);
-            shape.getFill().setSolidFill(CONFIG.COLORS.background_gray);
+            shape.getFill().setSolidFill(DEFAULT_THEME.colors.backgroundGray);
             shape.getBorder().getLineFill().setSolidFill(settings.primaryColor);
             shape.getBorder().setWeight(2);
-            setStyledText(shape, typeof step === 'string' ? step : step.label || '', { size: CONFIG.FONTS.sizes.body, align: SlidesApp.ParagraphAlignment.CENTER });
+            setStyledText(shape, typeof step === 'string' ? step : step.label || '', { size: DEFAULT_THEME.fonts.sizes.body, align: SlidesApp.ParagraphAlignment.CENTER });
             try { shape.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
 
             if (i < count - 1) {
@@ -865,7 +866,7 @@ export class GasDiagramSlideGenerator implements ISlideGenerator {
                 const by = ay;
                 const line = slide.insertLine(SlidesApp.LineCategory.STRAIGHT, ax, ay, bx, by);
                 line.setEndArrow(SlidesApp.ArrowStyle.FILL_ARROW);
-                line.getLineFill().setSolidFill(CONFIG.COLORS.neutral_gray);
+                line.getLineFill().setSolidFill(DEFAULT_THEME.colors.neutralGray);
             }
         });
     }
@@ -913,15 +914,15 @@ export class GasDiagramSlideGenerator implements ISlideGenerator {
 
                 const body = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, x, y + headerH, cardW, cardH - headerH);
                 body.getFill().setSolidFill('#FFFFFF');
-                body.getBorder().getLineFill().setSolidFill(CONFIG.COLORS.card_border);
+                body.getBorder().getLineFill().setSolidFill(DEFAULT_THEME.colors.cardBorder);
 
                 const textArea = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x + layout.pxToPt(10), y + headerH + layout.pxToPt(10), cardW - layout.pxToPt(20), cardH - headerH - layout.pxToPt(20));
-                setStyledText(textArea, desc, { size: 12, align: SlidesApp.ParagraphAlignment.START, color: CONFIG.COLORS.text_small_font });
+                setStyledText(textArea, desc, { size: 12, align: SlidesApp.ParagraphAlignment.START, color: DEFAULT_THEME.colors.textSmallFont });
             } else {
                 // Modern Clean Card
                 const card = slide.insertShape(SlidesApp.ShapeType.ROUND_RECTANGLE, x, y, cardW, cardH);
                 card.getFill().setSolidFill('#FFFFFF');
-                card.getBorder().getLineFill().setSolidFill(CONFIG.COLORS.card_border);
+                card.getBorder().getLineFill().setSolidFill(DEFAULT_THEME.colors.cardBorder);
 
                 // Accent Strip on Left
                 const strip = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, x, y + cardH * 0.1, layout.pxToPt(6), cardH * 0.8);
@@ -934,11 +935,11 @@ export class GasDiagramSlideGenerator implements ISlideGenerator {
 
                 // Title
                 const titleBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, contentX, y + layout.pxToPt(10), contentW, layout.pxToPt(30));
-                setStyledText(titleBox, title, { size: 16, bold: true, color: CONFIG.COLORS.text_primary });
+                setStyledText(titleBox, title, { size: 16, bold: true, color: DEFAULT_THEME.colors.textPrimary });
 
                 // Desc
                 const descBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, contentX, y + layout.pxToPt(40), contentW, cardH - layout.pxToPt(50));
-                setStyledText(descBox, desc, { size: 12, color: CONFIG.COLORS.text_small_font });
+                setStyledText(descBox, desc, { size: 12, color: DEFAULT_THEME.colors.textSmallFont });
                 try {
                     descBox.setContentAlignment(SlidesApp.ContentAlignment.TOP);
                 } catch (e) { }
@@ -962,7 +963,7 @@ export class GasDiagramSlideGenerator implements ISlideGenerator {
             // Card BG
             const card = slide.insertShape(SlidesApp.ShapeType.ROUND_RECTANGLE, x, y, cardW, cardH);
             card.getFill().setSolidFill('#FFFFFF');
-            card.getBorder().getLineFill().setSolidFill(CONFIG.COLORS.card_border);
+            card.getBorder().getLineFill().setSolidFill(DEFAULT_THEME.colors.cardBorder);
             // card.setShadow equivalent not avail, but we can add a bottom lip if we want depth?
             // Simulating shadow with offset shape underneath is possible but maybe too heavy. 
             // Stick to clean flat design.
@@ -972,7 +973,7 @@ export class GasDiagramSlideGenerator implements ISlideGenerator {
             // Label (Top)
             const labelH = layout.pxToPt(30);
             const labelBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x + padding, y + padding, cardW - padding * 2, labelH);
-            setStyledText(labelBox, item.label || 'Metric', { size: 14, color: CONFIG.COLORS.neutral_gray, align: SlidesApp.ParagraphAlignment.CENTER });
+            setStyledText(labelBox, item.label || 'Metric', { size: 14, color: DEFAULT_THEME.colors.neutralGray, align: SlidesApp.ParagraphAlignment.CENTER });
 
             // Value (Middle - Large)
             const valueH = layout.pxToPt(70);
@@ -991,7 +992,7 @@ export class GasDiagramSlideGenerator implements ISlideGenerator {
                 const statusH = layout.pxToPt(30);
                 const statusBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x + padding, y + labelH + valueH + padding, cardW - padding * 2, statusH);
 
-                let color = CONFIG.COLORS.neutral_gray;
+                let color = DEFAULT_THEME.colors.neutralGray;
                 let prefix = '';
                 if (item.status === 'good') { color = '#28a745'; prefix = '▲ '; }
                 if (item.status === 'bad') { color = '#dc3545'; prefix = '▼ '; }
@@ -1032,7 +1033,7 @@ export class GasDiagramSlideGenerator implements ISlideGenerator {
         // Rows
         rows.forEach((row: any[], rIdx: number) => {
             const isAlt = rIdx % 2 !== 0; // Alternating
-            const rowColor = isAlt ? CONFIG.COLORS.faint_gray : '#FFFFFF';
+            const rowColor = isAlt ? DEFAULT_THEME.colors.faintGray : '#FFFFFF';
 
             for (let c = 0; c < numCols; c++) {
                 const cell = table.getCell(rowIndex, c);
@@ -1040,9 +1041,9 @@ export class GasDiagramSlideGenerator implements ISlideGenerator {
                 cell.getText().setText(String(row[c] || ''));
                 const rowStyle = cell.getText().getTextStyle();
                 rowStyle.setFontSize(12);
-                rowStyle.setForegroundColor(CONFIG.COLORS.text_primary);
+                rowStyle.setForegroundColor(DEFAULT_THEME.colors.textPrimary);
                 try { cell.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
-                // const borderColor = CONFIG.COLORS.lane_border;
+                // const borderColor = DEFAULT_THEME.colors.laneBorder;
                 // cell.getBorderBottom().getLineFill().setSolidFill(borderColor);
                 // cell.getBorderTop().getLineFill().setSolidFill(borderColor);
                 // cell.getBorderLeft().setTransparent();
@@ -1086,12 +1087,12 @@ export class GasDiagramSlideGenerator implements ISlideGenerator {
             const boxW = area.width - (iconSize + layout.pxToPt(15));
             const box = slide.insertShape(SlidesApp.ShapeType.ROUND_RECTANGLE, boxLeft, y, boxW, itemH);
             box.getFill().setSolidFill('#FFFFFF');
-            box.getBorder().getLineFill().setSolidFill(CONFIG.COLORS.card_border);
+            box.getBorder().getLineFill().setSolidFill(DEFAULT_THEME.colors.cardBorder);
 
             const qText = (item.q || '').replace(/^[QA][:. ]+/, '');
             const aText = (item.a || '').replace(/^[QA][:. ]+/, '');
 
-            setStyledText(box, `Q. ${qText}\n\nA. ${aText}`, { size: 12, color: CONFIG.COLORS.text_primary });
+            setStyledText(box, `Q. ${qText}\n\nA. ${aText}`, { size: 12, color: DEFAULT_THEME.colors.textPrimary });
 
             // Style the A part? simple styling only.
             // A visual separator line inside?
@@ -1105,12 +1106,12 @@ export class GasDiagramSlideGenerator implements ISlideGenerator {
 
         // Background Cushion
         const bg = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, area.left, area.top, area.width, area.height);
-        bg.getFill().setSolidFill(CONFIG.COLORS.faint_gray);
+        bg.getFill().setSolidFill(DEFAULT_THEME.colors.faintGray);
         bg.getBorder().setTransparent();
 
         // Big Quote Marks
         const quoteMark = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, area.left, area.top - layout.pxToPt(20), layout.pxToPt(100), layout.pxToPt(100));
-        setStyledText(quoteMark, '“', { size: 120, color: CONFIG.COLORS.ghost_gray, font: 'Georgia' });
+        setStyledText(quoteMark, '“', { size: 120, color: DEFAULT_THEME.colors.ghostGray, font: 'Georgia' });
 
         const contentW = area.width * 0.8;
         const contentX = area.left + (area.width - contentW) / 2;
@@ -1121,7 +1122,7 @@ export class GasDiagramSlideGenerator implements ISlideGenerator {
 
         if (author) {
             const authorBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, contentX, area.top + area.height - layout.pxToPt(60), contentW, layout.pxToPt(40));
-            setStyledText(authorBox, `— ${author}`, { size: 16, align: SlidesApp.ParagraphAlignment.END, color: CONFIG.COLORS.neutral_gray });
+            setStyledText(authorBox, `— ${author}`, { size: 16, align: SlidesApp.ParagraphAlignment.END, color: DEFAULT_THEME.colors.neutralGray });
         }
     }
 
@@ -1145,7 +1146,7 @@ export class GasDiagramSlideGenerator implements ISlideGenerator {
 
             // Bar BG
             const barBg = slide.insertShape(SlidesApp.ShapeType.ROUND_RECTANGLE, area.left + labelW + layout.pxToPt(20), y + rowH / 3, barAreaW, rowH / 3);
-            barBg.getFill().setSolidFill(CONFIG.COLORS.ghost_gray);
+            barBg.getFill().setSolidFill(DEFAULT_THEME.colors.ghostGray);
             barBg.getBorder().setTransparent();
 
             // Bar FG
@@ -1158,7 +1159,7 @@ export class GasDiagramSlideGenerator implements ISlideGenerator {
 
             // Value
             const valBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, area.left + labelW + barAreaW + layout.pxToPt(30), y, layout.pxToPt(50), rowH);
-            setStyledText(valBox, `${percent}%`, { size: 14, color: CONFIG.COLORS.neutral_gray });
+            setStyledText(valBox, `${percent}%`, { size: 14, color: DEFAULT_THEME.colors.neutralGray });
             try { valBox.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
         });
     }
@@ -1227,7 +1228,7 @@ export class GasDiagramSlideGenerator implements ISlideGenerator {
                 Logger.log('Image insert failed: ' + e);
                 // Placeholder
                 const ph = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, imgX, area.top, halfW, area.height);
-                ph.getFill().setSolidFill(CONFIG.COLORS.ghost_gray);
+                ph.getFill().setSolidFill(DEFAULT_THEME.colors.ghostGray);
                 setStyledText(ph, 'Image Placeholder', { align: SlidesApp.ParagraphAlignment.CENTER });
             }
         }
@@ -1235,7 +1236,7 @@ export class GasDiagramSlideGenerator implements ISlideGenerator {
         // Draw Text
         const textBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, txtX, area.top, halfW, area.height);
         const textContent = points.join('\n');
-        setStyledText(textBox, textContent, { size: CONFIG.FONTS.sizes.body });
+        setStyledText(textBox, textContent, { size: DEFAULT_THEME.fonts.sizes.body });
     }
 }
 

@@ -1,7 +1,8 @@
 
 import { ISlideGenerator } from '../../../domain/services/ISlideGenerator';
 import { LayoutManager } from '../../../common/utils/LayoutManager';
-import { CONFIG } from '../../../common/config/SlideConfig';
+import { SlideTheme } from '../../../common/config/SlideTheme';
+import { DEFAULT_THEME } from '../../../common/config/DefaultTheme';
 import {
     insertImageFromUrlOrFileId,
     setStyledText,
@@ -15,7 +16,7 @@ export class GasSectionSlideGenerator implements ISlideGenerator {
     constructor(private creditImageBlob: GoogleAppsScript.Base.BlobSource | null) { }
 
     generate(slide: GoogleAppsScript.Slides.Slide, data: any, layout: LayoutManager, pageNum: number, settings: any, imageUpdateOption: string = 'update') {
-
+        const theme = layout.getTheme();
 
         // Handle Section Numbering (simplified for state)
         this.sectionCounter++;
@@ -57,15 +58,13 @@ export class GasSectionSlideGenerator implements ISlideGenerator {
             const ghost = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, ghostRect.left, ghostRect.top, ghostRect.width, ghostRect.height);
             ghost.getText().setText(num);
             const ghostTextStyle = ghost.getText().getTextStyle();
-            ghostTextStyle.setFontFamily(CONFIG.FONTS.family)
-                .setFontSize(CONFIG.FONTS.sizes.ghostNum)
+            ghostTextStyle.setFontFamily(theme.fonts.family)
+                .setFontSize(theme.fonts.sizes.ghostNum)
                 .setBold(true);
             try {
-                // Alpha not supported in simplified utils type defs yet, assuming direct set
-                // ghostTextStyle.setForegroundColorWithAlpha(CONFIG.COLORS.ghost_gray, 0.15);
-                ghostTextStyle.setForegroundColor(CONFIG.COLORS.ghost_gray);
+                ghostTextStyle.setForegroundColor(theme.colors.ghostGray);
             } catch (e) {
-                ghostTextStyle.setForegroundColor(CONFIG.COLORS.ghost_gray);
+                ghostTextStyle.setForegroundColor(theme.colors.ghostGray);
             }
             try {
                 ghost.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
@@ -88,7 +87,7 @@ export class GasSectionSlideGenerator implements ISlideGenerator {
             const titleShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, titleRect.left, titleRect.top, titleRect.width, titleRect.height);
             titleShape.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
             setStyledText(titleShape, data.title, {
-                size: CONFIG.FONTS.sizes.sectionTitle,
+                size: theme.fonts.sizes.sectionTitle,
                 bold: true,
                 align: SlidesApp.ParagraphAlignment.CENTER,
                 fontType: 'large'

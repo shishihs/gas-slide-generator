@@ -10,12 +10,7 @@ import { DEFAULT_THEME, AVAILABLE_THEMES } from '../../common/config/DefaultThem
 
 export class GasSlideRepository implements ISlideRepository {
 
-    // Note: sectionGenerator still uses old interface? 
-    // If so, we can't fully batch it unless we refactor it too.
-    // Plan: We marked GasSectionSlideGenerator as TODO in task.md. 
-    // For now, I'll assume we can make minimal changes or ignore it for the prototype.
-    // Actually, to make ts happy, we'll need to update it or cast it.
-    // Let's assume we update GasSectionSlideGenerator briefly or inline.
+    // Note: All generators (Title, Section, Content, Diagram) are refactored to use Batch API.
 
     createPresentation(presentation: Presentation, templateId?: string, destinationId?: string, settingsOverride?: any): string {
         const slidesApp = SlidesApp;

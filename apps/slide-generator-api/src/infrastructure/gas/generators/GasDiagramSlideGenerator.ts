@@ -42,9 +42,23 @@ export class GasDiagramSlideGenerator implements ISlideGenerator {
         // Priority: BODY -> OBJECT -> PICTURE
         // This allows users to define the "Diagram Area" using standard placeholders in their Master slides.
         const placeholders = slide.getPlaceholders();
-        const targetPlaceholder = placeholders.find(p => (p as any).getPlaceholderType() === SlidesApp.PlaceholderType.BODY)
-            || placeholders.find(p => (p as any).getPlaceholderType() === SlidesApp.PlaceholderType.OBJECT)
-            || placeholders.find(p => (p as any).getPlaceholderType() === SlidesApp.PlaceholderType.PICTURE);
+
+        // Helper to safely get placeholder type from PageElement
+        const getPlaceholderTypeSafe = (p: GoogleAppsScript.Slides.PageElement): GoogleAppsScript.Slides.PlaceholderType | null => {
+            try {
+                const shape = p.asShape();
+                if (shape) {
+                    return shape.getPlaceholderType();
+                }
+            } catch (e) {
+                // Not a shape or error getting type
+            }
+            return null;
+        };
+
+        const targetPlaceholder = placeholders.find(p => getPlaceholderTypeSafe(p) === SlidesApp.PlaceholderType.BODY)
+            || placeholders.find(p => getPlaceholderTypeSafe(p) === SlidesApp.PlaceholderType.OBJECT)
+            || placeholders.find(p => getPlaceholderTypeSafe(p) === SlidesApp.PlaceholderType.PICTURE);
 
         const workArea = targetPlaceholder ?
             { left: targetPlaceholder.getLeft(), top: targetPlaceholder.getTop(), width: targetPlaceholder.getWidth(), height: targetPlaceholder.getHeight() } :

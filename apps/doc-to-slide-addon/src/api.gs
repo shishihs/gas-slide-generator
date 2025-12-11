@@ -1091,7 +1091,17 @@ var global = this;
           const type = (data.type || data.layout || "").toLowerCase();
           Logger.log("Generating Diagram Slide: " + type);
           const placeholders = slide.getPlaceholders();
-          const targetPlaceholder = placeholders.find((p) => p.getPlaceholderType() === SlidesApp.PlaceholderType.BODY) || placeholders.find((p) => p.getPlaceholderType() === SlidesApp.PlaceholderType.OBJECT) || placeholders.find((p) => p.getPlaceholderType() === SlidesApp.PlaceholderType.PICTURE);
+          const getPlaceholderTypeSafe = (p) => {
+            try {
+              const shape = p.asShape();
+              if (shape) {
+                return shape.getPlaceholderType();
+              }
+            } catch (e) {
+            }
+            return null;
+          };
+          const targetPlaceholder = placeholders.find((p) => getPlaceholderTypeSafe(p) === SlidesApp.PlaceholderType.BODY) || placeholders.find((p) => getPlaceholderTypeSafe(p) === SlidesApp.PlaceholderType.OBJECT) || placeholders.find((p) => getPlaceholderTypeSafe(p) === SlidesApp.PlaceholderType.PICTURE);
           const workArea = targetPlaceholder ? { left: targetPlaceholder.getLeft(), top: targetPlaceholder.getTop(), width: targetPlaceholder.getWidth(), height: targetPlaceholder.getHeight() } : layout.getRect("contentSlide.body");
           if (targetPlaceholder) {
             try {

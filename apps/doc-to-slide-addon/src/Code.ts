@@ -361,18 +361,6 @@ function showHelpSidebar() {
     DocumentApp.getUi().showSidebar(html);
 }
 
-/**
- * Show the Manual Mode Dialog
- * This dialog is displayed when GCP Project ID is not configured.
- * It provides clickable links to the Gem URL that open in a new tab.
- */
-function showManualModeDialog() {
-    const html = HtmlService.createHtmlOutputFromFile('ManualModeDialog')
-        .setWidth(420)
-        .setHeight(400);
-    DocumentApp.getUi().showModalDialog(html, 'スライド生成の準備');
-}
-
 // ========================================
 // Core Functions
 // ========================================
@@ -420,13 +408,10 @@ function convertDocumentToJson() {
         }
 
         // 3. Check for GCP Project ID
-        // If missing, show Manual Mode dialog and return special result
+        // If missing, return special result to tell the sidebar to show JSON input
         const projectId = getGcpProjectId();
         if (!projectId || projectId === 'YOUR_GCP_PROJECT_ID') {
-            // Show custom HTML dialog with clickable link
-            showManualModeDialog();
-
-            // Return a special result to tell the sidebar to show JSON input
+            // Return a special result - sidebar will show the manual input section
             return { __manualModeRequired: true };
         }
 

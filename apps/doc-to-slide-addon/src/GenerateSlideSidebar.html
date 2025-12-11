@@ -123,6 +123,11 @@
       color: var(--error-color);
     }
 
+    #status.info {
+      background-color: #fff8e1;
+      color: #f57c00;
+    }
+
     #jsonPreview {
       background: #f1f3f4;
       border: 1px solid var(--border-color);
@@ -204,12 +209,58 @@
         transform: rotate(360deg);
       }
     }
+
+    /* Manual JSON Input Section */
+    #manualInputSection textarea {
+      width: 100%;
+      min-height: 120px;
+      padding: 10px;
+      font-family: 'Roboto Mono', monospace;
+      font-size: 11px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      margin-bottom: 12px;
+      resize: vertical;
+    }
+
+    #manualInputSection textarea:focus {
+      outline: none;
+      border-color: var(--primary-color);
+    }
+
+    .gem-link-box {
+      background: #e8f0fe;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+
+    .gem-link-box a {
+      color: var(--primary-color);
+      font-weight: 500;
+    }
   </style>
 </head>
 
 <body>
   <h3>🎨 スライド生成</h3>
   <p>ドキュメントの内容を、見た目の整ったGoogleスライドに自動変換します。</p>
+
+  <!-- Manual JSON Input Section (shown when GCP Project ID is missing) -->
+  <div class="section" id="manualInputSection" style="display: none;">
+    <div class="section-title">📝 Manual Mode - JSON を入力</div>
+    <p style="margin-bottom: 8px; font-size: 12px; color: var(--text-secondary);">
+      Gem で生成した JSON を下のテキストエリアに貼り付けてください。
+    </p>
+    <div class="gem-link-box" id="gemLinkBox">
+      <!-- Gem link will be inserted here -->
+    </div>
+    <textarea id="jsonInput" placeholder='{"slides": [...]} 形式のJSONを貼り付け'></textarea>
+    <button class="btn-primary" onclick="generateFromManualJson()">
+      スライドを生成
+    </button>
+  </div>
 
   <!-- Retry Action (Only visible on error) -->
   <div class="section" id="retrySection" style="display: none;">
@@ -244,6 +295,7 @@
       // Create cleaner UI state
       document.getElementById('retrySection').style.display = 'none';
       document.getElementById('resultSection').style.display = 'none';
+      document.getElementById('manualInputSection').style.display = 'none';
 
       showStatus('loading', '<span class="spinner"></span>ステップ 1/2: ドキュメントの内容を分析中...');
 
@@ -263,6 +315,12 @@
         return;
       }
 
+      // Check if manual mode is required
+      if (jsonResult.__manualModeRequired) {
+        showManualInputSection();
+        return;
+      }
+
       showStatus('loading', '<span class="spinner"></span>ステップ 2/2: スライドを生成中... (数分かかる場合があります)');
 
       google.script.run
@@ -272,12 +330,60 @@
     }
 
     /**
+     * Show the manual JSON input section
+     */
+    function showManualInputSection() {
+      document.getElementById('manualInputSection').style.display = 'block';
+      showStatus('info', '💡 Gem で JSON を生成し、上のフィールドに貼り付けてください。');
+
+      // Load Gem URL
+      google.script.run
+        .withSuccessHandler(function (gemUrl) {
+          var container = document.getElementById('gemLinkBox');
+          if (gemUrl) {
+            container.innerHTML = '<a href="' + gemUrl + '" target="_blank">🔗 Gem を開く (新しいタブ)</a>';
+          } else {
+            container.innerHTML = '<span style="color:#5f6368; font-size:12px;">(設定で Gem URL を保存すると、ここにリンクが表示されます)</span>';
+          }
+        })
+        .getGemUrl();
+    }
+
+    /**
+     * Generate slides from manually entered JSON
+     */
+    function generateFromManualJson() {
+      var jsonText = document.getElementById('jsonInput').value.trim();
+
+      if (!jsonText) {
+        showStatus('error', '❌ JSON を入力してください。');
+        return;
+      }
+
+      var jsonData;
+      try {
+        jsonData = JSON.parse(jsonText);
+      } catch (e) {
+        showStatus('error', '❌ JSON の形式が正しくありません: ' + e.message);
+        return;
+      }
+
+      showStatus('loading', '<span class="spinner"></span>スライドを生成中... (数分かかる場合があります)');
+      document.getElementById('manualInputSection').style.display = 'none';
+
+      google.script.run
+        .withSuccessHandler(onSlideSuccess)
+        .withFailureHandler(onError)
+        .generateSlidesFromJson(jsonData);
+    }
+
+    /**
      * Callback when slide generation is successful
      */
     function onSlideSuccess(result) {
       if (result.success) {
         showStatus('success', '✅ 全てのステップが完了しました！');
-        const resultSection = document.getElementById('resultSection');
+        var resultSection = document.getElementById('resultSection');
         resultSection.style.display = 'block';
         document.getElementById('slideLink').href = result.slideUrl;
       } else {
@@ -297,7 +403,7 @@
      * Helper to show status messages
      */
     function showStatus(type, message) {
-      const status = document.getElementById('status');
+      var status = document.getElementById('status');
       status.className = 'show ' + type;
       status.innerHTML = message;
     }

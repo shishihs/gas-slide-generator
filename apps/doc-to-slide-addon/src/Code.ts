@@ -418,7 +418,13 @@ function convertDocumentToJson() {
         // 4. Call Vertex AI directly (Standard Mode)
         const jsonResult = callVertexAI(documentText);
 
-        // 5. Store the result
+        // 5. Check for user color settings
+        const colors = getUserColors();
+        if (colors) {
+            if (!jsonResult.settings) jsonResult.settings = {};
+            jsonResult.settings.colors = colors;
+        }
+
         storeJsonData(jsonResult);
 
         Logger.log('JSON Result: ' + JSON.stringify(jsonResult));
@@ -478,7 +484,7 @@ function isValidSlideJson(data) {
  */
 function generateSlidesFromJson(jsonData) {
     try {
-        const templateId = getTemplateSlideId();
+        let templateId = getTemplateSlideId();
         let destinationId = undefined;
 
 
@@ -579,8 +585,18 @@ function generateSlidesFromJson(jsonData) {
             slides: slidesData,
             theme: theme,
             templateId: templateId || undefined,
-            destinationId: destinationId // Pass the pre-copied ID
+            destinationId: destinationId, // Pass the pre-copied ID
+            settings: undefined // Initialize
         };
+
+        // Attach custom color settings if available in jsonData or Properties
+        const userColors = getUserColors();
+        // Priority: JSON settings > User Properties > Defaults
+        const mergedColors = { ...userColors, ...(jsonData.settings && jsonData.settings.colors ? jsonData.settings.colors : {}) };
+
+        if (Object.keys(mergedColors).length > 0) {
+            payload.settings = { colors: mergedColors };
+        }
 
         console.log('Checking for SlideGeneratorApi library...');
         console.log('Type of SlideGeneratorApi:', typeof SlideGeneratorApi);
@@ -615,6 +631,35 @@ function generateSlidesFromJson(jsonData) {
         Logger.log('Error in generateSlides: ' + error.toString());
         throw error;
     }
+}
+
+
+// ========================================
+// User Settings (Colors)
+// ========================================
+
+/**
+ * Save user defined colors to Properties
+ */
+function saveUserColors(colors) {
+    const props = PropertiesService.getUserProperties();
+    props.setProperties({
+        'COLOR_PRIMARY': colors.primary,
+        'COLOR_DEEP': colors.deep,
+        'COLOR_TEXT': colors.text
+    });
+}
+
+/**
+ * Get user defined colors or defaults
+ */
+function getUserColors() {
+    const props = PropertiesService.getUserProperties();
+    return {
+        primary: props.getProperty('COLOR_PRIMARY') || '#8FB130',
+        deep: props.getProperty('COLOR_DEEP') || '#526717',
+        text: props.getProperty('COLOR_TEXT') || '#333333'
+    };
 }
 
 

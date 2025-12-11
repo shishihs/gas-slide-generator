@@ -23,7 +23,9 @@
             color: #333;
         }
 
-        h1, h2, h3 {
+        h1,
+        h2,
+        h3 {
             margin-top: 24px;
             margin-bottom: 12px;
             font-weight: 500;
@@ -52,7 +54,8 @@
             margin-bottom: 16px;
         }
 
-        ul, ol {
+        ul,
+        ol {
             margin-bottom: 16px;
             padding-left: 24px;
         }
@@ -105,95 +108,126 @@
 
 <body>
     <span class="header-logo">🤖📄➡️🎨</span>
-<h1>ユーザーガイド - スライド起草くん</h1>
+    <h1>ユーザーガイド - スライド起草くん</h1>
 
-<p>このアドオンは、Google ドキュメントの原稿から、AI を活用してその場で Google Slides を自動生成するツールです。</p>
+    <p>このアドオンは、Google ドキュメントの原稿から、AI を活用してその場で Google Slides を自動生成するツールです。</p>
 
-<h2>✨ 主な機能</h2>
+    <h2>✨ 主な機能</h2>
 
-<ul>
-<li><strong>テンプレート自動生成</strong>: 最初に一度だけ、デザインのベースとなるスライドを作成します。</li>
-<li><strong>AI 解析</strong>: ドキュメントの文章を読み取り、スライド構成案 (JSON) を自動で作ります。</li>
-<li><strong>スライド生成</strong>: 構成案を元に、実際の Google Slides を生成します。</li>
-</ul>
+    <ul>
+        <li><strong>テンプレート自動生成</strong>: 最初に一度だけ、デザインのベースとなるスライドを作成します。</li>
+        <li><strong>AI 解析</strong>: ドキュメントの文章を読み取り、スライド構成案 (JSON) を自動で作ります。</li>
+        <li><strong>スライド生成</strong>: 構成案を元に、実際の Google Slides を生成します。</li>
+    </ul>
 
-<hr>
+    <hr>
 
-<h2>🚀 はじめ方 (Quick Start)</h2>
+    <h2>🚀 はじめ方 (Quick Start)</h2>
 
-<h3>Step 1: テンプレートの準備</h3>
+    <h3>Step 1: テンプレートの準備</h3>
 
-<p>まず、スライドのデザインひな形（テンプレート）を準備します。</p>
+    <p>まず、スライドのデザインひな形（テンプレート）を準備します。</p>
 
-<ul>
-<li>メニューから <strong><code>スライド起草くん > 設定</code></strong> を開きます。</li>
-<li>「スライドテンプレート」セクションにある <strong>「テンプレートを新規作成」ボタン</strong> をクリック。</li>
-<li>「スライド作成完了」と表示されたら、作成された URL を開きます。</li>
-<li>生成されたスライドの「テーマ」を変更して、お好みのデザイン（フォントや色）に調整してください。</li>
-</ul>
-<p>    -   ※このスライドが今後の生成のベースになります。</p>
+    <ul>
+        <li>メニューから <strong><code>スライド起草くん > 設定</code></strong> を開きます。</li>
+        <li>「スライドテンプレート」セクションにある <strong>「テンプレートを新規作成」ボタン</strong> をクリック。</li>
+        <li>「スライド作成完了」と表示されたら、作成された URL を開きます。</li>
+        <li>生成されたスライドの「テーマ」を変更して、お好みのデザイン（フォントや色）に調整してください。</li>
+    </ul>
+    <p> - ※このスライドが今後の生成のベースになります。</p>
 
-<h3>Step 2: JSON の準備 (手動モード - 推奨)</h3>
+    <h3>Step 2: JSON の準備 (手動モード - 推奨)</h3>
 
-<p>推奨されるデフォルトの使い方です。専用の Gem (チャットボット) を使用します。</p>
+    <p>推奨されるデフォルトの使い方です。専用の Gem (チャットボット) を使用します。</p>
 
-<ul>
-<li><a href="https://gemini.google.com/app/" target="_blank">Google Gemini</a> (または設定画面に保存した Gem URL) を開きます。</li>
-<li>原稿を渡し、「スライドジェネレーター用のJSONを作って」と依頼します。</li>
-<li>生成された JSON コードをコピーします。</li>
-</ul>
+    <ul>
+        <li><a href="https://gemini.google.com/app/" target="_blank">Google Gemini</a> (または設定画面に保存した Gem URL) を開きます。
+        </li>
+        <li>原稿を渡し、「スライドジェネレーター用のJSONを作って」と依頼します。</li>
+        <li>生成された JSON コードをコピーします。</li>
+    </ul>
 
-<h3>Step 3: ドキュメントに貼り付け</h3>
+    <h3>Step 3: ドキュメントに貼り付け</h3>
 
-<ul>
-<li>この Google ドキュメントに、コピーした JSON をそのまま貼り付けます。</li>
-</ul>
-<p>    -   ※ 元の原稿は残していても構いませんが、JSON 全体が正しく貼られていることを確認してください。</p>
+    <ul>
+        <li>この Google ドキュメントに、コピーした JSON をそのまま貼り付けます。</li>
+    </ul>
+    <p> - ※ 元の原稿は残していても構いませんが、JSON 全体が正しく貼られていることを確認してください。</p>
 
-<h3>Step 4: スライド生成</h3>
+    <h3>Step 4: スライド生成</h3>
 
-<ul>
-<li>メニューから <strong><code>スライド起草くん > スライド生成</code></strong> をクリック。</li>
-<li>ドキュメント内の JSON が読み込まれ、スライドが自動生成されます。</li>
-</ul>
+    <ul>
+        <li>メニューから <strong><code>スライド起草くん > スライド生成</code></strong> をクリック。</li>
+        <li>ドキュメント内の JSON が読み込まれ、スライドが自動生成されます。</li>
+    </ul>
 
-<hr>
+    <hr>
 
-<h2>💡 自動生成モード (Advanced)</h2>
+    <h2>💡 自動生成モード (Advanced)</h2>
 
-<p>GCP プロジェクトをお持ちの方は、Vertex AI と連携してドキュメントから直接スライド生成が可能です。</p>
+    <p>GCP プロジェクトをお持ちの方は、Vertex AI と連携してドキュメントから直接スライド生成が可能です。</p>
 
-<ul>
-<li>メニューから <strong><code>スライド起草くん > 設定</code></strong> を開き、<code>GCP Project ID</code> などを入力します。</li>
-<li>ドキュメントに原稿 (文章) を入力します。</li>
-<li><strong><code>スライド生成</code></strong> メニューを実行すると、AI が自動で JSON 変換〜スライド生成を行います。</li>
-</ul>
+    <ul>
+        <li>メニューから <strong><code>スライド起草くん > 設定</code></strong> を開き、<code>GCP Project ID</code> などを入力します。</li>
+        <li>ドキュメントに原稿 (文章) を入力します。</li>
+        <li><strong><code>スライド生成</code></strong> メニューを実行すると、AI が自動で JSON 変換〜スライド生成を行います。</li>
+    </ul>
 
-<hr>
+    <hr>
 
-<h2>⚙️ 設定について (Settings)</h2>
+    <h2>⚙️ 設定について (Settings)</h2>
 
-<strong><code>スライド起草くん > 設定</code></strong> から各種設定を行えます。
+    <strong><code>スライド起草くん > 設定</code></strong> から各種設定を行えます。
 
-<ul>
-<li><strong>GCP Project ID</strong>: AI 機能 (Vertex AI) を利用するための Google Cloud プロジェクト ID。</li>
-<li><strong>Region</strong>: AI のデータセンター場所 (例: <code>asia-northeast1</code>)。</li>
-<li><strong>Model</strong>: 使用する AI モデル (例: <code>gemini-2.5-flash</code>)。</li>
-<li><strong>Gem URL</strong>: 手動モードで使用する Gem のリンク。</li>
-<li><strong>テンプレートスライド</strong>: 生成のベースとなるスライドの URL または ID。</li>
-</ul>
+    <ul>
+        <li><strong>GCP Project ID</strong>: AI 機能 (Vertex AI) を利用するための Google Cloud プロジェクト ID。</li>
+        <li><strong>Region</strong>: AI のデータセンター場所 (例: <code>asia-northeast1</code>)。</li>
+        <li><strong>Model</strong>: 使用する AI モデル (例: <code>gemini-2.5-flash</code>)。</li>
+        <li><strong>Gem URL</strong>: 手動モードで使用する Gem のリンク。</li>
+        <li><strong>テンプレートスライド</strong>: 生成のベースとなるスライドの URL または ID。</li>
+    </ul>
 
-<blockquote><p>💡 <strong>ヒント</strong>: 「手動モード」で利用する場合は、GCP 設定は不要です。Gem 等のチャットボットで作った JSON を直接ドキュメントに貼り付けて利用します。</p></blockquote>
+    <blockquote>
+        <p>💡 <strong>ヒント</strong>: 「手動モード」で利用する場合は、GCP 設定は不要です。Gem 等のチャットボットで作った JSON を直接ドキュメントに貼り付けて利用します。</p>
+    </blockquote>
 
-<hr>
+    <hr>
 
-<h2>❓ よくある質問</h2>
+    <h2>🎨 レイアウトの詳細 (Layouts)</h2>
 
-<strong>Q. エラーが表示されます</strong>
-<p>A. 設定画面で <code>GCP Project ID</code> が正しく入力されているか確認してください。また、初めて使う場合は初期設定 (テンプレート作成) が必要です。</p>
+    <p>テンプレートスライドには、以下の5つのレイアウト名のタグ (<code>LAYOUT:NAME</code>) が埋め込まれている必要があります。<br>
+        <small>※ <code>スライド起草くん > 設定 > テンプレートを新規作成</code> でこれらが含まれたテンプレートが自動作成されます。</small>
+    </p>
 
-<strong>Q. デザインを変えたい</strong>
-<p>A. 設定画面からテンプレートスライドを開き、テーマやフォントを変更してください。生成されるスライドは常にテンプレートのデザインを引き継ぎます。</p>
+    <ul>
+        <li><strong><code>TITLE</code></strong>: 表紙</li>
+        <li><strong><code>AGENDA</code></strong>: 目次</li>
+        <li><strong><code>SECTION</code></strong>: セクション区切り</li>
+        <li><strong><code>CONCLUSION</code></strong>: まとめ</li>
+        <li><strong><code>CONTENT</code></strong>: 上記以外のコンテンツ (基本)</li>
+    </ul>
+
+    <h3>JSON type との対応</h3>
+    <p>JSONを手動で編集する場合、<code>layout</code> プロパティは以下のように指定します。</p>
+
+    <ul>
+        <li><code>title</code> タイプ &rarr; <code>TITLE</code> レイアウト</li>
+        <li><code>agenda</code> タイプ &rarr; <code>AGENDA</code> レイアウト</li>
+        <li><code>section</code> タイプ &rarr; <code>SECTION</code> レイアウト</li>
+        <li><code>conclusion</code> タイプ &rarr; <code>CONCLUSION</code> レイアウト</li>
+        <li>その他すべて (<code>content</code>, <code>cards</code>, <code>timeline</code>, <code>kpi</code> 等) &rarr;
+            <strong><code>CONTENT</code></strong> レイアウト</li>
+    </ul>
+
+    <hr>
+
+    <h2>❓ よくある質問</h2>
+
+    <strong>Q. エラーが表示されます</strong>
+    <p>A. 設定画面で <code>GCP Project ID</code> が正しく入力されているか確認してください。また、初めて使う場合は初期設定 (テンプレート作成) が必要です。</p>
+
+    <strong>Q. デザインを変えたい</strong>
+    <p>A. 設定画面からテンプレートスライドを開き、テーマやフォントを変更してください。生成されるスライドは常にテンプレートのデザインを引き継ぎます。</p>
 
 </body>
 

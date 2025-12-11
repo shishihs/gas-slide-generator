@@ -61,7 +61,7 @@ export class TableDiagramRenderer implements IDiagramRenderer {
 
                 // Stronger separator for header
                 cell.getBorderBottom().setSolidFill(settings.primaryColor);
-                cell.getBorderBottom().setWeight(2);
+                cell.getBorderBottom().setWeight(3); // Thicker for clear hierarchy
 
                 try { cell.setContentAlignment(SlidesApp.ContentAlignment.BOTTOM); } catch (e) { } // Align bottom for header
             }

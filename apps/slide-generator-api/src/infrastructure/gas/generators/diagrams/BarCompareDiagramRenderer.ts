@@ -53,9 +53,11 @@ export class BarCompareDiagramRenderer implements IDiagramRenderer {
             try { labelShape.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
 
             // Bar Area
+            // Bar Area
             const barLeft = area.left + labelColW + layout.pxToPt(20);
             const maxBarWidth = area.width - (labelColW + layout.pxToPt(80)); // Leave room on right for diff
 
+            const barGap = layout.pxToPt(2); // Tighter gap
             const barY = currentY + (rowHeight - (barHeight * 2 + barGap * 2)) / 2;
 
             // Minimal Bars
@@ -73,6 +75,7 @@ export class BarCompareDiagramRenderer implements IDiagramRenderer {
             // Right (After) - Color, Slightly Thicker/Same
             const rightBarW = (rightNum / maxValue) * maxBarWidth;
             if (rightBarW > 0) {
+                // Closer to left bar
                 const b = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, barLeft, barY + barHeight + barGap, rightBarW, barHeight);
                 b.getFill().setSolidFill(settings.primaryColor);
                 b.getBorder().setTransparent();

@@ -34,20 +34,20 @@ export class FAQDiagramRenderer implements IDiagramRenderer {
             const qInd = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, area.left, y, layout.pxToPt(30), layout.pxToPt(30));
             setStyledText(qInd, 'Q.', { size: 16, bold: true, color: settings.primaryColor });
 
-            // Q Content
-            const qBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, area.left + layout.pxToPt(40), y, area.width - layout.pxToPt(40), layout.pxToPt(40));
+            // Q Content - Closer to Q.
+            const qBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, area.left + layout.pxToPt(30), y, area.width - layout.pxToPt(30), layout.pxToPt(40));
             setStyledText(qBox, qStr, { size: 14, bold: true, color: DEFAULT_THEME.colors.textPrimary });
 
             // A Indicator (Gray)
-            // Positioned below Q
-            const aY = y + layout.pxToPt(40); // Approx offset
+            // Positioned below Q - Closer
+            const aY = y + layout.pxToPt(30);
             const aInd = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, area.left, aY, layout.pxToPt(30), layout.pxToPt(30));
             setStyledText(aInd, 'A.', { size: 16, bold: true, color: DEFAULT_THEME.colors.neutralGray });
 
-            // A Content
-            const aBoxHasHeight = itemH - layout.pxToPt(50);
+            // A Content - Closer to A.
+            const aBoxHasHeight = itemH - layout.pxToPt(40);
             if (aBoxHasHeight > 10) {
-                const aBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, area.left + layout.pxToPt(40), aY, area.width - layout.pxToPt(40), aBoxHasHeight);
+                const aBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, area.left + layout.pxToPt(30), aY, area.width - layout.pxToPt(30), aBoxHasHeight);
                 setStyledText(aBox, aStr, { size: 12, color: DEFAULT_THEME.colors.textPrimary });
                 try { aBox.setContentAlignment(SlidesApp.ContentAlignment.TOP); } catch (e) { }
             }

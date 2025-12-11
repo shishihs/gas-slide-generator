@@ -1279,7 +1279,6 @@ var global = this;
                   const w = imgWidth * scale;
                   const h = imgHeight * scale;
                   ghostImage.setWidth(w).setHeight(h).setLeft(ghostRect.left + (ghostRect.width - w) / 2).setTop(ghostRect.top + (ghostRect.height - h) / 2);
-                  ghostImage.sendToBack();
                   ghostImageInserted = true;
                 }
               } catch (e) {
@@ -1300,7 +1299,6 @@ var global = this;
               ghost.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
             } catch (e) {
             }
-            ghost.sendToBack();
           }
           const titlePlaceholder = slide.getPlaceholder(SlidesApp.PlaceholderType.TITLE) || slide.getPlaceholder(SlidesApp.PlaceholderType.CENTERED_TITLE);
           if (titlePlaceholder) {
@@ -1461,13 +1459,14 @@ var global = this;
           }
           const type = (data.type || data.layout || "").toLowerCase();
           Logger.log("Generating Diagram Slide: " + type);
-          const bodyPlaceholder = slide.getPlaceholder(SlidesApp.PlaceholderType.BODY);
-          const workArea = bodyPlaceholder ? { left: bodyPlaceholder.getLeft(), top: bodyPlaceholder.getTop(), width: bodyPlaceholder.getWidth(), height: bodyPlaceholder.getHeight() } : layout.getRect("contentSlide.body");
-          if (bodyPlaceholder) {
+          const placeholders = slide.getPlaceholders();
+          const targetPlaceholder = placeholders.find((p) => p.getPlaceholderType() === SlidesApp.PlaceholderType.BODY) || placeholders.find((p) => p.getPlaceholderType() === SlidesApp.PlaceholderType.OBJECT) || placeholders.find((p) => p.getPlaceholderType() === SlidesApp.PlaceholderType.PICTURE);
+          const workArea = targetPlaceholder ? { left: targetPlaceholder.getLeft(), top: targetPlaceholder.getTop(), width: targetPlaceholder.getWidth(), height: targetPlaceholder.getHeight() } : layout.getRect("contentSlide.body");
+          if (targetPlaceholder) {
             try {
-              bodyPlaceholder.remove();
+              targetPlaceholder.remove();
             } catch (e) {
-              Logger.log("Warning: Could not remove body placeholder: " + e);
+              Logger.log("Warning: Could not remove target placeholder: " + e);
             }
           }
           const elementsBefore = slide.getPageElements().map((e) => e.getObjectId());
@@ -1528,13 +1527,24 @@ var global = this;
             }
             return true;
           });
+          let generatedGroup = null;
           if (newElements.length > 1) {
             try {
-              slide.group(newElements);
+              generatedGroup = slide.group(newElements);
               Logger.log(`Grouped ${newElements.length} content elements for ${type}`);
             } catch (e) {
               Logger.log(`Warning: Could not group elements: ${e}`);
             }
+          } else if (newElements.length === 1) {
+            generatedGroup = newElements[0];
+          }
+          if (generatedGroup) {
+            const currentWidth = generatedGroup.getWidth();
+            const currentHeight = generatedGroup.getHeight();
+            const centerX = workArea.left + (workArea.width - currentWidth) / 2;
+            const centerY = workArea.top + (workArea.height - currentHeight) / 2;
+            generatedGroup.setLeft(centerX);
+            generatedGroup.setTop(centerY);
           }
           addCucFooter(slide, layout, pageNum, settings, this.creditImageBlob);
         }
@@ -2231,8 +2241,9 @@ ${desc}`, {
             const valueBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x + padding, y + labelH + padding, cardW - padding * 2, valueH);
             const valStr = String(item.value || "0");
             let fontSize = 48;
-            if (valStr.length > 6) fontSize = 36;
-            if (valStr.length > 10) fontSize = 28;
+            if (valStr.length > 4) fontSize = 36;
+            if (valStr.length > 6) fontSize = 28;
+            if (valStr.length > 10) fontSize = 24;
             setStyledText(valueBox, valStr, { size: fontSize, bold: true, color: settings.primaryColor, align: SlidesApp.ParagraphAlignment.CENTER });
             if (item.change || item.status) {
               const statusH = layout.pxToPt(30);
@@ -2257,12 +2268,6 @@ ${desc}`, {
           const numRows = rows.length + (headers.length ? 1 : 0);
           const numCols = headers.length || (rows[0] ? rows[0].length : 1);
           if (numRows === 0 || numCols === 0) return;
-
-          // Color safety defaults
-          const primaryColor = settings.primaryColor || "#4285F4";
-          const textPrimary = (CONFIG.COLORS && CONFIG.COLORS.text_primary) ? CONFIG.COLORS.text_primary : "#000000";
-          const faintGray = (CONFIG.COLORS && CONFIG.COLORS.faint_gray) ? CONFIG.COLORS.faint_gray : "#F3F3F3";
-
           const table = slide.insertTable(numRows, numCols);
           table.setLeft(area.left);
           table.setTop(area.top);
@@ -2271,7 +2276,7 @@ ${desc}`, {
           if (headers.length) {
             for (let c = 0; c < numCols; c++) {
               const cell = table.getCell(0, c);
-              cell.getFill().setSolidFill(primaryColor);
+              cell.getFill().setSolidFill(settings.primaryColor);
               cell.getText().setText(headers[c] || "");
               const style = cell.getText().getTextStyle();
               style.setBold(true);
@@ -2286,14 +2291,14 @@ ${desc}`, {
           }
           rows.forEach((row, rIdx) => {
             const isAlt = rIdx % 2 !== 0;
-            const rowColor = isAlt ? faintGray : "#FFFFFF";
+            const rowColor = isAlt ? CONFIG.COLORS.faint_gray : "#FFFFFF";
             for (let c = 0; c < numCols; c++) {
               const cell = table.getCell(rowIndex, c);
               cell.getFill().setSolidFill(rowColor);
               cell.getText().setText(String(row[c] || ""));
               const rowStyle = cell.getText().getTextStyle();
               rowStyle.setFontSize(12);
-              rowStyle.setForegroundColor(textPrimary);
+              rowStyle.setForegroundColor(CONFIG.COLORS.text_primary);
               try {
                 cell.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
               } catch (e) {

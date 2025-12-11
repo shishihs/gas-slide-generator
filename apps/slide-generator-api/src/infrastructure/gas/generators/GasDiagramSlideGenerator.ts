@@ -130,13 +130,29 @@ export class GasDiagramSlideGenerator implements ISlideGenerator {
             return true;
         });
 
+        let generatedGroup: GoogleAppsScript.Slides.PageElement | null = null;
+
         if (newElements.length > 1) {
             try {
-                slide.group(newElements);
+                generatedGroup = slide.group(newElements) as any;
                 Logger.log(`Grouped ${newElements.length} content elements for ${type}`);
             } catch (e) {
                 Logger.log(`Warning: Could not group elements: ${e}`);
             }
+        } else if (newElements.length === 1) {
+            generatedGroup = newElements[0];
+        }
+
+        // Center the generated content within the work area
+        if (generatedGroup) {
+            const currentWidth = generatedGroup.getWidth();
+            const currentHeight = generatedGroup.getHeight();
+
+            const centerX = workArea.left + (workArea.width - currentWidth) / 2;
+            const centerY = workArea.top + (workArea.height - currentHeight) / 2;
+
+            generatedGroup.setLeft(centerX);
+            generatedGroup.setTop(centerY);
         }
 
         addCucFooter(slide, layout, pageNum, settings, this.creditImageBlob);
@@ -964,8 +980,9 @@ export class GasDiagramSlideGenerator implements ISlideGenerator {
             const valStr = String(item.value || '0');
             // Adaptive font size
             let fontSize = 48;
-            if (valStr.length > 6) fontSize = 36;
-            if (valStr.length > 10) fontSize = 28;
+            if (valStr.length > 4) fontSize = 36;
+            if (valStr.length > 6) fontSize = 28;
+            if (valStr.length > 10) fontSize = 24;
 
             setStyledText(valueBox, valStr, { size: fontSize, bold: true, color: settings.primaryColor, align: SlidesApp.ParagraphAlignment.CENTER });
 

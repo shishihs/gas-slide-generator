@@ -1459,13 +1459,14 @@ var global = this;
           }
           const type = (data.type || data.layout || "").toLowerCase();
           Logger.log("Generating Diagram Slide: " + type);
-          const bodyPlaceholder = slide.getPlaceholder(SlidesApp.PlaceholderType.BODY);
-          const workArea = bodyPlaceholder ? { left: bodyPlaceholder.getLeft(), top: bodyPlaceholder.getTop(), width: bodyPlaceholder.getWidth(), height: bodyPlaceholder.getHeight() } : layout.getRect("contentSlide.body");
-          if (bodyPlaceholder) {
+          const placeholders = slide.getPlaceholders();
+          const targetPlaceholder = placeholders.find((p) => p.getPlaceholderType() === SlidesApp.PlaceholderType.BODY) || placeholders.find((p) => p.getPlaceholderType() === SlidesApp.PlaceholderType.OBJECT) || placeholders.find((p) => p.getPlaceholderType() === SlidesApp.PlaceholderType.PICTURE);
+          const workArea = targetPlaceholder ? { left: targetPlaceholder.getLeft(), top: targetPlaceholder.getTop(), width: targetPlaceholder.getWidth(), height: targetPlaceholder.getHeight() } : layout.getRect("contentSlide.body");
+          if (targetPlaceholder) {
             try {
-              bodyPlaceholder.remove();
+              targetPlaceholder.remove();
             } catch (e) {
-              Logger.log("Warning: Could not remove body placeholder: " + e);
+              Logger.log("Warning: Could not remove target placeholder: " + e);
             }
           }
           const elementsBefore = slide.getPageElements().map((e) => e.getObjectId());
@@ -1526,13 +1527,24 @@ var global = this;
             }
             return true;
           });
+          let generatedGroup = null;
           if (newElements.length > 1) {
             try {
-              slide.group(newElements);
+              generatedGroup = slide.group(newElements);
               Logger.log(`Grouped ${newElements.length} content elements for ${type}`);
             } catch (e) {
               Logger.log(`Warning: Could not group elements: ${e}`);
             }
+          } else if (newElements.length === 1) {
+            generatedGroup = newElements[0];
+          }
+          if (generatedGroup) {
+            const currentWidth = generatedGroup.getWidth();
+            const currentHeight = generatedGroup.getHeight();
+            const centerX = workArea.left + (workArea.width - currentWidth) / 2;
+            const centerY = workArea.top + (workArea.height - currentHeight) / 2;
+            generatedGroup.setLeft(centerX);
+            generatedGroup.setTop(centerY);
           }
           addCucFooter(slide, layout, pageNum, settings, this.creditImageBlob);
         }
@@ -2229,8 +2241,9 @@ ${desc}`, {
             const valueBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x + padding, y + labelH + padding, cardW - padding * 2, valueH);
             const valStr = String(item.value || "0");
             let fontSize = 48;
-            if (valStr.length > 6) fontSize = 36;
-            if (valStr.length > 10) fontSize = 28;
+            if (valStr.length > 4) fontSize = 36;
+            if (valStr.length > 6) fontSize = 28;
+            if (valStr.length > 10) fontSize = 24;
             setStyledText(valueBox, valStr, { size: fontSize, bold: true, color: settings.primaryColor, align: SlidesApp.ParagraphAlignment.CENTER });
             if (item.change || item.status) {
               const statusH = layout.pxToPt(30);

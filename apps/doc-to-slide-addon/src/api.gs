@@ -1192,161 +1192,15 @@ var global = this;
     }
   });
 
-  // src/infrastructure/gas/generators/diagrams/DiagramRendererFactory.ts
-  var DiagramRendererFactory;
-  var init_DiagramRendererFactory = __esm({
-    "src/infrastructure/gas/generators/diagrams/DiagramRendererFactory.ts"() {
-      init_CardsDiagramRenderer();
-      DiagramRendererFactory = class {
-        static getRenderer(type) {
-          const normalizedType = type.toLowerCase();
-          if (normalizedType.includes("cards") || normalizedType.includes("headercards")) {
-            return new CardsDiagramRenderer();
-          }
-          return null;
-        }
-      };
-    }
-  });
-
-  // src/infrastructure/gas/generators/GasDiagramSlideGenerator.ts
-  var GasDiagramSlideGenerator;
-  var init_GasDiagramSlideGenerator = __esm({
-    "src/infrastructure/gas/generators/GasDiagramSlideGenerator.ts"() {
+  // src/infrastructure/gas/generators/diagrams/TimelineDiagramRenderer.ts
+  var TimelineDiagramRenderer;
+  var init_TimelineDiagramRenderer = __esm({
+    "src/infrastructure/gas/generators/diagrams/TimelineDiagramRenderer.ts"() {
       init_DefaultTheme();
       init_SlideUtils();
       init_ColorUtils();
-      init_DiagramRendererFactory();
-      GasDiagramSlideGenerator = class {
-        constructor(creditImageBlob) {
-          this.creditImageBlob = creditImageBlob;
-        }
-        generate(slide, data, layout, pageNum, settings, imageUpdateOption = "update") {
-          Logger.log(`Generating Diagram Slide: ${data.layout || data.type}`);
-          const titlePlaceholder = slide.getPlaceholder(SlidesApp.PlaceholderType.TITLE) || slide.getPlaceholder(SlidesApp.PlaceholderType.CENTERED_TITLE);
-          if (titlePlaceholder) {
-            try {
-              titlePlaceholder.asShape().getText().setText(data.title || "");
-            } catch (e) {
-              Logger.log(`Warning: Title placeholder found but text could not be set. ${e}`);
-            }
-          }
-          const type = (data.type || data.layout || "").toLowerCase();
-          Logger.log("Generating Diagram Slide: " + type);
-          const placeholders = slide.getPlaceholders();
-          const getPlaceholderTypeSafe = (p) => {
-            try {
-              const shape = p.asShape();
-              if (shape) {
-                return shape.getPlaceholderType();
-              }
-            } catch (e) {
-            }
-            return null;
-          };
-          const targetPlaceholder = placeholders.find((p) => getPlaceholderTypeSafe(p) === SlidesApp.PlaceholderType.BODY) || placeholders.find((p) => getPlaceholderTypeSafe(p) === SlidesApp.PlaceholderType.OBJECT) || placeholders.find((p) => getPlaceholderTypeSafe(p) === SlidesApp.PlaceholderType.PICTURE);
-          let workArea;
-          if (targetPlaceholder) {
-            workArea = {
-              left: targetPlaceholder.getLeft(),
-              top: targetPlaceholder.getTop(),
-              width: targetPlaceholder.getWidth(),
-              height: targetPlaceholder.getHeight()
-            };
-          } else {
-            const typeKey = `${type}Slide`;
-            const areaRect = layout.getRect(`${typeKey}.area`) || layout.getRect("contentSlide.body");
-            workArea = areaRect;
-          }
-          Logger.log(`WorkArea for ${type}: left=${workArea.left}, top=${workArea.top}, width=${workArea.width}, height=${workArea.height}`);
-          if (targetPlaceholder) {
-            try {
-              targetPlaceholder.remove();
-            } catch (e) {
-              Logger.log("Warning: Could not remove target placeholder: " + e);
-            }
-          }
-          const elementsBefore = slide.getPageElements().map((e) => e.getObjectId());
-          try {
-            const renderer = DiagramRendererFactory.getRenderer(type);
-            if (renderer) {
-              renderer.render(slide, data, workArea, settings, layout);
-            } else if (type.includes("timeline")) {
-              this.drawTimeline(slide, data, workArea, settings, layout);
-            } else if (type.includes("process")) {
-              this.drawProcess(slide, data, workArea, settings, layout);
-            } else if (type.includes("cycle")) {
-              this.drawCycle(slide, data, workArea, settings, layout);
-            } else if (type.includes("pyramid")) {
-              this.drawPyramid(slide, data, workArea, settings, layout);
-            } else if (type.includes("triangle")) {
-              this.drawTriangle(slide, data, workArea, settings, layout);
-            } else if (type.includes("statscompare")) {
-              this.drawStatsCompare(slide, data, workArea, settings, layout);
-            } else if (type.includes("barcompare")) {
-              this.drawBarCompare(slide, data, workArea, settings, layout);
-            } else if (type.includes("compare") || type.includes("kaizen")) {
-              this.drawComparison(slide, data, workArea, settings, layout);
-            } else if (type.includes("stepup") || type.includes("stair")) {
-              this.drawStepUp(slide, data, workArea, settings, layout);
-            } else if (type.includes("flowchart")) {
-              this.drawFlowChart(slide, data, workArea, settings, layout);
-            } else if (type.includes("diagram")) {
-              this.drawLanes(slide, data, workArea, settings, layout);
-            } else if (type.includes("kpi")) {
-              this.drawKPI(slide, data, workArea, settings, layout);
-            } else if (type.includes("table")) {
-              this.drawTable(slide, data, workArea, settings, layout);
-            } else if (type.includes("faq")) {
-              this.drawFAQ(slide, data, workArea, settings, layout);
-            } else if (type.includes("progress")) {
-              this.drawProgress(slide, data, workArea, settings, layout);
-            } else if (type.includes("quote")) {
-              this.drawQuote(slide, data, workArea, settings, layout);
-            } else if (type.includes("imagetext")) {
-              this.drawImageText(slide, data, workArea, settings, layout);
-            } else {
-              Logger.log("Diagram logic not implemented for type: " + type);
-            }
-          } catch (e) {
-            Logger.log(`ERROR in drawing ${type}: ${e}`);
-          }
-          const newElements = slide.getPageElements().filter((e) => {
-            if (elementsBefore.includes(e.getObjectId())) return false;
-            try {
-              const shape = e.asShape();
-              if (shape) {
-                const placeholderType = shape.getPlaceholderType();
-                if (placeholderType === SlidesApp.PlaceholderType.TITLE || placeholderType === SlidesApp.PlaceholderType.SUBTITLE || placeholderType === SlidesApp.PlaceholderType.CENTERED_TITLE) {
-                  return false;
-                }
-              }
-            } catch (e2) {
-            }
-            return true;
-          });
-          let generatedGroup = null;
-          if (newElements.length > 1) {
-            try {
-              generatedGroup = slide.group(newElements);
-              Logger.log(`Grouped ${newElements.length} content elements for ${type}`);
-            } catch (e) {
-              Logger.log(`Warning: Could not group elements: ${e}`);
-            }
-          } else if (newElements.length === 1) {
-            generatedGroup = newElements[0];
-          }
-          if (generatedGroup) {
-            const currentWidth = generatedGroup.getWidth();
-            const currentHeight = generatedGroup.getHeight();
-            const centerX = workArea.left + (workArea.width - currentWidth) / 2;
-            const centerY = workArea.top + (workArea.height - currentHeight) / 2;
-            generatedGroup.setLeft(centerX);
-            generatedGroup.setTop(centerY);
-          }
-          addFooter(slide, layout, pageNum, settings, this.creditImageBlob);
-        }
-        drawTimeline(slide, data, area, settings, layout) {
+      TimelineDiagramRenderer = class {
+        render(slide, data, area, settings, layout) {
           const milestones = data.milestones || data.items || [];
           if (!milestones.length) return;
           const inner = layout.pxToPt(80), baseY = area.top + area.height * 0.5;
@@ -1410,7 +1264,19 @@ var global = this;
             }
           });
         }
-        drawProcess(slide, data, area, settings, layout) {
+      };
+    }
+  });
+
+  // src/infrastructure/gas/generators/diagrams/ProcessDiagramRenderer.ts
+  var ProcessDiagramRenderer;
+  var init_ProcessDiagramRenderer = __esm({
+    "src/infrastructure/gas/generators/diagrams/ProcessDiagramRenderer.ts"() {
+      init_DefaultTheme();
+      init_SlideUtils();
+      init_ColorUtils();
+      ProcessDiagramRenderer = class {
+        render(slide, data, area, settings, layout) {
           const steps = data.steps || data.items || [];
           if (!steps.length) return;
           const n = steps.length;
@@ -1469,7 +1335,18 @@ var global = this;
             }
           }
         }
-        drawCycle(slide, data, area, settings, layout) {
+      };
+    }
+  });
+
+  // src/infrastructure/gas/generators/diagrams/CycleDiagramRenderer.ts
+  var CycleDiagramRenderer;
+  var init_CycleDiagramRenderer = __esm({
+    "src/infrastructure/gas/generators/diagrams/CycleDiagramRenderer.ts"() {
+      init_DefaultTheme();
+      init_SlideUtils();
+      CycleDiagramRenderer = class {
+        render(slide, data, area, settings, layout) {
           const items = data.items || [];
           if (!items.length) return;
           const textLengths = items.map((item) => {
@@ -1551,7 +1428,19 @@ ${labelText}`, { size: fontSize, bold: true, color: DEFAULT_THEME.colors.backgro
             arrow.setRotation(pos.rotation);
           });
         }
-        drawPyramid(slide, data, area, settings, layout) {
+      };
+    }
+  });
+
+  // src/infrastructure/gas/generators/diagrams/PyramidDiagramRenderer.ts
+  var PyramidDiagramRenderer;
+  var init_PyramidDiagramRenderer = __esm({
+    "src/infrastructure/gas/generators/diagrams/PyramidDiagramRenderer.ts"() {
+      init_DefaultTheme();
+      init_SlideUtils();
+      init_ColorUtils();
+      PyramidDiagramRenderer = class {
+        render(slide, data, area, settings, layout) {
           const levels = data.levels || data.items || [];
           if (!levels.length) return;
           const levelsToDraw = levels.slice(0, 4);
@@ -1628,68 +1517,127 @@ ${labelText}`, { size: fontSize, bold: true, color: DEFAULT_THEME.colors.backgro
             }
           });
         }
-        drawComparison(slide, data, area, settings, layout) {
+      };
+    }
+  });
+
+  // src/infrastructure/gas/generators/diagrams/TriangleDiagramRenderer.ts
+  var TriangleDiagramRenderer;
+  var init_TriangleDiagramRenderer = __esm({
+    "src/infrastructure/gas/generators/diagrams/TriangleDiagramRenderer.ts"() {
+      init_DefaultTheme();
+      init_SlideUtils();
+      TriangleDiagramRenderer = class {
+        render(slide, data, area, settings, layout) {
+          const items = data.items || [];
+          if (!items.length) return;
+          const itemsToDraw = items.slice(0, 3);
+          const centerX = area.left + area.width / 2;
+          const centerY = area.top + area.height / 2;
+          const radius = Math.min(area.width, area.height) / 3.2;
+          const positions = [
+            { x: centerX, y: centerY - radius },
+            { x: centerX + radius * 0.866, y: centerY + radius * 0.5 },
+            { x: centerX - radius * 0.866, y: centerY + radius * 0.5 }
+          ];
+          const circleSize = layout.pxToPt(160);
+          const trianglePath = slide.insertShape(SlidesApp.ShapeType.TRIANGLE, centerX - radius / 2, centerY - radius / 2, radius, radius);
+          trianglePath.setRotation(0);
+          trianglePath.getFill().setSolidFill(DEFAULT_THEME.colors.faintGray);
+          trianglePath.getBorder().setTransparent();
+          positions.slice(0, itemsToDraw.length).forEach((pos, i) => {
+            const item = itemsToDraw[i];
+            const title = item.title || item.label || "";
+            const desc = item.desc || item.subLabel || "";
+            const x = pos.x - circleSize / 2;
+            const y = pos.y - circleSize / 2;
+            const circle = slide.insertShape(SlidesApp.ShapeType.ELLIPSE, x, y, circleSize, circleSize);
+            circle.getFill().setSolidFill(settings.primaryColor);
+            circle.getBorder().setTransparent();
+            setStyledText(circle, `${title}
+${desc}`, {
+              size: 14,
+              bold: true,
+              color: DEFAULT_THEME.colors.backgroundGray,
+              align: SlidesApp.ParagraphAlignment.CENTER
+            });
+            try {
+              circle.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
+              const textRange = circle.getText();
+              if (title.length > 0 && desc.length > 0) {
+              }
+            } catch (e) {
+            }
+          });
+        }
+      };
+    }
+  });
+
+  // src/infrastructure/gas/generators/diagrams/ComparisonDiagramRenderer.ts
+  var ComparisonDiagramRenderer;
+  var init_ComparisonDiagramRenderer = __esm({
+    "src/infrastructure/gas/generators/diagrams/ComparisonDiagramRenderer.ts"() {
+      init_DefaultTheme();
+      init_SlideUtils();
+      init_ColorUtils();
+      ComparisonDiagramRenderer = class {
+        render(slide, data, area, settings, layout) {
           const leftTitle = data.leftTitle || "\u30D7\u30E9\u30F3A";
           const rightTitle = data.rightTitle || "\u30D7\u30E9\u30F3B";
           const leftItems = data.leftItems || [];
           const rightItems = data.rightItems || [];
-          const gap = layout.pxToPt(25);
+          const gap = layout.pxToPt(60);
           const colWidth = (area.width - gap) / 2;
           const compareColors = generateCompareColors(settings.primaryColor);
-          const headerH = layout.pxToPt(45);
-          const contentPadding = layout.pxToPt(20);
-          const itemSpacing = layout.pxToPt(12);
-          const drawColumn = (x, title, items, headerColor) => {
-            const header = slide.insertShape(SlidesApp.ShapeType.ROUND_RECTANGLE, x, area.top, colWidth, headerH);
-            header.getFill().setSolidFill(headerColor);
-            header.getBorder().setTransparent();
-            setStyledText(header, title, {
-              size: 16,
+          const headerH = layout.pxToPt(50);
+          const itemSpacing = layout.pxToPt(16);
+          const drawColumn = (x, title, items, accentColor) => {
+            const line = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, x, area.top, colWidth, layout.pxToPt(3));
+            line.getFill().setSolidFill(accentColor);
+            line.getBorder().setTransparent();
+            const titleBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x, area.top + layout.pxToPt(15), colWidth, headerH);
+            setStyledText(titleBox, title, {
+              size: 24,
+              // Large
               bold: true,
-              color: "#FFFFFF",
-              align: SlidesApp.ParagraphAlignment.CENTER
+              color: DEFAULT_THEME.colors.textPrimary,
+              align: SlidesApp.ParagraphAlignment.START
             });
-            try {
-              header.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
-            } catch (e) {
-            }
-            const boxTop = area.top + headerH - layout.pxToPt(5);
-            const boxHeight = area.height - headerH + layout.pxToPt(5);
-            const contentBox = slide.insertShape(SlidesApp.ShapeType.ROUND_RECTANGLE, x, boxTop, colWidth, boxHeight);
-            contentBox.getFill().setSolidFill("#FFFFFF");
-            contentBox.getBorder().getLineFill().setSolidFill(DEFAULT_THEME.colors.cardBorder);
-            contentBox.getBorder().setWeight(1);
-            let currentY = boxTop + contentPadding;
-            const itemWidth = colWidth - contentPadding * 2;
-            items.forEach((itemText, idx) => {
-              const bulletSize = layout.pxToPt(8);
-              const bulletShape = slide.insertShape(
-                SlidesApp.ShapeType.ELLIPSE,
-                x + contentPadding,
-                currentY + layout.pxToPt(5),
-                bulletSize,
-                bulletSize
-              );
-              bulletShape.getFill().setSolidFill(headerColor);
-              bulletShape.getBorder().setTransparent();
-              const textBox = slide.insertShape(
-                SlidesApp.ShapeType.TEXT_BOX,
-                x + contentPadding + bulletSize + layout.pxToPt(10),
-                currentY,
-                itemWidth - bulletSize - layout.pxToPt(10),
-                layout.pxToPt(24)
-              );
+            let currentY = area.top + headerH + layout.pxToPt(30);
+            items.forEach((itemText) => {
+              const bulletW = layout.pxToPt(12);
+              const bulletH = layout.pxToPt(2);
+              const bullet = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, x, currentY + layout.pxToPt(10), bulletW, bulletH);
+              bullet.getFill().setSolidFill(accentColor);
+              bullet.getBorder().setTransparent();
+              const textX = x + bulletW + layout.pxToPt(10);
+              const textW = colWidth - (bulletW + layout.pxToPt(10));
+              const textBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, textX, currentY, textW, layout.pxToPt(30));
               setStyledText(textBox, itemText, {
-                size: DEFAULT_THEME.fonts.sizes.body,
-                color: DEFAULT_THEME.colors.textPrimary
+                size: 16,
+                color: DEFAULT_THEME.colors.textPrimary,
+                align: SlidesApp.ParagraphAlignment.START
               });
-              currentY += layout.pxToPt(28) + itemSpacing;
+              currentY += layout.pxToPt(40) + itemSpacing;
             });
           };
           drawColumn(area.left, leftTitle, leftItems, compareColors.left);
           drawColumn(area.left + colWidth + gap, rightTitle, rightItems, compareColors.right);
         }
-        drawStatsCompare(slide, data, area, settings, layout) {
+      };
+    }
+  });
+
+  // src/infrastructure/gas/generators/diagrams/StatsCompareDiagramRenderer.ts
+  var StatsCompareDiagramRenderer;
+  var init_StatsCompareDiagramRenderer = __esm({
+    "src/infrastructure/gas/generators/diagrams/StatsCompareDiagramRenderer.ts"() {
+      init_DefaultTheme();
+      init_SlideUtils();
+      init_ColorUtils();
+      StatsCompareDiagramRenderer = class {
+        render(slide, data, area, settings, layout) {
           const leftTitle = data.leftTitle || "\u5C0E\u5165\u524D";
           const rightTitle = data.rightTitle || "\u5C0E\u5165\u5F8C";
           const stats = data.stats || [];
@@ -1765,7 +1713,19 @@ ${labelText}`, { size: fontSize, bold: true, color: DEFAULT_THEME.colors.backgro
             currentY += rowHeight;
           });
         }
-        drawBarCompare(slide, data, area, settings, layout) {
+      };
+    }
+  });
+
+  // src/infrastructure/gas/generators/diagrams/BarCompareDiagramRenderer.ts
+  var BarCompareDiagramRenderer;
+  var init_BarCompareDiagramRenderer = __esm({
+    "src/infrastructure/gas/generators/diagrams/BarCompareDiagramRenderer.ts"() {
+      init_DefaultTheme();
+      init_SlideUtils();
+      init_ColorUtils();
+      BarCompareDiagramRenderer = class {
+        render(slide, data, area, settings, layout) {
           const leftTitle = data.leftTitle || "\u5C0E\u5165\u524D";
           const rightTitle = data.rightTitle || "\u5C0E\u5165\u5F8C";
           const stats = data.stats || [];
@@ -1839,112 +1799,80 @@ ${labelText}`, { size: fontSize, bold: true, color: DEFAULT_THEME.colors.backgro
             currentY += rowHeight;
           });
         }
-        drawTriangle(slide, data, area, settings, layout) {
-          const items = data.items || [];
-          if (!items.length) return;
-          const itemsToDraw = items.slice(0, 3);
-          const centerX = area.left + area.width / 2;
-          const centerY = area.top + area.height / 2;
-          const radius = Math.min(area.width, area.height) / 3.2;
-          const positions = [
-            { x: centerX, y: centerY - radius },
-            { x: centerX + radius * 0.866, y: centerY + radius * 0.5 },
-            { x: centerX - radius * 0.866, y: centerY + radius * 0.5 }
-          ];
-          const circleSize = layout.pxToPt(160);
-          const trianglePath = slide.insertShape(SlidesApp.ShapeType.TRIANGLE, centerX - radius / 2, centerY - radius / 2, radius, radius);
-          trianglePath.setRotation(0);
-          trianglePath.getFill().setSolidFill(DEFAULT_THEME.colors.faintGray);
-          trianglePath.getBorder().setTransparent();
-          positions.slice(0, itemsToDraw.length).forEach((pos, i) => {
-            const item = itemsToDraw[i];
-            const title = item.title || item.label || "";
-            const desc = item.desc || item.subLabel || "";
-            const x = pos.x - circleSize / 2;
-            const y = pos.y - circleSize / 2;
-            const circle = slide.insertShape(SlidesApp.ShapeType.ELLIPSE, x, y, circleSize, circleSize);
-            circle.getFill().setSolidFill(settings.primaryColor);
-            circle.getBorder().setTransparent();
-            setStyledText(circle, `${title}
-${desc}`, {
-              size: 14,
-              bold: true,
-              color: DEFAULT_THEME.colors.backgroundGray,
-              align: SlidesApp.ParagraphAlignment.CENTER
-            });
-            try {
-              circle.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
-              const textRange = circle.getText();
-              if (title.length > 0 && desc.length > 0) {
-              }
-            } catch (e) {
-            }
-          });
-        }
-        drawStepUp(slide, data, area, settings, layout) {
+      };
+    }
+  });
+
+  // src/infrastructure/gas/generators/diagrams/StepUpDiagramRenderer.ts
+  var StepUpDiagramRenderer;
+  var init_StepUpDiagramRenderer = __esm({
+    "src/infrastructure/gas/generators/diagrams/StepUpDiagramRenderer.ts"() {
+      init_DefaultTheme();
+      init_SlideUtils();
+      StepUpDiagramRenderer = class {
+        render(slide, data, area, settings, layout) {
           const items = data.items || [];
           if (!items.length) return;
           const count = items.length;
-          const gap = layout.pxToPt(15);
+          const gap = layout.pxToPt(20);
           const stepWidth = (area.width - gap * (count - 1)) / count;
-          const maxStepHeight = area.height * 0.85;
-          const minStepHeight = area.height * 0.35;
+          const maxStepHeight = area.height;
+          const minStepHeight = area.height * 0.4;
           const heightIncrement = (maxStepHeight - minStepHeight) / Math.max(1, count - 1);
           items.forEach((item, i) => {
             const stepH = minStepHeight + i * heightIncrement;
             const x = area.left + i * (stepWidth + gap);
             const y = area.top + (area.height - stepH);
-            const shape = slide.insertShape(SlidesApp.ShapeType.ROUND_RECTANGLE, x, y, stepWidth, stepH);
-            const alpha = 0.6 + i * 0.12;
-            shape.getFill().setSolidFill(settings.primaryColor, Math.min(1, alpha));
+            const shape = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, x, y, stepWidth, stepH);
+            shape.getFill().setSolidFill(DEFAULT_THEME.colors.backgroundGray);
             shape.getBorder().setTransparent();
-            const badgeSize = layout.pxToPt(28);
-            const badge = slide.insertShape(SlidesApp.ShapeType.ELLIPSE, x + layout.pxToPt(10), y + layout.pxToPt(10), badgeSize, badgeSize);
-            badge.getFill().setSolidFill("#FFFFFF");
-            badge.getBorder().setTransparent();
-            setStyledText(badge, String(i + 1), {
-              size: 14,
+            const topBar = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, x, y, stepWidth, layout.pxToPt(4));
+            topBar.getFill().setSolidFill(settings.primaryColor);
+            topBar.getBorder().setTransparent();
+            const numBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x, y + layout.pxToPt(10), stepWidth, layout.pxToPt(60));
+            setStyledText(numBox, String(i + 1).padStart(2, "0"), {
+              size: 42,
               bold: true,
-              color: settings.primaryColor,
-              align: SlidesApp.ParagraphAlignment.CENTER
+              color: DEFAULT_THEME.colors.neutralGray,
+              align: SlidesApp.ParagraphAlignment.END
             });
-            try {
-              badge.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
-            } catch (e) {
-            }
-            const titleH = layout.pxToPt(35);
-            const contentPadding = layout.pxToPt(15);
-            const titleBox = slide.insertShape(
-              SlidesApp.ShapeType.TEXT_BOX,
-              x + contentPadding,
-              y + layout.pxToPt(45),
-              stepWidth - contentPadding * 2,
-              titleH
-            );
-            setStyledText(titleBox, item.title || "", {
-              size: 16,
-              color: "#FFFFFF",
+            const title = item.title || item.label || "";
+            const desc = item.desc || item.description || item.text || "";
+            const contentY = y + layout.pxToPt(70);
+            const titleBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x + layout.pxToPt(10), contentY, stepWidth - layout.pxToPt(20), layout.pxToPt(40));
+            setStyledText(titleBox, title, {
+              size: 18,
               bold: true,
-              align: SlidesApp.ParagraphAlignment.CENTER
+              color: DEFAULT_THEME.colors.textPrimary,
+              align: SlidesApp.ParagraphAlignment.START
             });
-            const desc = item.desc || item.description || "";
-            if (desc && stepH > layout.pxToPt(100)) {
-              const descBox = slide.insertShape(
-                SlidesApp.ShapeType.TEXT_BOX,
-                x + contentPadding,
-                y + layout.pxToPt(80),
-                stepWidth - contentPadding * 2,
-                stepH - layout.pxToPt(100)
-              );
+            const descBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x + layout.pxToPt(10), contentY + layout.pxToPt(45), stepWidth - layout.pxToPt(20), stepH - layout.pxToPt(120));
+            const descH = stepH - layout.pxToPt(120);
+            if (descH > 20) {
               setStyledText(descBox, desc, {
-                size: 11,
-                color: "rgba(255,255,255,0.9)",
-                align: SlidesApp.ParagraphAlignment.CENTER
+                size: 14,
+                color: DEFAULT_THEME.colors.textSmallFont,
+                align: SlidesApp.ParagraphAlignment.START
               });
+              try {
+                descBox.setContentAlignment(SlidesApp.ContentAlignment.TOP);
+              } catch (e) {
+              }
             }
           });
         }
-        drawLanes(slide, data, area, settings, layout) {
+      };
+    }
+  });
+
+  // src/infrastructure/gas/generators/diagrams/LanesDiagramRenderer.ts
+  var LanesDiagramRenderer;
+  var init_LanesDiagramRenderer = __esm({
+    "src/infrastructure/gas/generators/diagrams/LanesDiagramRenderer.ts"() {
+      init_DefaultTheme();
+      init_SlideUtils();
+      LanesDiagramRenderer = class {
+        render(slide, data, area, settings, layout) {
           const lanes = data.lanes || [];
           const n = Math.max(1, lanes.length);
           const { laneGapPx, lanePadPx, laneTitleHeightPx, cardGapPx, cardMinHeightPx, cardMaxHeightPx, arrowHeightPx, arrowGapPx } = DEFAULT_THEME.diagram;
@@ -2001,7 +1929,18 @@ ${desc}`, {
             }
           }
         }
-        drawFlowChart(slide, data, area, settings, layout) {
+      };
+    }
+  });
+
+  // src/infrastructure/gas/generators/diagrams/FlowChartDiagramRenderer.ts
+  var FlowChartDiagramRenderer;
+  var init_FlowChartDiagramRenderer = __esm({
+    "src/infrastructure/gas/generators/diagrams/FlowChartDiagramRenderer.ts"() {
+      init_DefaultTheme();
+      init_SlideUtils();
+      FlowChartDiagramRenderer = class {
+        render(slide, data, area, settings, layout) {
           const steps = data.steps || data.items || [];
           if (!steps.length) return;
           const count = steps.length;
@@ -2031,7 +1970,18 @@ ${desc}`, {
             }
           });
         }
-        drawKPI(slide, data, area, settings, layout) {
+      };
+    }
+  });
+
+  // src/infrastructure/gas/generators/diagrams/KPIDiagramRenderer.ts
+  var KPIDiagramRenderer;
+  var init_KPIDiagramRenderer = __esm({
+    "src/infrastructure/gas/generators/diagrams/KPIDiagramRenderer.ts"() {
+      init_DefaultTheme();
+      init_SlideUtils();
+      KPIDiagramRenderer = class {
+        render(slide, data, area, settings, layout) {
           const items = data.items || [];
           if (!items.length) return;
           const cols = items.length > 4 ? 4 : items.length || 1;
@@ -2073,7 +2023,16 @@ ${desc}`, {
             }
           });
         }
-        drawTable(slide, data, area, settings, layout) {
+      };
+    }
+  });
+
+  // src/infrastructure/gas/generators/diagrams/TableDiagramRenderer.ts
+  var TableDiagramRenderer;
+  var init_TableDiagramRenderer = __esm({
+    "src/infrastructure/gas/generators/diagrams/TableDiagramRenderer.ts"() {
+      TableDiagramRenderer = class {
+        render(slide, data, area, settings, layout) {
           const headers = data.headers || [];
           const rows = data.rows || [];
           const numCols = Math.max(
@@ -2126,7 +2085,18 @@ ${desc}`, {
             rowIndex++;
           });
         }
-        drawFAQ(slide, data, area, settings, layout) {
+      };
+    }
+  });
+
+  // src/infrastructure/gas/generators/diagrams/FAQDiagramRenderer.ts
+  var FAQDiagramRenderer;
+  var init_FAQDiagramRenderer = __esm({
+    "src/infrastructure/gas/generators/diagrams/FAQDiagramRenderer.ts"() {
+      init_DefaultTheme();
+      init_SlideUtils();
+      FAQDiagramRenderer = class {
+        render(slide, data, area, settings, layout) {
           const items = data.items || data.points || [];
           const parsedItems = [];
           if (items.length && typeof items[0] === "string") {
@@ -2164,7 +2134,18 @@ ${desc}`, {
 A. ${aText}`, { size: 12, color: DEFAULT_THEME.colors.textPrimary });
           });
         }
-        drawQuote(slide, data, area, settings, layout) {
+      };
+    }
+  });
+
+  // src/infrastructure/gas/generators/diagrams/QuoteDiagramRenderer.ts
+  var QuoteDiagramRenderer;
+  var init_QuoteDiagramRenderer = __esm({
+    "src/infrastructure/gas/generators/diagrams/QuoteDiagramRenderer.ts"() {
+      init_DefaultTheme();
+      init_SlideUtils();
+      QuoteDiagramRenderer = class {
+        render(slide, data, area, settings, layout) {
           const text = data.text || data.points && data.points[0] || "";
           const author = data.author || data.points && data.points[1] || "";
           const bg = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, area.left, area.top, area.width, area.height);
@@ -2185,7 +2166,18 @@ A. ${aText}`, { size: 12, color: DEFAULT_THEME.colors.textPrimary });
             setStyledText(authorBox, `\u2014 ${author}`, { size: 16, align: SlidesApp.ParagraphAlignment.END, color: DEFAULT_THEME.colors.neutralGray });
           }
         }
-        drawProgress(slide, data, area, settings, layout) {
+      };
+    }
+  });
+
+  // src/infrastructure/gas/generators/diagrams/ProgressDiagramRenderer.ts
+  var ProgressDiagramRenderer;
+  var init_ProgressDiagramRenderer = __esm({
+    "src/infrastructure/gas/generators/diagrams/ProgressDiagramRenderer.ts"() {
+      init_DefaultTheme();
+      init_SlideUtils();
+      ProgressDiagramRenderer = class {
+        render(slide, data, area, settings, layout) {
           const items = data.items || [];
           if (!items.length) return;
           const rowH = layout.pxToPt(50);
@@ -2218,7 +2210,18 @@ A. ${aText}`, { size: 12, color: DEFAULT_THEME.colors.textPrimary });
             }
           });
         }
-        drawImageText(slide, data, area, settings, layout) {
+      };
+    }
+  });
+
+  // src/infrastructure/gas/generators/diagrams/ImageTextDiagramRenderer.ts
+  var ImageTextDiagramRenderer;
+  var init_ImageTextDiagramRenderer = __esm({
+    "src/infrastructure/gas/generators/diagrams/ImageTextDiagramRenderer.ts"() {
+      init_DefaultTheme();
+      init_SlideUtils();
+      ImageTextDiagramRenderer = class {
+        render(slide, data, area, settings, layout) {
           const imageUrl = data.image;
           const points = data.points || [];
           const gap = layout.pxToPt(20);
@@ -2236,7 +2239,6 @@ A. ${aText}`, { size: 12, color: DEFAULT_THEME.colors.textPrimary });
                 img = slide.insertImage(imageUrl);
               }
               if (img) {
-                img.setLeft(imgX).setTop(area.top).setWidth(halfW).setHeight(area.height);
                 const scale = Math.min(halfW / img.getWidth(), area.height / img.getHeight());
                 const w = img.getWidth() * scale;
                 const h = img.getHeight() * scale;
@@ -2254,6 +2256,192 @@ A. ${aText}`, { size: 12, color: DEFAULT_THEME.colors.textPrimary });
           const textBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, txtX, area.top, halfW, area.height);
           const textContent = points.join("\n");
           setStyledText(textBox, textContent, { size: DEFAULT_THEME.fonts.sizes.body });
+        }
+      };
+    }
+  });
+
+  // src/infrastructure/gas/generators/diagrams/DiagramRendererFactory.ts
+  var DiagramRendererFactory;
+  var init_DiagramRendererFactory = __esm({
+    "src/infrastructure/gas/generators/diagrams/DiagramRendererFactory.ts"() {
+      init_CardsDiagramRenderer();
+      init_TimelineDiagramRenderer();
+      init_ProcessDiagramRenderer();
+      init_CycleDiagramRenderer();
+      init_PyramidDiagramRenderer();
+      init_TriangleDiagramRenderer();
+      init_ComparisonDiagramRenderer();
+      init_StatsCompareDiagramRenderer();
+      init_BarCompareDiagramRenderer();
+      init_StepUpDiagramRenderer();
+      init_LanesDiagramRenderer();
+      init_FlowChartDiagramRenderer();
+      init_KPIDiagramRenderer();
+      init_TableDiagramRenderer();
+      init_FAQDiagramRenderer();
+      init_QuoteDiagramRenderer();
+      init_ProgressDiagramRenderer();
+      init_ImageTextDiagramRenderer();
+      DiagramRendererFactory = class {
+        static getRenderer(type) {
+          const normalizedType = type.toLowerCase();
+          if (normalizedType.includes("cards") || normalizedType.includes("headercards")) {
+            return new CardsDiagramRenderer();
+          }
+          if (normalizedType.includes("timeline")) {
+            return new TimelineDiagramRenderer();
+          }
+          if (normalizedType.includes("process")) {
+            return new ProcessDiagramRenderer();
+          }
+          if (normalizedType.includes("cycle")) {
+            return new CycleDiagramRenderer();
+          }
+          if (normalizedType.includes("pyramid")) {
+            return new PyramidDiagramRenderer();
+          }
+          if (normalizedType.includes("triangle")) {
+            return new TriangleDiagramRenderer();
+          }
+          if (normalizedType.includes("comparison")) {
+            if (normalizedType.includes("stats")) return new StatsCompareDiagramRenderer();
+            if (normalizedType.includes("bar")) return new BarCompareDiagramRenderer();
+            return new ComparisonDiagramRenderer();
+          }
+          if (normalizedType.includes("stepup")) {
+            return new StepUpDiagramRenderer();
+          }
+          if (normalizedType.includes("lanes")) {
+            return new LanesDiagramRenderer();
+          }
+          if (normalizedType.includes("flow")) {
+            return new FlowChartDiagramRenderer();
+          }
+          if (normalizedType.includes("kpi")) {
+            return new KPIDiagramRenderer();
+          }
+          if (normalizedType.includes("table")) {
+            return new TableDiagramRenderer();
+          }
+          if (normalizedType.includes("faq")) {
+            return new FAQDiagramRenderer();
+          }
+          if (normalizedType.includes("quote")) {
+            return new QuoteDiagramRenderer();
+          }
+          if (normalizedType.includes("progress")) {
+            return new ProgressDiagramRenderer();
+          }
+          if (normalizedType.includes("image")) {
+            return new ImageTextDiagramRenderer();
+          }
+          return null;
+        }
+      };
+    }
+  });
+
+  // src/infrastructure/gas/generators/GasDiagramSlideGenerator.ts
+  var GasDiagramSlideGenerator;
+  var init_GasDiagramSlideGenerator = __esm({
+    "src/infrastructure/gas/generators/GasDiagramSlideGenerator.ts"() {
+      init_SlideUtils();
+      init_DiagramRendererFactory();
+      GasDiagramSlideGenerator = class {
+        constructor(creditImageBlob) {
+          this.creditImageBlob = creditImageBlob;
+        }
+        generate(slide, data, layout, pageNum, settings, imageUpdateOption = "update") {
+          Logger.log(`Generating Diagram Slide: ${data.layout || data.type}`);
+          const titlePlaceholder = slide.getPlaceholder(SlidesApp.PlaceholderType.TITLE) || slide.getPlaceholder(SlidesApp.PlaceholderType.CENTERED_TITLE);
+          if (titlePlaceholder) {
+            try {
+              titlePlaceholder.asShape().getText().setText(data.title || "");
+            } catch (e) {
+              Logger.log(`Warning: Title placeholder found but text could not be set. ${e}`);
+            }
+          }
+          const type = (data.type || data.layout || "").toLowerCase();
+          Logger.log("Generating Diagram Slide: " + type);
+          const placeholders = slide.getPlaceholders();
+          const getPlaceholderTypeSafe = (p) => {
+            try {
+              const shape = p.asShape();
+              if (shape) {
+                return shape.getPlaceholderType();
+              }
+            } catch (e) {
+            }
+            return null;
+          };
+          const targetPlaceholder = placeholders.find((p) => getPlaceholderTypeSafe(p) === SlidesApp.PlaceholderType.BODY) || placeholders.find((p) => getPlaceholderTypeSafe(p) === SlidesApp.PlaceholderType.OBJECT) || placeholders.find((p) => getPlaceholderTypeSafe(p) === SlidesApp.PlaceholderType.PICTURE);
+          let workArea;
+          if (targetPlaceholder) {
+            workArea = {
+              left: targetPlaceholder.getLeft(),
+              top: targetPlaceholder.getTop(),
+              width: targetPlaceholder.getWidth(),
+              height: targetPlaceholder.getHeight()
+            };
+          } else {
+            const typeKey = `${type}Slide`;
+            const areaRect = layout.getRect(`${typeKey}.area`) || layout.getRect("contentSlide.body");
+            workArea = areaRect;
+          }
+          Logger.log(`WorkArea for ${type}: left=${workArea.left}, top=${workArea.top}, width=${workArea.width}, height=${workArea.height}`);
+          if (targetPlaceholder) {
+            try {
+              targetPlaceholder.remove();
+            } catch (e) {
+              Logger.log("Warning: Could not remove target placeholder: " + e);
+            }
+          }
+          const elementsBefore = slide.getPageElements().map((e) => e.getObjectId());
+          try {
+            const renderer = DiagramRendererFactory.getRenderer(type);
+            if (renderer) {
+              renderer.render(slide, data, workArea, settings, layout);
+            } else {
+              Logger.log("Diagram logic not implemented for type: " + type);
+            }
+          } catch (e) {
+            Logger.log(`ERROR in drawing ${type}: ${e}`);
+          }
+          const newElements = slide.getPageElements().filter((e) => {
+            if (elementsBefore.includes(e.getObjectId())) return false;
+            try {
+              const shape = e.asShape();
+              if (shape) {
+                const placeholderType = shape.getPlaceholderType();
+                if (placeholderType === SlidesApp.PlaceholderType.TITLE || placeholderType === SlidesApp.PlaceholderType.SUBTITLE || placeholderType === SlidesApp.PlaceholderType.CENTERED_TITLE) {
+                  return false;
+                }
+              }
+            } catch (e2) {
+            }
+            return true;
+          });
+          let generatedGroup = null;
+          if (newElements.length > 1) {
+            try {
+              generatedGroup = slide.group(newElements);
+              Logger.log(`Grouped ${newElements.length} content elements for ${type}`);
+            } catch (e) {
+              Logger.log(`Warning: Could not group elements: ${e}`);
+            }
+          } else if (newElements.length === 1) {
+            generatedGroup = newElements[0];
+          }
+          if (generatedGroup) {
+            const currentWidth = generatedGroup.getWidth();
+            const currentHeight = generatedGroup.getHeight();
+            const centerX = workArea.left + (workArea.width - currentWidth) / 2;
+            const centerY = workArea.top + (workArea.height - currentHeight) / 2;
+            generatedGroup.setLeft(centerX);
+            generatedGroup.setTop(centerY);
+          }
+          addFooter(slide, layout, pageNum, settings, this.creditImageBlob);
         }
       };
     }

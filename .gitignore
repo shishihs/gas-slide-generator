@@ -1,5 +1,6 @@
 # Dependencies
 node_modules/
+slide_snapshots/
 
 # Build
 dist/

@@ -417,15 +417,18 @@ function convertDocumentToJson() {
             return directJson;
         }
 
-        // 3. Check for GCP Project ID
-        // If missing, return special result to tell the sidebar to show JSON input
+        // 3. Check for Mock Mode or GCP Project ID
+        // If mock mode is enabled, we skip the Project ID check
+        const userProperties = PropertiesService.getUserProperties();
+        const useMock = userProperties.getProperty('USE_MOCK_RESPONSE') === 'true';
         const projectId = getGcpProjectId();
-        if (!projectId || projectId === 'YOUR_GCP_PROJECT_ID') {
+
+        if (!useMock && (!projectId || projectId === 'YOUR_GCP_PROJECT_ID')) {
             // Return a special result - sidebar will show the manual input section
             return { __manualModeRequired: true };
         }
 
-        // 4. Call Vertex AI directly (Standard Mode)
+        // 4. Call Vertex AI directly (Standard Mode or Mock)
         const jsonResult = callVertexAI(documentText);
 
         // 5. Check for user color settings

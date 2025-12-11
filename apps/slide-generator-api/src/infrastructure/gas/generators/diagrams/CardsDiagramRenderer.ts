@@ -85,13 +85,13 @@ export class CardsDiagramRenderer implements IDiagramRenderer {
                 // Minimal Card (No header bar)
                 // Use a small dot accent
                 const dotSize = layout.pxToPt(6);
-                const dot = slide.insertShape(SlidesApp.ShapeType.ELLIPSE, x, y + layout.pxToPt(9), dotSize, dotSize);
+                const dot = slide.insertShape(SlidesApp.ShapeType.ELLIPSE, x, y + layout.pxToPt(11), dotSize, dotSize);
                 dot.getFill().setSolidFill(settings.primaryColor);
                 dot.getBorder().setTransparent();
 
                 // Title next to dot
-                const contentX = x + dotSize + layout.pxToPt(12);
-                const contentW = cardW - (dotSize + layout.pxToPt(12));
+                const contentX = x + dotSize + layout.pxToPt(15);
+                const contentW = cardW - (dotSize + layout.pxToPt(15));
 
                 const titleH = layout.pxToPt(30);
                 const titleBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, contentX, y, contentW, titleH);
@@ -101,6 +101,7 @@ export class CardsDiagramRenderer implements IDiagramRenderer {
                     color: DEFAULT_THEME.colors.textPrimary,
                     align: SlidesApp.ParagraphAlignment.START
                 });
+                try { titleBox.setContentAlignment(SlidesApp.ContentAlignment.TOP); } catch (e) { }
 
                 // Body below
                 const descTop = y + titleH;
@@ -112,6 +113,7 @@ export class CardsDiagramRenderer implements IDiagramRenderer {
                         color: typeof DEFAULT_THEME.colors.textSmallFont === 'string' ? DEFAULT_THEME.colors.textSmallFont : '#424242',
                         align: SlidesApp.ParagraphAlignment.START
                     });
+                    try { descBox.setContentAlignment(SlidesApp.ContentAlignment.TOP); } catch (e) { }
                 }
             }
         });

@@ -1,15 +1,18 @@
 import { ISlideGenerator } from '../../../domain/services/ISlideGenerator';
 import { LayoutManager } from '../../../common/utils/LayoutManager';
 import { addFooter } from '../../../common/utils/SlideUtils';
+import * as ColorUtils from '../../../common/utils/ColorUtils';
 import { DiagramRendererFactory } from './diagrams/DiagramRendererFactory';
 
 export class GasDiagramSlideGenerator implements ISlideGenerator {
     constructor(private creditImageBlob: GoogleAppsScript.Base.BlobSource | null) { }
 
     generate(slide: GoogleAppsScript.Slides.Slide, data: any, layout: LayoutManager, pageNum: number, settings: any, imageUpdateOption: string = 'update') {
-        Logger.log(`Generating Diagram Slide: ${data.layout || data.type}`);
+        Logger.log(`[GasDiagramSlideGenerator] Generating Diagram Slide: ${data.layout || data.type}`);
+        Logger.log(`[Debug] ColorUtils loaded: ${!!ColorUtils}`); // Ensure dependency is kept by bundler
 
         // Set Title
+
         const titlePlaceholder = slide.getPlaceholder(SlidesApp.PlaceholderType.TITLE) || slide.getPlaceholder(SlidesApp.PlaceholderType.CENTERED_TITLE);
         if (titlePlaceholder) {
             try {

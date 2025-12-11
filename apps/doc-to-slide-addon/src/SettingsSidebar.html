@@ -156,6 +156,24 @@
             border-radius: 2px;
             font-family: 'Roboto Mono', monospace;
         }
+
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s ease-in-out infinite;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
     </style>
 </head>
 
@@ -231,7 +249,17 @@
 
         <div class="form-group">
             <label for="templateSlideId">テンプレートスライドの URL または ID</label>
-            <input type="text" id="templateSlideId" placeholder="https://docs.google.com/presentation/d/...">
+            <div style="display: flex; gap: 8px;">
+                <input type="text" id="templateSlideId" placeholder="https://docs.google.com/presentation/d/..."
+                    style="flex:1;">
+                <button type="button" onclick="checkTemplateId()"
+                    style="width: auto; padding: 0 12px; background-color: #f1f3f4; color: #3c4043; border: 1px solid #dadce0;"
+                    title="アクセス権を確認">
+                    確認
+                </button>
+            </div>
+            <div id="checkStatus"
+                style="font-size: 11px; margin-top: 4px; min-height: 20px; display: flex; align-items: center;"></div>
             <div class="help-text">
                 テンプレートとなる Google Slides の URL または ID を入力してください。<br>
                 (例: <code>https://docs.google.com/presentation/d/xxxxx/edit</code>)
@@ -309,6 +337,11 @@
             };
 
             // Save using the GAS backend
+            statusDiv.innerHTML = '<span class="spinner"></span> 保存中...';
+            statusDiv.className = 'show';
+            statusDiv.style.backgroundColor = '#e8f0fe';
+            statusDiv.style.color = '#1a73e8';
+
             google.script.run
                 .withSuccessHandler(function () {
                     showStatus('success', '✅ 設定が正常に保存されました！');
@@ -317,6 +350,36 @@
                     showStatus('error', '❌ エラー: ' + error.message);
                 })
                 .saveScriptProperties(props);
+        }
+
+        function checkTemplateId() {
+            const id = document.getElementById('templateSlideId').value.trim();
+            const checkStatus = document.getElementById('checkStatus');
+
+            if (!id) {
+                checkStatus.textContent = 'IDが入力されていません';
+                checkStatus.style.color = '#text-secondary';
+                return;
+            }
+
+            checkStatus.innerHTML = '<span class="spinner"></span> 確認中...';
+            checkStatus.style.color = 'var(--text-secondary)';
+
+            google.script.run
+                .withSuccessHandler(function (result) {
+                    if (result.valid) {
+                        checkStatus.innerHTML = result.message;
+                        checkStatus.style.color = 'var(--success-color)';
+                    } else {
+                        checkStatus.innerHTML = result.message;
+                        checkStatus.style.color = 'var(--error-color)';
+                    }
+                })
+                .withFailureHandler(function (err) {
+                    checkStatus.innerHTML = '❌ エラー: ' + err.message;
+                    checkStatus.style.color = 'var(--error-color)';
+                })
+                .checkSlideIdAccess(id);
         }
 
         function showStatus(type, message) {

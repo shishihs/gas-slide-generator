@@ -49,6 +49,25 @@ function getGemUrl() {
 }
 
 /**
+ * Check if the provided slide ID is accessible
+ * @param {string} id - The Slide ID or URL
+ */
+function checkSlideIdAccess(id) {
+    const cleanId = extractPresentationIdFromUrl(id);
+    if (!cleanId) {
+        return { valid: false, message: 'IDが空、または無効です' };
+    }
+
+    try {
+        const pres = SlidesApp.openById(cleanId);
+        const name = pres.getName();
+        return { valid: true, message: `✅ アクセス成功: ${name}` };
+    } catch (e) {
+        return { valid: false, message: `❌ アクセス失敗: ${e.message}` };
+    }
+}
+
+/**
  * Extract Presentation ID from a URL or return as is
  * @param {string} urlOrId - The URL or ID string
  * @returns {string|null} - The extracted ID or original string
@@ -540,34 +559,11 @@ function generateSlidesFromJson(jsonData) {
             }
 
             if (!destinationId) {
-                Logger.log('Template access failed. Attempting to auto-create a new template...');
-                try {
-                    // Auto-fix: Create a new template on the fly
-                    Logger.log('Generating fallback template...');
-                    const newTemplate = createTemplatePresentation(); // This also updates the property
-                    const newTemplateId = newTemplate.id;
-                    Logger.log('New template created: ' + newTemplateId);
-
-                    // Wait for Drive propagation before copying
-                    Utilities.sleep(5000);
-
-                    // Use the new valid template
-                    const newTemplateFile = DriveApp.getFileById(newTemplateId);
-                    const newFile = newTemplateFile.makeCopy(title);
-                    destinationId = newFile.getId();
-                    templateId = newTemplateId; // Update for payload
-
-                    Logger.log('Auto-healing successful. New Template ID: ' + templateId + ', Destination: ' + destinationId);
-
-                } catch (autoFixError) {
-                    Logger.log('Auto-healing failed: ' + autoFixError.toString());
-                    // Critical failure
-                    throw new Error(
-                        `Failed to access or copy the template slide (ID: ${templateId}). \n` +
-                        `Attempted to auto-generate a new template but failed: ${autoFixError.message}\n` +
-                        `Please try manually using 'Slide Generator > Create Template'.`
-                    );
-                }
+                Logger.log('Template access failed. Throwing error...');
+                throw new Error(
+                    `Failed to access or copy the template slide (ID: ${templateId}). \n` +
+                    `Please check the ID in settings and ensure you have permission to access it.`
+                );
             }
         }
 

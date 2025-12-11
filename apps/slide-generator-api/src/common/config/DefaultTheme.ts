@@ -330,7 +330,7 @@ export const DEFAULT_THEME: SlideTheme = {
             body: { left: 60, top: 160, width: 840, height: 320 }
         },
         sectionSlide: {
-            ghostNum: { left: 650, top: 290, width: 300, height: 250 }, // Adjusted
+            ghostNum: { left: 400, top: 100, width: 550, height: 350 }, // Adjusted
             title: { left: 60, top: 180, width: 700, height: 140 }
         },
         closingSlide: {

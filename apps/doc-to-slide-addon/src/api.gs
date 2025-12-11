@@ -1,11 +1,16 @@
 var global = this;
 (() => {
+  var __defProp = Object.defineProperty;
   var __getOwnPropNames = Object.getOwnPropertyNames;
   var __esm = (fn, res) => function __init() {
     return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
   };
   var __commonJS = (cb, mod) => function __require() {
     return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+  };
+  var __export = (target, all) => {
+    for (var name in all)
+      __defProp(target, name, { get: all[name], enumerable: true });
   };
 
   // src/domain/model/Presentation.ts
@@ -258,7 +263,7 @@ var global = this;
             body: { left: 60, top: 160, width: 840, height: 320 }
           },
           sectionSlide: {
-            ghostNum: { left: 650, top: 290, width: 300, height: 250 },
+            ghostNum: { left: 400, top: 100, width: 550, height: 350 },
             // Adjusted
             title: { left: 60, top: 180, width: 700, height: 140 }
           },
@@ -486,6 +491,20 @@ var global = this;
   });
 
   // src/common/utils/ColorUtils.ts
+  var ColorUtils_exports = {};
+  __export(ColorUtils_exports, {
+    darkenColor: () => darkenColor,
+    generateCompareColors: () => generateCompareColors,
+    generateProcessColors: () => generateProcessColors,
+    generatePyramidColors: () => generatePyramidColors,
+    generateStepUpColors: () => generateStepUpColors,
+    generateTimelineCardColors: () => generateTimelineCardColors,
+    generateTintedGray: () => generateTintedGray,
+    hexToRgb: () => hexToRgb,
+    hslToHex: () => hslToHex,
+    lightenColor: () => lightenColor,
+    rgbToHsl: () => rgbToHsl
+  });
   function hexToRgb(hex) {
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     return result ? {
@@ -493,6 +512,77 @@ var global = this;
       g: parseInt(result[2], 16),
       b: parseInt(result[3], 16)
     } : null;
+  }
+  function rgbToHsl(r, g, b) {
+    r /= 255;
+    g /= 255;
+    b /= 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+    let h = 0, s, l = (max + min) / 2;
+    if (max === min) {
+      h = s = 0;
+    } else {
+      const d = max - min;
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      switch (max) {
+        case r:
+          h = (g - b) / d + (g < b ? 6 : 0);
+          break;
+        case g:
+          h = (b - r) / d + 2;
+          break;
+        case b:
+          h = (r - g) / d + 4;
+          break;
+      }
+      h /= 6;
+    }
+    return {
+      h: h * 360,
+      s: s * 100,
+      l: l * 100
+    };
+  }
+  function hslToHex(h, s, l) {
+    s /= 100;
+    l /= 100;
+    const c = (1 - Math.abs(2 * l - 1)) * s, x = c * (1 - Math.abs(h / 60 % 2 - 1)), m = l - c / 2;
+    let r = 0, g = 0, b = 0;
+    if (0 <= h && h < 60) {
+      r = c;
+      g = x;
+      b = 0;
+    } else if (60 <= h && h < 120) {
+      r = x;
+      g = c;
+      b = 0;
+    } else if (120 <= h && h < 180) {
+      r = 0;
+      g = c;
+      b = x;
+    } else if (180 <= h && h < 240) {
+      r = 0;
+      g = x;
+      b = c;
+    } else if (240 <= h && h < 300) {
+      r = x;
+      g = 0;
+      b = c;
+    } else if (300 <= h && h < 360) {
+      r = c;
+      g = 0;
+      b = x;
+    }
+    r = Math.round((r + m) * 255);
+    g = Math.round((g + m) * 255);
+    b = Math.round((b + m) * 255);
+    return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
+  }
+  function generateTintedGray(tintColorHex, saturation, lightness) {
+    const rgb = hexToRgb(tintColorHex);
+    if (!rgb) return "#F8F9FA";
+    const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
+    return hslToHex(hsl.h, saturation, lightness);
   }
   function lightenColor(color, amount) {
     const rgb = hexToRgb(color);
@@ -516,6 +606,14 @@ var global = this;
     const colors = [];
     for (let i = 0; i < levels; i++) {
       const lightenAmount = i / Math.max(1, levels - 1) * 0.6;
+      colors.push(lightenColor(baseColor, lightenAmount));
+    }
+    return colors;
+  }
+  function generateStepUpColors(baseColor, steps) {
+    const colors = [];
+    for (let i = 0; i < steps; i++) {
+      const lightenAmount = 0.6 * (1 - i / Math.max(1, steps - 1));
       colors.push(lightenColor(baseColor, lightenAmount));
     }
     return colors;
@@ -1162,11 +1260,11 @@ var global = this;
               }
             } else {
               const dotSize = layout.pxToPt(6);
-              const dot = slide.insertShape(SlidesApp.ShapeType.ELLIPSE, x, y + layout.pxToPt(9), dotSize, dotSize);
+              const dot = slide.insertShape(SlidesApp.ShapeType.ELLIPSE, x, y + layout.pxToPt(11), dotSize, dotSize);
               dot.getFill().setSolidFill(settings.primaryColor);
               dot.getBorder().setTransparent();
-              const contentX = x + dotSize + layout.pxToPt(12);
-              const contentW = cardW - (dotSize + layout.pxToPt(12));
+              const contentX = x + dotSize + layout.pxToPt(15);
+              const contentW = cardW - (dotSize + layout.pxToPt(15));
               const titleH = layout.pxToPt(30);
               const titleBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, contentX, y, contentW, titleH);
               setStyledText(titleBox, title, {
@@ -1175,6 +1273,10 @@ var global = this;
                 color: DEFAULT_THEME.colors.textPrimary,
                 align: SlidesApp.ParagraphAlignment.START
               });
+              try {
+                titleBox.setContentAlignment(SlidesApp.ContentAlignment.TOP);
+              } catch (e) {
+              }
               const descTop = y + titleH;
               const descH = cardH - titleH;
               if (descH > 20) {
@@ -1184,6 +1286,10 @@ var global = this;
                   color: typeof DEFAULT_THEME.colors.textSmallFont === "string" ? DEFAULT_THEME.colors.textSmallFont : "#424242",
                   align: SlidesApp.ParagraphAlignment.START
                 });
+                try {
+                  descBox.setContentAlignment(SlidesApp.ContentAlignment.TOP);
+                } catch (e) {
+                }
               }
             }
           });
@@ -2286,56 +2392,80 @@ A. ${aText}`, { size: 12, color: DEFAULT_THEME.colors.textPrimary });
       DiagramRendererFactory = class {
         static getRenderer(type) {
           const normalizedType = type.toLowerCase();
+          Logger.log(`[Factory] Checking renderer for type: '${type}' (normalized: '${normalizedType}')`);
           if (normalizedType.includes("cards") || normalizedType.includes("headercards")) {
+            Logger.log("[Factory] Matched CardsDiagramRenderer");
             return new CardsDiagramRenderer();
           }
           if (normalizedType.includes("timeline")) {
+            Logger.log("[Factory] Matched TimelineDiagramRenderer");
             return new TimelineDiagramRenderer();
           }
           if (normalizedType.includes("process")) {
+            Logger.log("[Factory] Matched ProcessDiagramRenderer");
             return new ProcessDiagramRenderer();
           }
           if (normalizedType.includes("cycle")) {
+            Logger.log("[Factory] Matched CycleDiagramRenderer");
             return new CycleDiagramRenderer();
           }
           if (normalizedType.includes("pyramid")) {
+            Logger.log("[Factory] Matched PyramidDiagramRenderer");
             return new PyramidDiagramRenderer();
           }
           if (normalizedType.includes("triangle")) {
+            Logger.log("[Factory] Matched TriangleDiagramRenderer");
             return new TriangleDiagramRenderer();
           }
           if (normalizedType.includes("compare") || normalizedType.includes("comparison") || normalizedType.includes("kaizen")) {
-            if (normalizedType.includes("stats")) return new StatsCompareDiagramRenderer();
-            if (normalizedType.includes("bar")) return new BarCompareDiagramRenderer();
+            if (normalizedType.includes("stats")) {
+              Logger.log("[Factory] Matched StatsCompareDiagramRenderer");
+              return new StatsCompareDiagramRenderer();
+            }
+            if (normalizedType.includes("bar")) {
+              Logger.log("[Factory] Matched BarCompareDiagramRenderer");
+              return new BarCompareDiagramRenderer();
+            }
+            Logger.log("[Factory] Matched ComparisonDiagramRenderer");
             return new ComparisonDiagramRenderer();
           }
           if (normalizedType.includes("stepup") || normalizedType.includes("stair")) {
+            Logger.log("[Factory] Matched StepUpDiagramRenderer");
             return new StepUpDiagramRenderer();
           }
           if (normalizedType.includes("lanes") || normalizedType.includes("diagram")) {
+            Logger.log("[Factory] Matched LanesDiagramRenderer");
             return new LanesDiagramRenderer();
           }
           if (normalizedType.includes("flow")) {
+            Logger.log("[Factory] Matched FlowChartDiagramRenderer");
             return new FlowChartDiagramRenderer();
           }
           if (normalizedType.includes("kpi")) {
+            Logger.log("[Factory] Matched KPIDiagramRenderer");
             return new KPIDiagramRenderer();
           }
           if (normalizedType.includes("table")) {
+            Logger.log("[Factory] Matched TableDiagramRenderer");
             return new TableDiagramRenderer();
           }
           if (normalizedType.includes("faq")) {
+            Logger.log("[Factory] Matched FAQDiagramRenderer");
             return new FAQDiagramRenderer();
           }
           if (normalizedType.includes("quote")) {
+            Logger.log("[Factory] Matched QuoteDiagramRenderer");
             return new QuoteDiagramRenderer();
           }
           if (normalizedType.includes("progress")) {
+            Logger.log("[Factory] Matched ProgressDiagramRenderer");
             return new ProgressDiagramRenderer();
           }
           if (normalizedType.includes("image") || normalizedType.includes("imagetext")) {
+            Logger.log("[Factory] Matched ImageTextDiagramRenderer");
             return new ImageTextDiagramRenderer();
           }
+          Logger.log("[Factory] No matching renderer found.");
           return null;
         }
       };
@@ -2347,13 +2477,15 @@ A. ${aText}`, { size: 12, color: DEFAULT_THEME.colors.textPrimary });
   var init_GasDiagramSlideGenerator = __esm({
     "src/infrastructure/gas/generators/GasDiagramSlideGenerator.ts"() {
       init_SlideUtils();
+      init_ColorUtils();
       init_DiagramRendererFactory();
       GasDiagramSlideGenerator = class {
         constructor(creditImageBlob) {
           this.creditImageBlob = creditImageBlob;
         }
         generate(slide, data, layout, pageNum, settings, imageUpdateOption = "update") {
-          Logger.log(`Generating Diagram Slide: ${data.layout || data.type}`);
+          Logger.log(`[GasDiagramSlideGenerator] Generating Diagram Slide: ${data.layout || data.type}`);
+          Logger.log(`[Debug] ColorUtils loaded: ${!!ColorUtils_exports}`);
           const titlePlaceholder = slide.getPlaceholder(SlidesApp.PlaceholderType.TITLE) || slide.getPlaceholder(SlidesApp.PlaceholderType.CENTERED_TITLE);
           if (titlePlaceholder) {
             try {

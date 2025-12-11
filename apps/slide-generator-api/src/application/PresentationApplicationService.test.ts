@@ -27,7 +27,7 @@ describe('PresentationApplicationService', () => {
 
         expect(url).toBe('https://mock-url.com');
         expect(mockRepo.createPresentation).toHaveBeenCalledTimes(1);
-        expect(mockRepo.createPresentation).toHaveBeenCalledWith(expect.any(Presentation), 'tmpl-123', undefined);
+        expect(mockRepo.createPresentation).toHaveBeenCalledWith(expect.any(Presentation), 'tmpl-123', undefined, undefined);
 
         // Verify Domain Object construction
         const capturedPresentation = mockRepo.createPresentation.mock.calls[0][0];

@@ -1,6 +1,5 @@
 
 import { GasDiagramSlideGenerator } from './GasDiagramSlideGenerator';
-import { CONFIG } from '../../../common/config/SlideConfig';
 
 // Mock Dependencies
 jest.mock('../../../common/utils/SlideUtils', () => ({

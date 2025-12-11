@@ -1,7 +1,6 @@
 
 import { ISlideGenerator } from '../../../domain/services/ISlideGenerator';
 import { LayoutManager } from '../../../common/utils/LayoutManager';
-import { CONFIG } from '../../../common/config/SlideConfig';
 import {
     insertImageFromUrlOrFileId,
     setStyledText,

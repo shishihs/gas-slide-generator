@@ -36,3 +36,7 @@ Thumbs.db
 
 # Agent
 
+
+# Clasp
+.clasprc.json
+# .clasp.json # Uncomment this if you want to ignore script ID mapping

@@ -87,24 +87,24 @@ var global = this;
       }
     },
     colors: {
-      primary: "#0F4C81",
-      // Trustworthy Blue - Professional, intellectual, reliable
-      deepPrimary: "#0A3B66",
-      // Darker Navy
+      primary: "#4A6C42",
+      // Company Color (Deep Olive) - Reverted as requested
+      deepPrimary: "#2E3A45",
+      // Slate Charcoal - Classic match for Olive
       textPrimary: "#333333",
-      // Soft Black - better readability than pure black
-      textSmallFont: "#555555",
+      // Soft Black - Kept for readability
+      textSmallFont: "#424242",
       backgroundWhite: "#FFFFFF",
       cardBg: "#FFFFFF",
-      backgroundGray: "#F4F5F7",
-      // Cooler gray
-      faintGray: "#F4F5F7",
+      backgroundGray: "#F8F9FA",
+      // Reverted to warmer/lighter gray
+      faintGray: "#F8F9FA",
       ghostGray: "#E0E0E0",
       tableHeaderBg: "#E0E0E0",
       laneBorder: "#EEEEEE",
-      cardBorder: "#DDDDDD",
+      cardBorder: "#E0E0E0",
       neutralGray: "#9E9E9E",
-      processArrow: "#0F4C81"
+      processArrow: "#4A6C42"
     },
     diagram: {
       laneGapPx: 30,

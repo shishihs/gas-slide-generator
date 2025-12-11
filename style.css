@@ -55,8 +55,8 @@ body {
 .slide-container {
   width: var(--slide-width);
   height: var(--slide-height);
-  background-color: var(--base-color);
-  color: var(--main-color);
+  background-color: var(--bg-gray);
+  color: var(--text-main);
   position: relative;
   overflow: hidden;
   margin-bottom: 20px;
@@ -76,9 +76,9 @@ h1 {
 h2 {
   font-size: 32px;
   font-weight: 700;
-  color: var(--main-color);
+  color: var(--deep-primary);
   margin-bottom: 20px;
-  border-bottom: 3px solid var(--accent-color);
+  border-bottom: 3px solid var(--primary);
   padding-bottom: 10px;
   display: inline-block;
 }
@@ -87,7 +87,8 @@ h3 {
   font-size: 24px;
   font-weight: 700;
   margin-bottom: 15px;
-  color: var(--secondary-accent);
+  color: var(--deep-primary);
+
 }
 
 p,
@@ -96,23 +97,26 @@ td,
 th {
   font-size: 20px;
   line-height: 1.6;
-  color: #34495E;
+  color: var(--text-sub);
+
 }
 
 .subhead {
   font-size: 24px;
-  color: var(--text-gray);
+  color: var(--text-small);
+
   margin-bottom: 30px;
   font-weight: 400;
 }
 
 strong {
-  color: var(--accent-color);
+  color: var(--deep-primary);
   font-weight: 700;
 }
 
 .highlight {
-  background: linear-gradient(transparent 60%, rgba(241, 196, 15, 0.4) 60%);
+  background: linear-gradient(transparent 60%, rgba(143, 177, 48, 0.3) 60%);
+
   padding: 0 4px;
 }
 
@@ -134,7 +138,7 @@ strong {
   align-items: center;
   /* Center alignment for strong impact */
   text-align: center;
-  background: linear-gradient(135deg, #2C3E50 0%, #1A252F 100%);
+  background: var(--deep-primary);
   color: white;
 }
 
@@ -145,7 +149,8 @@ strong {
 }
 
 .slide-title .subhead {
-  color: #BDC3C7;
+  color: var(--bg-gray);
+
   font-size: 32px;
 }
 
@@ -157,14 +162,14 @@ strong {
 
 /* Section Slide */
 .slide-section {
-  background-color: var(--main-color);
+  background-color: var(--deep-primary);
   color: white;
   justify-content: center;
   padding-left: var(--margin-x);
 }
 
 .slide-section h1 {
-  border-left: 10px solid var(--accent-color);
+  border-left: 10px solid var(--primary);
   padding-left: 30px;
   color: white;
 }
@@ -205,8 +210,9 @@ strong {
 .agenda-item {
   font-size: 22px;
   padding: 15px 20px;
-  background-color: white;
-  border-left: 5px solid var(--secondary-accent);
+  background-color: var(--bg-white);
+  border-left: 5px solid var(--primary);
+  color: var(--text-main);
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
@@ -218,19 +224,22 @@ strong {
 }
 
 .custom-table th {
-  background-color: var(--main-color);
-  color: white;
+  background-color: var(--table-header);
+  color: var(--text-primary);
   padding: 15px;
   text-align: left;
+  border-bottom: 2px solid var(--deep-primary);
 }
 
 .custom-table td {
   padding: 15px;
-  border-bottom: 2px solid #ECF0F1;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
 }
 
 .custom-table tr:nth-child(even) {
-  background-color: #FAFAFA;
+  background-color: var(--bg-white);
+
 }
 
 /* Cards */
@@ -240,23 +249,25 @@ strong {
 }
 
 .card {
-  background: white;
+  background: var(--bg-white);
   padding: 25px;
   border-radius: 8px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-  border-top: 4px solid var(--secondary-accent);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--border-color);
+  border-top: 4px solid var(--primary);
 }
 
 .card-title {
   font-weight: 700;
   font-size: 22px;
   margin-bottom: 10px;
-  color: var(--main-color);
+  color: var(--text-primary);
 }
 
 .card-desc {
   font-size: 18px;
-  color: #555;
+  color: var(--text-small);
+
 }
 
 /* Pyramid */
@@ -280,19 +291,23 @@ strong {
 }
 
 .pyramid-level:nth-child(1) {
-  background-color: #E74C3C;
+  background-color: var(--primary);
   width: 40%;
+  color: white;
 }
 
 .pyramid-level:nth-child(2) {
-  background-color: #E67E22;
+  background-color: #A4C639;
   width: 60%;
+  color: white;
 }
 
+/* Lighter green */
 .pyramid-level:nth-child(3) {
-  background-color: #F1C40F;
+  background-color: var(--table-header);
   width: 80%;
-  color: #333;
+  color: var(--text-primary);
+  border: 1px solid var(--deep-primary);
 }
 
 .pyramid-level span {
@@ -345,7 +360,7 @@ strong {
 
 .bar-fill {
   height: 100%;
-  background: var(--secondary-accent);
+  background: var(--neutral-gray);
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -356,7 +371,7 @@ strong {
 }
 
 .bar-fill.highlight {
-  background: var(--accent-color);
+  background: var(--primary);
 }
 
 /* StepUp */
@@ -384,27 +399,29 @@ strong {
 
 .step-item:nth-child(1) {
   height: 20%;
-  background: #BDC3C7;
+  background: var(--ghost-gray);
+  color: var(--text-small);
 }
 
 .step-item:nth-child(2) {
   height: 40%;
-  background: #95A5A6;
+  background: #D0D4CC;
+  color: var(--text-small);
 }
 
 .step-item:nth-child(3) {
   height: 60%;
-  background: #7F8C8D;
+  background: #B0BBA2;
 }
 
 .step-item:nth-child(4) {
   height: 80%;
-  background: #3498DB;
+  background: var(--primary);
 }
 
 .step-item:nth-child(5) {
   height: 100%;
-  background: #2980B9;
+  background: var(--deep-primary);
 }
 
 /* Process */
@@ -417,9 +434,10 @@ strong {
 }
 
 .process-step {
-  background: white;
-  border: 3px solid var(--secondary-accent);
+  background: var(--bg-white);
+  border: 3px solid var(--primary);
   border-radius: 50%;
+
   width: 180px;
   height: 180px;
   display: flex;

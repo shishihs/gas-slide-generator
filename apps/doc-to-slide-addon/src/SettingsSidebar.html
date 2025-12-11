@@ -181,16 +181,59 @@
     <h3>⚙️ 設定</h3>
     <p>スライド起草くんのアドオン設定を行います。</p>
 
-    <div class="info-box">
-        ℹ️ <b>モード A (自動):</b> Vertex AI に接続します (GCP プロジェクトが必要です)。<br>
-        ℹ️ <b>モード B (手動):</b> Gem のコンテンツを使用します (GCP 不要)。
+
+    <div class="section">
+        <div class="section-title">手動生成 (GCP 不要)</div>
+
+        <div class="form-group">
+            <label for="gemUrl">Gem とチャットを開始</label>
+            <input type="text" id="gemUrl" placeholder="https://gemini.google.com/app/...">
+            <div class="help-text">
+                カスタム Gem の URL。GCP が設定されていない場合、アドオンはこのリンクを提示します。
+            </div>
+            <div style="margin-top: 8px;">
+                <a href="#" onclick="openGemUrl(); return false;"
+                    style="font-size: 13px; color: var(--primary-color);">Gem を開く ↗</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">スライドテンプレート</div>
+
+        <div class="form-group">
+            <label for="templateSlideId">テンプレートスライドの URL または ID</label>
+            <div style="display: flex; gap: 8px;">
+                <input type="text" id="templateSlideId" placeholder="https://docs.google.com/presentation/d/..."
+                    style="flex:1;">
+                <button type="button" onclick="checkTemplateId()"
+                    style="width: auto; padding: 0 12px; background-color: #f1f3f4; color: #3c4043; border: 1px solid #dadce0;"
+                    title="アクセス権を確認">
+                    確認
+                </button>
+            </div>
+            <div id="checkStatus"
+                style="font-size: 11px; margin-top: 4px; min-height: 20px; display: flex; align-items: center;"></div>
+            <div class="help-text">
+                テンプレートとなる Google Slides の URL または ID を入力してください。<br>
+                (例: <code>https://docs.google.com/presentation/d/xxxxx/edit</code>)
+            </div>
+            <div style="margin-top: 12px;">
+                <button type="button" onclick="createTemplate()" style="background-color: #ea4335; color: white;">
+                    テンプレートを新規作成
+                </button>
+                <div class="help-text" style="margin-top:4px;">
+                    ※ 新しいテンプレートスライドを作成し、上記のIDを自動更新します。
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="section">
         <div class="section-title"
             style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;"
             onclick="toggleGcpSettings()">
-            <span>Mode A: Vertex AI 自動生成 (上級者向け)</span>
+            <span>Vertex AI 自動生成 (上級者向け)</span>
             <span id="gcpToggleIcon"
                 style="color: var(--text-secondary); transform: rotate(0deg); transition: transform 0.2s;">▼</span>
         </div>
@@ -237,54 +280,6 @@
                     <input type="checkbox" id="useMockResponse" style="width:auto; margin-right:8px;">
                     Mock レスポンスを使用する (テスト用)
                 </label>
-            </div>
-        </div>
-    </div>
-    </div>
-
-    <div class="section">
-        <div class="section-title">手動生成 (GCP 不要)</div>
-
-        <div class="form-group">
-            <label for="gemUrl">Gem とチャットを開始</label>
-            <input type="text" id="gemUrl" placeholder="https://gemini.google.com/app/...">
-            <div class="help-text">
-                カスタム Gem の URL。GCP が設定されていない場合、アドオンはこのリンクを提示します。
-            </div>
-            <div style="margin-top: 8px;">
-                <a href="#" onclick="openGemUrl(); return false;"
-                    style="font-size: 13px; color: var(--primary-color);">Gem を開く ↗</a>
-            </div>
-        </div>
-    </div>
-
-    <div class="section">
-        <div class="section-title">スライドテンプレート</div>
-
-        <div class="form-group">
-            <label for="templateSlideId">テンプレートスライドの URL または ID</label>
-            <div style="display: flex; gap: 8px;">
-                <input type="text" id="templateSlideId" placeholder="https://docs.google.com/presentation/d/..."
-                    style="flex:1;">
-                <button type="button" onclick="checkTemplateId()"
-                    style="width: auto; padding: 0 12px; background-color: #f1f3f4; color: #3c4043; border: 1px solid #dadce0;"
-                    title="アクセス権を確認">
-                    確認
-                </button>
-            </div>
-            <div id="checkStatus"
-                style="font-size: 11px; margin-top: 4px; min-height: 20px; display: flex; align-items: center;"></div>
-            <div class="help-text">
-                テンプレートとなる Google Slides の URL または ID を入力してください。<br>
-                (例: <code>https://docs.google.com/presentation/d/xxxxx/edit</code>)
-            </div>
-            <div style="margin-top: 12px;">
-                <button type="button" onclick="createTemplate()" style="background-color: #ea4335; color: white;">
-                    テンプレートを新規作成
-                </button>
-                <div class="help-text" style="margin-top:4px;">
-                    ※ 新しいテンプレートスライドを作成し、上記のIDを自動更新します。
-                </div>
             </div>
         </div>
     </div>

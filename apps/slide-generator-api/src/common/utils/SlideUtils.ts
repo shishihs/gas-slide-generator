@@ -1,17 +1,28 @@
-import { CONFIG } from '../config/SlideConfig';
+import { SlideTheme } from '../config/SlideTheme';
+import { DEFAULT_THEME, CONFIG } from '../config/DefaultTheme';
 import { hexToRgb } from './ColorUtils';
 
-export function applyTextStyle(textRange: GoogleAppsScript.Slides.TextRange, opt: { color?: string; size?: number; bold?: boolean; align?: GoogleAppsScript.Slides.ParagraphAlignment; fontType?: 'large' | 'small' }) {
+/**
+ * Get theme from layout or use default
+ */
+function getThemeFromLayout(layout: any): SlideTheme {
+    if (layout && typeof layout.getTheme === 'function') {
+        return layout.getTheme();
+    }
+    return DEFAULT_THEME;
+}
+
+export function applyTextStyle(textRange: GoogleAppsScript.Slides.TextRange, opt: { color?: string; size?: number; bold?: boolean; align?: GoogleAppsScript.Slides.ParagraphAlignment; fontType?: 'large' | 'small' }, theme: SlideTheme = DEFAULT_THEME) {
     const style = textRange.getTextStyle();
     let defaultColor;
     if (opt.fontType === 'large') {
-        defaultColor = CONFIG.COLORS.text_primary;
+        defaultColor = theme.colors.textPrimary;
     } else {
-        defaultColor = CONFIG.COLORS.text_small_font;
+        defaultColor = theme.colors.textSmallFont;
     }
-    style.setFontFamily(CONFIG.FONTS.family)
+    style.setFontFamily(theme.fonts.family)
         .setForegroundColor(opt.color || defaultColor)
-        .setFontSize(opt.size || CONFIG.FONTS.sizes.body)
+        .setFontSize(opt.size || theme.fonts.sizes.body)
         .setBold(opt.bold || false);
     if (opt.align) {
         try {
@@ -30,7 +41,7 @@ export function setStyledText(shapeOrCell: GoogleAppsScript.Slides.Shape | Googl
     applyStyleRanges(tr, parsed.ranges);
 }
 
-export function setBulletsWithInlineStyles(shape: GoogleAppsScript.Slides.Shape, points: string[]) {
+export function setBulletsWithInlineStyles(shape: GoogleAppsScript.Slides.Shape, points: string[], theme: SlideTheme = DEFAULT_THEME) {
     const joiner = '\n\n';
     let combined = '';
     const ranges: any[] = [];
@@ -50,8 +61,8 @@ export function setBulletsWithInlineStyles(shape: GoogleAppsScript.Slides.Shape,
     const tr = shape.getText();
     tr.setText(combined || '—');
     applyTextStyle(tr, {
-        size: CONFIG.FONTS.sizes.body
-    });
+        size: theme.fonts.sizes.body
+    }, theme);
     try {
         tr.getParagraphs().forEach(p => {
             p.getRange().getParagraphStyle().setLineSpacing(100).setSpaceBelow(6);
@@ -94,7 +105,7 @@ export function parseInlineStyles(s: string) {
                     start,
                     end,
                     bold: true,
-                    color: CONFIG.COLORS.primary_color,
+                    color: DEFAULT_THEME.colors.primary,
                 };
                 ranges.push(rangeObj);
                 i = nextCharIndex;
@@ -116,7 +127,7 @@ export function parseInlineStyles(s: string) {
                     start,
                     end,
                     bold: true,
-                    color: CONFIG.COLORS.primary_color,
+                    color: DEFAULT_THEME.colors.primary,
                 };
                 ranges.push(rangeObj);
                 i = nextCharIndex;
@@ -478,13 +489,15 @@ export function adjustShapeText_External(shape: GoogleAppsScript.Slides.Shape, p
  * Add footer to slide with optional page number
  */
 export function addFooter(slide: GoogleAppsScript.Slides.Slide, layout: any, pageNum: number, settings: any, creditImageBlob: GoogleAppsScript.Base.BlobSource | null) {
-    if (CONFIG.FOOTER_TEXT && CONFIG.FOOTER_TEXT.trim() !== '') {
+    const theme = getThemeFromLayout(layout);
+
+    if (theme.footerText && theme.footerText.trim() !== '') {
         const leftRect = layout.getRect('footer.leftText');
         const leftShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, leftRect.left, leftRect.top, leftRect.width, leftRect.height);
         const tr = leftShape.getText();
-        tr.setText(CONFIG.FOOTER_TEXT);
+        tr.setText(theme.footerText);
         applyTextStyle(tr, {
-            size: CONFIG.FONTS.sizes.footer,
+            size: theme.fonts.sizes.footer,
             fontType: 'large'
         });
         try {
@@ -498,8 +511,8 @@ export function addFooter(slide: GoogleAppsScript.Slides.Slide, layout: any, pag
         const tr = rightShape.getText();
         tr.setText(String(pageNum));
         applyTextStyle(tr, {
-            size: CONFIG.FONTS.sizes.footer,
-            color: CONFIG.COLORS.primary_color,
+            size: theme.fonts.sizes.footer,
+            color: theme.colors.primary,
             align: SlidesApp.ParagraphAlignment.END
         });
         try {
@@ -542,11 +555,12 @@ export function estimateTextWidthPt(text: string, fontSize: number): number {
 }
 
 export function drawStandardTitleHeader(slide: GoogleAppsScript.Slides.Slide, layout: any, key: string, title: string, settings: any, preCalculatedWidthPt: number | null = null, imageUpdateOption: string = 'update') {
+    const theme = getThemeFromLayout(layout);
     const titleRect = safeGetRect(layout, `${key}.title`);
     if (!titleRect) {
         return;
     }
-    const initialFontSize = CONFIG.FONTS.sizes.contentTitle;
+    const initialFontSize = theme.fonts.sizes.contentTitle;
     const optimalHeight = layout.pxToPt(initialFontSize + 8);
     const cmToPt = 28.3465;
     const verticalShiftPt = 0.3 * cmToPt;
@@ -587,21 +601,23 @@ export function drawStandardTitleHeader(slide: GoogleAppsScript.Slides.Slide, la
 
 export function drawSubheadIfAny(slide: GoogleAppsScript.Slides.Slide, layout: any, key: string, subhead: string, preCalculatedWidthPt: number | null = null) {
     if (!subhead) return 0;
+    const theme = getThemeFromLayout(layout);
     const rect = safeGetRect(layout, `${key}.subhead`);
     if (!rect) {
         return 0;
     }
     const box = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, rect.left, rect.top, rect.width, rect.height);
     setStyledText(box, subhead, {
-        size: CONFIG.FONTS.sizes.subhead,
+        size: theme.fonts.sizes.subhead,
         fontType: 'large'
     });
     return layout.pxToPt(36);
 }
 
 export function createContentCushion(slide: GoogleAppsScript.Slides.Slide, area: any, settings: any, layout: any) {
+    const theme = getThemeFromLayout(layout);
     const cushion = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, area.left, area.top, area.width, area.height);
-    cushion.getFill().setSolidFill(CONFIG.COLORS.card_bg);
+    cushion.getFill().setSolidFill(theme.colors.cardBg);
     try {
         const border = cushion.getBorder();
         border.setTransparent();

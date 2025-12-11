@@ -159,6 +159,8 @@ export class GasSlideRepository implements ISlideRepository {
             } else if (layoutType === 'SECTION' || rawType === 'section') {
                 sectionGenerator.generate(slide, commonData, layoutManager, index + 1, settings);
             } else if (
+                // Visual Types handled by DiagramGenerator
+                rawType.includes('agenda') || // Move Agenda here
                 rawType.includes('timeline') ||
                 rawType.includes('process') ||
                 rawType.includes('cycle') ||
@@ -179,7 +181,7 @@ export class GasSlideRepository implements ISlideRepository {
                 // Use Diagram Generator for visual types
                 diagramGenerator.generate(slide, commonData, layoutManager, index + 1, settings);
             } else {
-                // Default Content Generator
+                // Default Content Generator (Bullet points, Two-column text)
                 contentGenerator.generate(slide, commonData, layoutManager, index + 1, settings);
             }
 

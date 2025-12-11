@@ -28,18 +28,29 @@ export class TableDiagramRenderer implements IDiagramRenderer {
         const theme = layout.getTheme();
 
         // Iterate through all cells to set base refined style
-        // Clean typography, no heavy borders initially
         for (let r = 0; r < numRows; r++) {
             for (let c = 0; c < numCols; c++) {
                 const cell: any = table.getCell(r, c);
-                cell.getFill().setTransparent(); // Airy look
 
-                // Borders: Only horizontal lines
+                // Backgrounds
+                if (r === 0) {
+                    // Header
+                    cell.getFill().setSolidFill(settings.primaryColor);
+                } else if (r % 2 === 0) {
+                    // Even Rows (Data) - Very Light Gray
+                    cell.getFill().setSolidFill('#F8F9FA');
+                } else {
+                    // Odd Rows (Data) - White/Transparent
+                    cell.getFill().setTransparent();
+                }
+
+                // Borders: Only horizontal lines? Or full grid?
+                // Modern tables often use just horizontal.
                 cell.getBorderRight().setTransparent();
                 cell.getBorderLeft().setTransparent();
                 cell.getBorderTop().setTransparent();
 
-                // Bottom border: subtle
+                // Bottom border: subtle white or gray depending on bg
                 const borderBottom = cell.getBorderBottom();
                 borderBottom.setSolidFill(theme.colors.ghostGray);
                 borderBottom.setWeight(1);
@@ -51,19 +62,14 @@ export class TableDiagramRenderer implements IDiagramRenderer {
         if (headers.length) {
             for (let c = 0; c < numCols; c++) {
                 const cell: any = table.getCell(0, c);
-                // Editorial Header: No solid background fill, just strong text and a thicker bottom line
                 cell.getText().setText(headers[c] || '');
                 const style = cell.getText().getTextStyle();
                 style.setFontFamily(theme.fonts.family);
                 style.setBold(true);
-                style.setFontSize(14); // Slightly larger
-                style.setForegroundColor(settings.primaryColor); // Colored text instead of white on color
+                style.setFontSize(14);
+                style.setForegroundColor('#FFFFFF'); // White text
 
-                // Stronger separator for header
-                cell.getBorderBottom().setSolidFill(settings.primaryColor);
-                cell.getBorderBottom().setWeight(3); // Thicker for clear hierarchy
-
-                try { cell.setContentAlignment(SlidesApp.ContentAlignment.BOTTOM); } catch (e) { } // Align bottom for header
+                try { cell.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
             }
             rowIndex++;
         }

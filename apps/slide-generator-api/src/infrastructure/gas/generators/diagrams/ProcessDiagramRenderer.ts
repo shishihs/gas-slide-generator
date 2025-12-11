@@ -9,67 +9,71 @@ export class ProcessDiagramRenderer implements IDiagramRenderer {
         const steps = data.steps || data.items || [];
         if (!steps.length) return;
 
-        const n = steps.length;
-        const startY = area.top + layout.pxToPt(20);
-        let currentY = startY;
+        const count = steps.length;
+        // Layout: Horizontal flow? Or Vertical?
+        // Process usually Horizontal L->R. User request "Chevron Layout" implies widely used horizontal bars.
+        // Let's do Horizontal flow if it fits, else Vertical list with arrows.
+        // Given text length might be long, Vertical List with "Chevron-like" headers might be safer?
+        // But "Process" usually implies timeline-ish.
+        // Let's stick to Vertical List but make it look like a "Chain".
 
-        // Dynamic Spacing based on count
-        const totalH = area.height;
-        const itemH = totalH / n;
-        // Cap max height per item to keep it tight if few items
-        const actualItemH = Math.min(itemH, layout.pxToPt(100));
-        const margin = layout.pxToPt(20);
-
-        const numColW = layout.pxToPt(50); // Narrower col for number
-
-        // Horizontal proximity: Bring text closer to number
-        const gapNumToText = layout.pxToPt(10);
-        const textLeft = area.left + numColW + gapNumToText;
-        const textWidth = area.width - (numColW + gapNumToText);
+        // Vertical Chain Layout
+        const itemHeight = Math.min(area.height / count, 120);
+        const gap = 10;
+        const boxWidth = area.width;
 
         steps.forEach((step: string, i: number) => {
-            const cleanText = String(step || '').replace(/^\s*\d+[\.\s]*/, '');
-            const numStr = String(i + 1).padStart(2, '0');
+            const y = area.top + (i * itemHeight);
+            const h = itemHeight - gap;
 
-            // 1. Step Number (Large, Styled, Top-aligned with text)
-            // Lower Y slightly to align baseline? or alignment TOP is fine if fonts match.
-            // Let's keep TOP alignment but ensure sizes balance.
+            // 1. Pentagon/Chevron Shape for the container? 
+            // Let's use a Rounded Rectangle with a heavy left border or number circle.
 
-            const numShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, area.left, currentY, numColW, layout.pxToPt(40));
-            // No border/fill
-            setStyledText(numShape, numStr, {
-                size: 28, // Slightly smaller but Bold
+            // Container Box
+            const box = slide.insertShape(SlidesApp.ShapeType.ROUND_RECTANGLE, area.left, y, boxWidth, h);
+            box.getFill().setSolidFill(settings.card_bg || '#F8F9FA');
+            box.getBorder().setTransparent();
+
+            // 2. Number Circle (Left)
+            const circleSize = 40;
+            const circleX = area.left + 20;
+            const circleY = y + (h - circleSize) / 2;
+
+            const circle = slide.insertShape(SlidesApp.ShapeType.ELLIPSE, circleX, circleY, circleSize, circleSize);
+            circle.getFill().setSolidFill(settings.primaryColor);
+            circle.getBorder().setTransparent();
+
+            // Number
+            setStyledText(circle, String(i + 1), {
+                size: 18,
                 bold: true,
-                color: settings.primaryColor || theme.colors.primary,
-                align: SlidesApp.ParagraphAlignment.END // Align right towards the text
+                color: '#FFFFFF',
+                align: SlidesApp.ParagraphAlignment.CENTER
             }, theme);
-            try { numShape.setContentAlignment(SlidesApp.ContentAlignment.TOP); } catch (e) { }
+            try { circle.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
 
-            // 2. Content Text (Closer to Number)
-            const textShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, textLeft, currentY + layout.pxToPt(6), textWidth, actualItemH - margin);
-            // +6pt offset to align visual top with the large number
+            // 3. Arrow Down (between items)? Only if not last.
+            if (i < count - 1) {
+                // Draw a small arrow pointing down from this box to next?
+                // Or just the boxes themselves imply flow.
+            }
 
-            setStyledText(textShape, cleanText, {
+            // 4. Content
+            const textX = circleX + circleSize + 20;
+            const textW = boxWidth - (textX - area.left) - 20;
+
+            const textBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, textX, y + 5, textW, h - 10);
+            const cleanText = String(step || '').replace(/^\s*\d+[\.\s]*/, '');
+
+            setStyledText(textBox, cleanText, {
                 size: 14,
                 color: theme.colors.textPrimary,
                 align: SlidesApp.ParagraphAlignment.START,
-                bold: true // Title-like weight for the step content
+                bold: false
             }, theme);
-            try { textShape.setContentAlignment(SlidesApp.ContentAlignment.TOP); } catch (e) { }
-
-            // 3. Separator (Vertical flow guide)
-            // Instead of full width line, how about a small vertical line under the number to lead eye to next?
-            // Or keep full width but make it very subtle.
-            // Let's stick to full width for "List" feel, but very light.
-            if (i < n - 1) {
-                const lineY = currentY + actualItemH - margin / 2;
-                // Indent line to start at text, keeping numbers in a "gutter"
-                const line = slide.insertLine(SlidesApp.LineCategory.STRAIGHT, textLeft, lineY, area.left + area.width, lineY);
-                line.getLineFill().setSolidFill(theme.colors.faintGray);
-                line.setWeight(0.5);
-            }
-
-            currentY += actualItemH;
+            // Vertically center text
+            try { textBox.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
         });
     }
 }
+```

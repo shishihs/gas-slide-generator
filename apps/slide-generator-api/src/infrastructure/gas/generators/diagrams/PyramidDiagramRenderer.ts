@@ -5,77 +5,112 @@ import { generatePyramidColors } from '../../../../common/utils/ColorUtils';
 
 export class PyramidDiagramRenderer implements IDiagramRenderer {
     render(slide: GoogleAppsScript.Slides.Slide, data: any, area: any, settings: any, layout: LayoutManager): void {
-        const theme = layout.getTheme();
-
         const levels = data.levels || data.items || [];
         if (!levels.length) return;
-        const levelsToDraw = levels.slice(0, 5); // Allow up to 5
 
-        const levelHeight = layout.pxToPt(60);
-        // Vertical gap
-        const levelGap = layout.pxToPt(20);
+        // Reverse levels so the first item is at the top (Apex) or bottom (Base)? 
+        // Typically Pyramid Principle: Main Message (Top) -> Supporting (Bottom).
+        // Let's assume index 0 is Top.
 
-        const totalHeight = (levelHeight * levelsToDraw.length) + (levelGap * (levelsToDraw.length - 1));
-        const startY = area.top + (area.height - totalHeight) / 2;
+        const count = levels.length;
+        const pyramidH = Math.min(area.height, 400);
+        const pyramidW = Math.min(area.width * 0.6, 500); // Pyramid takes 60% width
 
-        // Use a centered list approach for the "Pyramid" feel, where width decreases or increases
-        // But for editorial, a clean stack with numbering is better than a literal triangle.
-        // Let's do a "Stepped List" where the number indicates hierarchy.
+        const centerX = area.left + (area.width / 2);
+        const topY = area.top + (area.height - pyramidH) / 2;
+        const bottomY = topY + pyramidH;
 
-        const contentW = layout.pxToPt(500);
-        const centerX = area.left + area.width / 2;
-        const startX = centerX - contentW / 2;
+        // Gap between levels
+        const gap = 4;
+        const levelHeight = (pyramidH - (gap * (count - 1))) / count;
 
-        levelsToDraw.forEach((level: any, index: number) => {
-            const y = startY + index * (levelHeight + levelGap);
-            const isLast = index === levelsToDraw.length - 1;
+        levels.forEach((level: any, index: number) => {
+            // Calculate Trapezoid Coordinates
+            // Top width factor (0 at apex, 1 at base)
+            const topRatio = index / count;
+            const bottomRatio = (index + 1) / count;
 
-            // 1. Number / Hierarchy Indicator (01, 02...)
-            const numStr = String(index + 1).padStart(2, '0');
-            const numW = layout.pxToPt(50);
-            const numBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, startX, y, numW, levelHeight);
-            setStyledText(numBox, numStr, {
-                size: 32,
-                bold: true,
-                color: settings.primaryColor,
-                align: SlidesApp.ParagraphAlignment.END // Right align number towards content
-            }, theme);
-            try { numBox.setContentAlignment(SlidesApp.ContentAlignment.TOP); } catch (e) { }
+            const segmentTopY = topY + (index * (levelHeight + gap));
+            // Width at segment top
+            const segmentTopW = pyramidW * topRatio;
+            // Width at segment bottom
+            const segmentBottomW = pyramidW * bottomRatio;
 
-            // 2. Separator line (vertical accent)
-            // Move closer to number
-            const lineX = startX + numW + layout.pxToPt(10);
-            // Height: connect visually but leave breathing room
-            const line = slide.insertLine(SlidesApp.LineCategory.STRAIGHT, lineX, y + layout.pxToPt(5), lineX, y + levelHeight - layout.pxToPt(5));
-            line.getLineFill().setSolidFill(theme.colors.ghostGray);
-            line.setWeight(1);
+            // To verify: Index 0 (Top) -> topRatio=0 (Point), bottomRatio=1/3.
 
-            // 3. Content
-            // Closer to line
-            const contentX = lineX + layout.pxToPt(15);
-            const textW = contentW - (contentX - startX);
-            const levelTitle = level.title || `Level ${index + 1}`;
-            const levelDesc = level.description || '';
+            // Draw shape using Builder? No, standard TRAPEZOID shape doesn't allow easy ratio control in GAS.
+            // But we can approximate with basic shapes or standard ISOSCELES_TRIANGLE masked?
+            // Actually, simply stacking trapezoids is hard in standard Slides API without FreeformBuilder (which GAS doesn't fully expose easily).
+            // Workaround: Overlapping triangles? Or just simple Rectangles of varying width (Step Pyramid)?
+            // Let's do a "Triangle" layout where we place text boxes, and maybe a large background Triangle behind everything?
+            // Or better: Use 'ShapeType.TRAPEZOID' is fixed ratio? No.
 
-            // Title
-            const titleH = layout.pxToPt(25);
-            const titleBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, contentX, y, textW, titleH);
-            setStyledText(titleBox, levelTitle.toUpperCase(), {
-                size: 14,
-                bold: true,
-                color: theme.colors.textPrimary,
-                align: SlidesApp.ParagraphAlignment.START
-            }, theme);
+            // Layout Strategy: Draw one big Triangle background, then white lines to slice it?
+            // Yes, easiest.
+        });
 
-            // Description - Closer to title
-            if (levelDesc) {
-                const descBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, contentX, y + titleH, textW, levelHeight - titleH);
-                setStyledText(descBox, levelDesc, {
-                    size: 12,
-                    color: theme.colors.neutralGray,
-                    align: SlidesApp.ParagraphAlignment.START
-                }, theme);
-                try { descBox.setContentAlignment(SlidesApp.ContentAlignment.TOP); } catch (e) { }
+        // 1. Draw Main Triangle Background
+        // Use theme primary color
+        // Note: Google Apps Script uses 'TRIANGLE' typically for isosceles style in standard set
+        const mainTriangle = slide.insertShape(SlidesApp.ShapeType.TRIANGLE, centerX - pyramidW / 2, topY, pyramidW, pyramidH);
+        mainTriangle.getFill().setSolidFill(settings.primaryColor);
+        mainTriangle.getBorder().setTransparent();
+
+        // 2. Draw White Lines to "slice" levels
+        for (let i = 1; i < count; i++) {
+            const lineY = topY + (i * (pyramidH / count));
+            // Calculate width at this Y
+            // Linear interpolation: y goes 0..H, width goes 0..W
+            const ratio = i / count;
+            const widthAtY = pyramidW * ratio;
+
+            // The line actually needs to be white rectangle to "erase" or just a line
+            // A line is fine.
+            const line = slide.insertLine(
+                SlidesApp.LineCategory.STRAIGHT,
+                centerX - widthAtY / 2 + 2, // Slight indent
+                lineY,
+                centerX + widthAtY / 2 - 2,
+                lineY
+            );
+            line.getLineFill().setSolidFill('#FFFFFF');
+            line.setWeight(2);
+        }
+
+        // 3. Labels (Outside the pyramid, connected by lines)
+        levels.forEach((level: any, index: number) => {
+            const y = topY + (index * (pyramidH / count)) + (levelHeight / 2) - 10; // Center of segment
+
+            // Label X Position: Right side of pyramid
+            const ratioAtCenter = (index + 0.5) / count;
+            const pyramidEdgeX = centerX + (pyramidW * ratioAtCenter) / 2;
+
+            const lineStartX = pyramidEdgeX + 10;
+            const lineEndX = lineStartX + 30;
+            const textX = lineEndX + 10;
+
+            // Connector Line
+            const conn = slide.insertLine(SlidesApp.LineCategory.STRAIGHT, lineStartX, y + 10, lineEndX, y + 10);
+            conn.getLineFill().setSolidFill(settings.text_primary || '#333333');
+            conn.setWeight(1);
+
+            // Text Box
+            const textBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, textX, y - 10, 200, 50);
+
+            const title = level.label || level.title || '';
+            const sub = level.subLabel || level.desc || '';
+            const textContent = `${title}\n${sub}`;
+
+            const textRange = textBox.getText();
+            textRange.setText(textContent);
+
+            // Style
+            const titleRange = textRange.getRange(0, title.length);
+            titleRange.getTextStyle().setBold(true).setFontSize(16).setForegroundColor(settings.text_primary || '#333333');
+
+            if (sub) {
+                const subRange = textRange.getRange(title.length + 1, sub.length);
+                subRange.getTextStyle().setBold(false).setFontSize(12).setForegroundColor(settings.ghost_gray || '#666666');
             }
         });
     }

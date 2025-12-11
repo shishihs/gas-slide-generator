@@ -10,103 +10,81 @@ export class CycleDiagramRenderer implements IDiagramRenderer {
 
         const centerX = area.left + area.width / 2;
         const centerY = area.top + area.height / 2;
-        const radius = Math.min(area.width, area.height) * 0.35;
+        // Radius for the center of satellite items
+        const orbitRadius = Math.min(area.width, area.height) * 0.35;
 
-        // 1. Central Thin Circle (The Path)
-        // Instead of bent arrows, we use a clean circle representing the cycle.
-        const circleParams = {
-            left: centerX - radius,
-            top: centerY - radius,
-            width: radius * 2,
-            height: radius * 2
-        };
-        const mainCircle = slide.insertShape(SlidesApp.ShapeType.ELLIPSE, circleParams.left, circleParams.top, circleParams.width, circleParams.height);
-        mainCircle.getFill().setTransparent();
-        mainCircle.getBorder().getLineFill().setSolidFill(theme.colors.ghostGray); // Very subtle
-        mainCircle.getBorder().setWeight(1);
-        mainCircle.getBorder().setDashStyle(SlidesApp.DashStyle.DOT); // Dotted for "flow"
+        // 1. Center Hub
+        const centerR = 120;
+        const centerBubble = slide.insertShape(SlidesApp.ShapeType.ELLIPSE, centerX - centerR / 2, centerY - centerR / 2, centerR, centerR);
+        centerBubble.getFill().setSolidFill(settings.primaryColor);
+        centerBubble.getBorder().setTransparent();
 
         // Center Text
-        if (data.centerText) {
-            const centerW = radius * 1.2;
-            const centerTextBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, centerX - centerW / 2, centerY - layout.pxToPt(20), centerW, layout.pxToPt(40));
-            setStyledText(centerTextBox, data.centerText, {
-                size: 18,
-                bold: true,
-                align: SlidesApp.ParagraphAlignment.CENTER,
-                color: theme.colors.primary
-            }, theme);
-            try { centerTextBox.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
-        }
+        const centerText = data.centerText || data.title || 'CYCLE';
+        setStyledText(centerBubble, centerText, {
+            size: 18,
+            bold: true,
+            color: '#FFFFFF',
+            align: SlidesApp.ParagraphAlignment.CENTER
+        }, theme);
+        try { centerBubble.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
 
+        // 2. Satellite Items
         const count = items.length;
         const angleStep = (2 * Math.PI) / count;
-        // Start from top (-PI/2)
-        const startAngle = -Math.PI / 2;
+        const startAngle = -Math.PI / 2; // Top
 
         items.forEach((item: any, i: number) => {
             const angle = startAngle + (i * angleStep);
 
-            // Item Position (on the circle)
-            const itemX = centerX + Math.cos(angle) * radius;
-            const itemY = centerY + Math.sin(angle) * radius;
+            const x = centerX + Math.cos(angle) * orbitRadius;
+            const y = centerY + Math.sin(angle) * orbitRadius;
 
-            // Dot at anchor point (Slightly larger for impact)
-            const dotR = layout.pxToPt(10);
-            const dot = slide.insertShape(SlidesApp.ShapeType.ELLIPSE, itemX - dotR / 2, itemY - dotR / 2, dotR, dotR);
-            dot.getFill().setSolidFill(theme.colors.backgroundWhite);
-            dot.getBorder().getLineFill().setSolidFill(theme.colors.primary);
-            dot.getBorder().setWeight(2);
+            // Draw Connector Arrow from Center to Item (or vice versa)
+            // Draw before shape so it's behind
+            // From edge of center bubble to item bubble?
+            // Simple line from center to x,y is easiest, send to back.
+            const conn = slide.insertLine(SlidesApp.LineCategory.STRAIGHT, centerX, centerY, x, y);
+            conn.getLineFill().setSolidFill(theme.colors.neutralGray);
+            conn.setWeight(2);
+            conn.sendToBack();
+            // Note: sendToBack acts on the page, might go behind background if not careful. 
+            // Usually fine.
 
-            // Text Positioning
-            const isRight = itemX > centerX;
+            // Satellite Bubble (Number)
+            const bubbleR = 50;
+            const bubble = slide.insertShape(SlidesApp.ShapeType.ELLIPSE, x - bubbleR / 2, y - bubbleR / 2, bubbleR, bubbleR);
+            bubble.getFill().setSolidFill('#FFFFFF');
+            bubble.getBorder().getLineFill().setSolidFill(settings.primaryColor);
+            bubble.getBorder().setWeight(3);
 
-            const textW = layout.pxToPt(140);
-            const textH = layout.pxToPt(60);
-            // Reduced margin to keep text visually connected to anchor
-            const margin = layout.pxToPt(10);
-
-            let textLeft = isRight ? (itemX + margin) : (itemX - textW - margin);
-            // Adjust for exact center alignment cases (Top/Bottom items)
-            if (Math.abs(itemX - centerX) < 5) { textLeft = itemX - textW / 2; }
-
-            const textTop = itemY - textH / 2;
-
-            const labelStr = item.label || '';
-            const subLabelStr = item.subLabel || `${String(i + 1).padStart(2, '0')}`;
-
-            // Create separate box for Number to style it boldly
-            // Number (Large, Accent) -> Label (Normal)
-
-            // Align logic
-            const align = Math.abs(itemX - centerX) < 5 ? SlidesApp.ParagraphAlignment.CENTER : (isRight ? SlidesApp.ParagraphAlignment.START : SlidesApp.ParagraphAlignment.END);
-
-            // Single box approach for now to keep it simple but utilize line break
-            const textBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, textLeft, textTop, textW, textH);
-
-            // To properly style mixed content (Bold Number + Normal Text) in one box often requires advanced API or multiple calls.
-            // For now, let's stick to the "Editorial" look where the Title is Bold and Number is small/accented or vice versa.
-            // Let's make the Number part of the label but separate line.
-
-            setStyledText(textBox, `${subLabelStr}\n${labelStr}`, {
-                size: 14,
-                bold: true, // Title is bold
-                color: theme.colors.textPrimary,
-                align: align
+            setStyledText(bubble, String(i + 1).padStart(2, '0'), {
+                size: 20,
+                bold: true,
+                color: settings.primaryColor,
+                align: SlidesApp.ParagraphAlignment.CENTER
             }, theme);
-            // Ideally we'd color the number differently.
-            // Since we can't easily mixed-style in mock/helper, use formatting:
-            // "01 | Title" ? No, "01\nTitle" is stacked.
+            try { bubble.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
 
-            // Let's add a small connector line from dot to text if "Minimal" allows,
-            // to bridge the gap strongly.
-            if (Math.abs(itemX - centerX) > 5) {
-                const lineStart = isRight ? (itemX + dotR / 2) : (itemX - dotR / 2);
-                const lineEnd = isRight ? (textLeft) : (textLeft + textW);
-                const connector = slide.insertLine(SlidesApp.LineCategory.STRAIGHT, lineStart, itemY, lineEnd, itemY);
-                connector.getLineFill().setSolidFill(theme.colors.primary);
-                connector.setWeight(1);
-            }
+            // Label (Outside the bubble)
+            // Position relative to bubble based on angle?
+            // Left items -> Text on Left. Right -> Right.
+            const isRight = x > centerX;
+            const textW = 120;
+            const textH = 60;
+            const textX = isRight ? x + bubbleR / 2 + 10 : x - bubbleR / 2 - textW - 10;
+            const textY = y - textH / 2;
+
+            const textBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, textX, textY, textW, textH);
+            const label = item.label || item.title || '';
+            setStyledText(textBox, label, {
+                size: 14,
+                bold: true,
+                color: theme.colors.textPrimary,
+                align: isRight ? SlidesApp.ParagraphAlignment.START : SlidesApp.ParagraphAlignment.END
+            }, theme);
+            try { textBox.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
+
         });
     }
 }

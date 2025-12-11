@@ -9,6 +9,7 @@ import { ComparisonDiagramRenderer } from './ComparisonDiagramRenderer';
 import { StatsCompareDiagramRenderer } from './StatsCompareDiagramRenderer';
 import { BarCompareDiagramRenderer } from './BarCompareDiagramRenderer';
 import { StepUpDiagramRenderer } from './StepUpDiagramRenderer';
+import { AgendaDiagramRenderer } from './AgendaDiagramRenderer';
 import { LanesDiagramRenderer } from './LanesDiagramRenderer';
 import { FlowChartDiagramRenderer } from './FlowChartDiagramRenderer';
 import { KPIDiagramRenderer } from './KPIDiagramRenderer';
@@ -38,6 +39,12 @@ export class DiagramRendererFactory {
         if (normalizedType.includes('cycle')) {
             Logger.log('[Factory] Matched CycleDiagramRenderer');
             return new CycleDiagramRenderer();
+        }
+        // The following block has been modified to include AgendaDiagramRenderer
+        // and to use a switch-like structure based on the instruction's intent.
+        if (normalizedType.includes('agenda')) {
+            Logger.log('[Factory] Matched AgendaDiagramRenderer');
+            return new AgendaDiagramRenderer();
         }
         if (normalizedType.includes('pyramid')) {
             Logger.log('[Factory] Matched PyramidDiagramRenderer');

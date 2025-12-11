@@ -67,14 +67,16 @@ export class RequestFactory {
             };
             if (style.color.startsWith('#')) {
                 const hex = style.color.replace('#', '');
-                const r = parseInt(hex.substring(0, 2), 16) / 255;
-                const g = parseInt(hex.substring(2, 4), 16) / 255;
-                const b = parseInt(hex.substring(4, 6), 16) / 255;
-                textStyle.foregroundColor = {
-                    opaqueColor: {
-                        rgbColor: { red: r, green: g, blue: b }
-                    }
-                };
+                if (hex.length >= 6) {
+                    const r = parseInt(hex.substring(0, 2), 16) / 255;
+                    const g = parseInt(hex.substring(2, 4), 16) / 255;
+                    const b = parseInt(hex.substring(4, 6), 16) / 255;
+                    textStyle.foregroundColor = {
+                        opaqueColor: {
+                            rgbColor: { red: r, green: g, blue: b }
+                        }
+                    };
+                }
             }
             fields.push('foregroundColor');
         }
@@ -174,11 +176,11 @@ export class RequestFactory {
         const fields: string[] = [];
         const shapeProperties: any = {};
 
-        if (fillHex !== undefined) {
+        if (fillHex !== undefined && fillHex !== null) {
             // Check for transparent
             if (fillHex === 'TRANSPARENT') {
                 shapeProperties.shapeBackgroundFill = { propertyState: 'NOT_RENDERED' };
-            } else {
+            } else if (typeof fillHex === 'string' && fillHex.startsWith('#') && fillHex.length >= 7) {
                 // Hex to RGB
                 // Simple parser (assumes #RRGGBB)
                 const r = parseInt(fillHex.substring(1, 3), 16) / 255;
@@ -199,7 +201,7 @@ export class RequestFactory {
             const outline: any = {};
             if (borderHex === 'TRANSPARENT') {
                 outline.propertyState = 'NOT_RENDERED';
-            } else if (borderHex) {
+            } else if (borderHex && typeof borderHex === 'string' && borderHex.startsWith('#') && borderHex.length >= 7) {
                 const r = parseInt(borderHex.substring(1, 3), 16) / 255;
                 const g = parseInt(borderHex.substring(3, 5), 16) / 255;
                 const b = parseInt(borderHex.substring(5, 7), 16) / 255;

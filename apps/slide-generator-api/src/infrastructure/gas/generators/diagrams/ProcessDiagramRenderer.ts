@@ -77,9 +77,10 @@ export class ProcessDiagramRenderer implements IDiagramRenderer {
     }
 
     private hexToRgb(hex: string): GoogleAppsScript.Slides.Schema.RgbColor {
-        const r = parseInt(hex.slice(1, 3), 16) / 255;
-        const g = parseInt(hex.slice(3, 5), 16) / 255;
-        const b = parseInt(hex.slice(5, 7), 16) / 255;
+        const safeHex = (hex && typeof hex === 'string') ? hex : '#000000';
+        const r = parseInt(safeHex.slice(1, 3), 16) / 255;
+        const g = parseInt(safeHex.slice(3, 5), 16) / 255;
+        const b = parseInt(safeHex.slice(5, 7), 16) / 255;
         return { red: r, green: g, blue: b };
     }
 }

@@ -50,7 +50,8 @@ export class QuoteDiagramRenderer implements IDiagramRenderer {
         // I'll inline a simple hex parser again or assume gray/black fallback for safety if primaryColor is complex.
         // Or I can paste the helper. I'll paste the helper. 
         const hexToRgb = (hex: string) => {
-            const h = (hex || '#000000').replace('#', '');
+            const safeHex = (hex && typeof hex === 'string') ? hex : '#000000';
+            const h = safeHex.replace('#', '');
             return {
                 red: parseInt(h.substring(0, 2), 16) / 255,
                 green: parseInt(h.substring(2, 4), 16) / 255,

@@ -36,7 +36,8 @@ export class BarCompareDiagramRenderer implements IDiagramRenderer {
 
         // Helper for Line RGB
         const hexToRgb = (hex: string) => {
-            const h = (hex || '#000000').replace('#', '');
+            const safeHex = (hex && typeof hex === 'string') ? hex : '#000000';
+            const h = safeHex.replace('#', '');
             return {
                 red: parseInt(h.substring(0, 2), 16) / 255,
                 green: parseInt(h.substring(2, 4), 16) / 255,

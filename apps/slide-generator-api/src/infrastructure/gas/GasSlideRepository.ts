@@ -181,8 +181,14 @@ export class GasSlideRepository implements ISlideRepository {
             allRequests.push(...reqs);
         });
 
+        // Store URL before closing
+        const presentationUrl = pres.getUrl();
+
         // 6. Execute Batch Update
         if (allRequests.length > 0) {
+            // Important: Save and close to ensure SlidesApp changes (appendSlide) are visible to Advanced Slides API
+            pres.saveAndClose();
+
             // Split into chunks if too large (API limit is usually high, but safe practice)
             // Limit is 100 requests per call is FALSE. Limit is generous, but payload size matters.
             // We can send all in one go for typical pres (e.g. < 50 slides).
@@ -194,8 +200,11 @@ export class GasSlideRepository implements ISlideRepository {
                 Logger.log(`Batch Update Failed: ${e}`);
                 throw e;
             }
+        } else {
+            // If no requests, just save
+            pres.saveAndClose();
         }
 
-        return pres.getUrl();
+        return presentationUrl;
     }
 }

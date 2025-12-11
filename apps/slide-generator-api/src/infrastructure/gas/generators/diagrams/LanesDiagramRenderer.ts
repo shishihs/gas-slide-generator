@@ -1,13 +1,13 @@
 import { IDiagramRenderer } from './IDiagramRenderer';
 import { LayoutManager } from '../../../../common/utils/LayoutManager';
-import { DEFAULT_THEME } from '../../../../common/config/DefaultTheme';
 import { setStyledText, drawArrowBetweenRects } from '../../../../common/utils/SlideUtils';
 
 export class LanesDiagramRenderer implements IDiagramRenderer {
     render(slide: GoogleAppsScript.Slides.Slide, data: any, area: any, settings: any, layout: LayoutManager): void {
+        const theme = layout.getTheme();
         const lanes = data.lanes || [];
         const n = Math.max(1, lanes.length);
-        const { laneGapPx, lanePadPx, laneTitleHeightPx, cardGapPx, cardMinHeightPx, cardMaxHeightPx, arrowHeightPx, arrowGapPx } = DEFAULT_THEME.diagram;
+        const { laneGapPx, lanePadPx, laneTitleHeightPx, cardGapPx, cardMinHeightPx, cardMaxHeightPx, arrowHeightPx, arrowGapPx } = theme.diagram;
         const px = (p: number) => layout.pxToPt(p);
 
         const laneW = (area.width - px(laneGapPx) * (n - 1)) / n;
@@ -21,15 +21,15 @@ export class LanesDiagramRenderer implements IDiagramRenderer {
             const lt = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, left, area.top, laneW, px(laneTitleHeightPx));
             lt.getFill().setSolidFill(settings.primaryColor);
             lt.getBorder().getLineFill().setSolidFill(settings.primaryColor);
-            setStyledText(lt, lane.title || '', { size: DEFAULT_THEME.fonts.sizes.laneTitle, bold: true, color: DEFAULT_THEME.colors.backgroundGray, align: SlidesApp.ParagraphAlignment.CENTER });
+            setStyledText(lt, lane.title || '', { size: theme.fonts.sizes.laneTitle, bold: true, color: theme.colors.backgroundGray, align: SlidesApp.ParagraphAlignment.CENTER }, theme);
             try { lt.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
 
             // Lane Body
             const laneBodyTop = area.top + px(laneTitleHeightPx);
             const laneBodyHeight = area.height - px(laneTitleHeightPx);
             const laneBg = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, left, laneBodyTop, laneW, laneBodyHeight);
-            laneBg.getFill().setSolidFill(DEFAULT_THEME.colors.backgroundGray);
-            laneBg.getBorder().getLineFill().setSolidFill(DEFAULT_THEME.colors.laneBorder);
+            laneBg.getFill().setSolidFill(theme.colors.backgroundGray);
+            laneBg.getBorder().getLineFill().setSolidFill(theme.colors.laneBorder);
 
             const items = Array.isArray(lane.items) ? lane.items : [];
             const rows = Math.max(1, items.length);
@@ -42,9 +42,9 @@ export class LanesDiagramRenderer implements IDiagramRenderer {
             for (let i = 0; i < rows; i++) {
                 const cardTop = firstTop + i * (cardH + px(cardGapPx));
                 const card = slide.insertShape(SlidesApp.ShapeType.ROUND_RECTANGLE, left + px(lanePadPx), cardTop, laneW - px(lanePadPx) * 2, cardH);
-                card.getFill().setSolidFill(DEFAULT_THEME.colors.backgroundGray);
-                card.getBorder().getLineFill().setSolidFill(DEFAULT_THEME.colors.cardBorder);
-                setStyledText(card, items[i] || '', { size: DEFAULT_THEME.fonts.sizes.body });
+                card.getFill().setSolidFill(theme.colors.backgroundGray);
+                card.getBorder().getLineFill().setSolidFill(theme.colors.cardBorder);
+                setStyledText(card, items[i] || '', { size: theme.fonts.sizes.body }, theme);
                 try { card.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
 
                 cardBoxes[j][i] = {

@@ -21,6 +21,7 @@ export class GasContentSlideGenerator implements ISlideGenerator {
     constructor(private creditImageBlob: GoogleAppsScript.Base.BlobSource | null) { }
 
     generate(slide: GoogleAppsScript.Slides.Slide, data: any, layout: LayoutManager, pageNum: number, settings: any, imageUpdateOption: string = 'update') {
+        const theme = layout.getTheme();
 
 
         // Title Placeholder
@@ -110,8 +111,8 @@ export class GasContentSlideGenerator implements ISlideGenerator {
             // Assume bodies[0] is Left, bodies[1] is Right (usually order of creation or x-pos)
             // We might want to sort by Left position to be safe.
             const sortedBodies = bodies.map(p => p.asShape()).sort((a, b) => a.getLeft() - b.getLeft());
-            setBulletsWithInlineStyles(sortedBodies[0], L); // Use setBulletsWithInlineStyles for content
-            setBulletsWithInlineStyles(sortedBodies[1], R);
+            setBulletsWithInlineStyles(sortedBodies[0], L, theme); // Use setBulletsWithInlineStyles for content
+            setBulletsWithInlineStyles(sortedBodies[1], R, theme);
 
         } else if (isTwo) {
             // User wants 2 columns but Layout doesn't have 2 body placeholders.
@@ -150,14 +151,14 @@ export class GasContentSlideGenerator implements ISlideGenerator {
 
             const leftShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, leftTextRect.left, leftTextRect.top, leftTextRect.width, leftTextRect.height);
             const rightShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, rightTextRect.left, rightTextRect.top, rightTextRect.width, rightTextRect.height);
-            setBulletsWithInlineStyles(leftShape, L);
-            setBulletsWithInlineStyles(rightShape, R);
+            setBulletsWithInlineStyles(leftShape, L, theme);
+            setBulletsWithInlineStyles(rightShape, R, theme);
         } else {
             // Single Column case
             if (bodies.length > 0) {
                 const bodyShape = bodies[0].asShape();
                 // We apply content.
-                setBulletsWithInlineStyles(bodyShape, points);
+                setBulletsWithInlineStyles(bodyShape, points, theme);
                 // We do NOT manual bold/size settings to respect template.
             } else {
                 // Fallback: No body placeholder found. Draw manually.
@@ -170,7 +171,7 @@ export class GasContentSlideGenerator implements ISlideGenerator {
                 const padding = layout.pxToPt(20);
                 const textRect = { left: bodyRect.left + padding, top: bodyRect.top + padding, width: bodyRect.width - (padding * 2), height: bodyRect.height - (padding * 2) };
                 const bodyShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, textRect.left, textRect.top, textRect.width, textRect.height);
-                setBulletsWithInlineStyles(bodyShape, points);
+                setBulletsWithInlineStyles(bodyShape, points, theme);
             }
         }
 

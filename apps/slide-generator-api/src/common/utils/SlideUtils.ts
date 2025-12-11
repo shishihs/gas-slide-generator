@@ -33,11 +33,11 @@ export function applyTextStyle(textRange: GoogleAppsScript.Slides.TextRange, opt
     }
 }
 
-export function setStyledText(shapeOrCell: GoogleAppsScript.Slides.Shape | GoogleAppsScript.Slides.TableCell, rawText: string, baseOpt?: any) {
-    const parsed = parseInlineStyles(rawText || '');
+export function setStyledText(shapeOrCell: GoogleAppsScript.Slides.Shape | GoogleAppsScript.Slides.TableCell, rawText: string, baseOpt?: any, theme: SlideTheme = DEFAULT_THEME) {
+    const parsed = parseInlineStyles(rawText || '', theme.colors.primary);
     const tr = shapeOrCell.getText();
     tr.setText(parsed.output);
-    applyTextStyle(tr, baseOpt || {});
+    applyTextStyle(tr, baseOpt || {}, theme);
     applyStyleRanges(tr, parsed.ranges);
 }
 
@@ -46,7 +46,7 @@ export function setBulletsWithInlineStyles(shape: GoogleAppsScript.Slides.Shape,
     let combined = '';
     const ranges: any[] = [];
     (points || []).forEach((pt, idx) => {
-        const parsed = parseInlineStyles(String(pt || ''));
+        const parsed = parseInlineStyles(String(pt || ''), theme.colors.primary);
         const bullet = parsed.output;
         if (idx > 0) combined += joiner;
         const start = combined.length;
@@ -83,7 +83,7 @@ function checkSpacing(s: string, out: string, i: number, nextCharIndex: number) 
     return { prefix, suffix };
 }
 
-function parseInlineStyles(s: string) {
+function parseInlineStyles(s: string, highlightColor: string) {
     const ranges = [];
     let out = '';
     let i = 0;
@@ -105,7 +105,7 @@ function parseInlineStyles(s: string) {
                     start,
                     end,
                     bold: true,
-                    color: DEFAULT_THEME.colors.primary,
+                    color: highlightColor,
                 };
                 ranges.push(rangeObj);
                 i = nextCharIndex;
@@ -127,7 +127,7 @@ function parseInlineStyles(s: string) {
                     start,
                     end,
                     bold: true,
-                    color: DEFAULT_THEME.colors.primary,
+                    color: highlightColor,
                 };
                 ranges.push(rangeObj);
                 i = nextCharIndex;
@@ -499,7 +499,7 @@ export function drawStandardTitleHeader(slide: GoogleAppsScript.Slides.Slide, la
         size: initialFontSize,
         bold: true,
         fontType: 'large'
-    });
+    }, theme);
     try {
         titleShape.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
     } catch (e) { }
@@ -534,7 +534,7 @@ export function drawSubheadIfAny(slide: GoogleAppsScript.Slides.Slide, layout: a
     setStyledText(box, subhead, {
         size: theme.fonts.sizes.subhead,
         fontType: 'large'
-    });
+    }, theme);
     return layout.pxToPt(36);
 }
 

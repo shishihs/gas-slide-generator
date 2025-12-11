@@ -1,10 +1,10 @@
 import { IDiagramRenderer } from './IDiagramRenderer';
 import { LayoutManager } from '../../../../common/utils/LayoutManager';
-import { DEFAULT_THEME } from '../../../../common/config/DefaultTheme';
 import { setStyledText } from '../../../../common/utils/SlideUtils';
 
 export class TriangleDiagramRenderer implements IDiagramRenderer {
     render(slide: GoogleAppsScript.Slides.Slide, data: any, area: any, settings: any, layout: LayoutManager): void {
+        const theme = layout.getTheme();
         const items = data.items || [];
         if (!items.length) return;
 
@@ -30,7 +30,7 @@ export class TriangleDiagramRenderer implements IDiagramRenderer {
         trianglePath.setRotation(0); // 正三角形の向きに
         // 実際にはシェイプの頂点は矩形内配置なので微調整が必要だが、一旦シンプルに
         // 背景の三角形は薄く
-        trianglePath.getFill().setSolidFill(DEFAULT_THEME.colors.faintGray);
+        trianglePath.getFill().setSolidFill(theme.colors.faintGray);
         trianglePath.getBorder().setTransparent();
 
         // Send manually to back (GAS doesn't have z-index easily, relying on insertion order - insert first = back)
@@ -53,9 +53,9 @@ export class TriangleDiagramRenderer implements IDiagramRenderer {
             setStyledText(circle, `${title}\n${desc}`, {
                 size: 14,
                 bold: true,
-                color: DEFAULT_THEME.colors.backgroundGray,
+                color: theme.colors.backgroundGray,
                 align: SlidesApp.ParagraphAlignment.CENTER
-            });
+            }, theme);
             try {
                 circle.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
                 // タイトルと説明のフォントサイズを変える

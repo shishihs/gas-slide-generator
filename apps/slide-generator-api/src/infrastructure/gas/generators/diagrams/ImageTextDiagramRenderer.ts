@@ -1,10 +1,10 @@
 import { IDiagramRenderer } from './IDiagramRenderer';
 import { LayoutManager } from '../../../../common/utils/LayoutManager';
-import { DEFAULT_THEME } from '../../../../common/config/DefaultTheme';
 import { setStyledText, insertImageFromUrlOrFileId } from '../../../../common/utils/SlideUtils';
 
 export class ImageTextDiagramRenderer implements IDiagramRenderer {
     render(slide: GoogleAppsScript.Slides.Slide, data: any, area: any, settings: any, layout: LayoutManager): void {
+        const theme = layout.getTheme();
         const imageUrl = data.image;
         const points = data.points || []; // Text content
 
@@ -42,14 +42,14 @@ export class ImageTextDiagramRenderer implements IDiagramRenderer {
                 Logger.log('Image insert failed: ' + e);
                 // Placeholder
                 const ph = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, imgX, area.top, halfW, area.height);
-                ph.getFill().setSolidFill(DEFAULT_THEME.colors.ghostGray);
-                setStyledText(ph, 'Image Placeholder', { align: SlidesApp.ParagraphAlignment.CENTER });
+                ph.getFill().setSolidFill(theme.colors.ghostGray);
+                setStyledText(ph, 'Image Placeholder', { align: SlidesApp.ParagraphAlignment.CENTER }, theme);
             }
         }
 
         // Draw Text
         const textBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, txtX, area.top, halfW, area.height);
         const textContent = points.join('\n');
-        setStyledText(textBox, textContent, { size: DEFAULT_THEME.fonts.sizes.body });
+        setStyledText(textBox, textContent, { size: theme.fonts.sizes.body }, theme);
     }
 }

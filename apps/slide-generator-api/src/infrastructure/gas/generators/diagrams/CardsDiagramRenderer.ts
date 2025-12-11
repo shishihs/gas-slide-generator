@@ -1,10 +1,10 @@
 import { IDiagramRenderer } from './IDiagramRenderer';
 import { LayoutManager } from '../../../../common/utils/LayoutManager';
-import { DEFAULT_THEME } from '../../../../common/config/DefaultTheme';
 import { setStyledText } from '../../../../common/utils/SlideUtils';
 
 export class CardsDiagramRenderer implements IDiagramRenderer {
     render(slide: GoogleAppsScript.Slides.Slide, data: any, area: any, settings: any, layout: LayoutManager): void {
+        const theme = layout.getTheme();
         const items = data.items || [];
         if (!items.length) return;
         const type = (data.type || '').toLowerCase();
@@ -50,9 +50,9 @@ export class CardsDiagramRenderer implements IDiagramRenderer {
                 setStyledText(numBox, numStr, {
                     size: 14,
                     bold: true,
-                    color: DEFAULT_THEME.colors.neutralGray,
+                    color: theme.colors.neutralGray,
                     align: SlidesApp.ParagraphAlignment.END
-                });
+                }, theme);
 
                 // Title - Large and bold, closer to top
                 const titleTop = y + layout.pxToPt(6); // Aligned with num
@@ -61,9 +61,9 @@ export class CardsDiagramRenderer implements IDiagramRenderer {
                 setStyledText(titleBox, title, {
                     size: 18,
                     bold: true,
-                    color: DEFAULT_THEME.colors.textPrimary,
+                    color: theme.colors.textPrimary,
                     align: SlidesApp.ParagraphAlignment.START
-                });
+                }, theme);
                 try { titleBox.setContentAlignment(SlidesApp.ContentAlignment.TOP); } catch (e) { }
 
                 // Body - Closer to title
@@ -73,9 +73,9 @@ export class CardsDiagramRenderer implements IDiagramRenderer {
                     const descBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x, descTop, cardW, descH);
                     setStyledText(descBox, desc, {
                         size: 13,
-                        color: typeof DEFAULT_THEME.colors.textSmallFont === 'string' ? DEFAULT_THEME.colors.textSmallFont : '#424242',
+                        color: typeof theme.colors.textSmallFont === 'string' ? theme.colors.textSmallFont : '#424242',
                         align: SlidesApp.ParagraphAlignment.START
-                    });
+                    }, theme);
                     try { descBox.setContentAlignment(SlidesApp.ContentAlignment.TOP); } catch (e) { }
                 }
 
@@ -96,9 +96,9 @@ export class CardsDiagramRenderer implements IDiagramRenderer {
                 setStyledText(titleBox, title, {
                     size: 16,
                     bold: true,
-                    color: DEFAULT_THEME.colors.textPrimary,
+                    color: theme.colors.textPrimary,
                     align: SlidesApp.ParagraphAlignment.START
-                });
+                }, theme);
                 try { titleBox.setContentAlignment(SlidesApp.ContentAlignment.TOP); } catch (e) { }
 
                 // Body closer to Title
@@ -108,9 +108,9 @@ export class CardsDiagramRenderer implements IDiagramRenderer {
                     const descBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, contentX, descTop, contentW, descH);
                     setStyledText(descBox, desc, {
                         size: 13,
-                        color: typeof DEFAULT_THEME.colors.textSmallFont === 'string' ? DEFAULT_THEME.colors.textSmallFont : '#424242',
+                        color: typeof theme.colors.textSmallFont === 'string' ? theme.colors.textSmallFont : '#424242',
                         align: SlidesApp.ParagraphAlignment.START
-                    });
+                    }, theme);
                     try { descBox.setContentAlignment(SlidesApp.ContentAlignment.TOP); } catch (e) { }
                 }
             }

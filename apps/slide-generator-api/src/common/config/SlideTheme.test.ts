@@ -10,7 +10,7 @@ describe('SlideTheme', () => {
 
             expect(DEFAULT_THEME.fonts).toBeDefined();
             expect(DEFAULT_THEME.fonts.family).toBe('Noto Sans JP');
-            expect(DEFAULT_THEME.fonts.sizes.body).toBe(16);
+            expect(DEFAULT_THEME.fonts.sizes.body).toBe(18);
 
             expect(DEFAULT_THEME.colors).toBeDefined();
             expect(DEFAULT_THEME.colors.primary).toBe('#4A6C42');

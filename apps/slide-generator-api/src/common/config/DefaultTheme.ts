@@ -194,7 +194,191 @@ const DEFAULT_POSITIONS: SlidePositions = {
 // Default Theme
 // ============================================================
 
-export const DEFAULT_THEME: SlideTheme = {
+// ============================================================
+// Shared Base Configuration (Editorial Layout)
+// ============================================================
+
+const BASE_POSITIONS: SlidePositions = {
+    // Updated positions for "Editorial" look - wider margins (60px side margins)
+    titleSlide: {
+        logo: { left: 60, top: 60, width: 150 },
+        title: { left: 60, top: 200, width: 840, height: 120 },
+        date: { left: 60, top: 480, width: 300, height: 40 }
+    },
+    contentSlide: {
+        headerLogo: { right: 30, top: 30, width: 80 },
+        title: { left: 60, top: 30, width: 840, height: 70 },
+        titleUnderline: { left: 60, top: 100, width: 80, height: 3 }, // Short elegant underline
+        subhead: { left: 60, top: 110, width: 840, height: 30 },
+        body: { left: 60, top: 160, width: 840, height: 320 },
+        twoColLeft: { left: 60, top: 160, width: 400, height: 320 }, // 40px gap
+        twoColRight: { left: 500, top: 160, width: 400, height: 320 }
+    },
+    compareSlide: {
+        headerLogo: { right: 30, top: 30, width: 80 },
+        title: { left: 60, top: 30, width: 840, height: 70 },
+        titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+        subhead: { left: 60, top: 110, width: 840, height: 30 },
+        leftBox: { left: 60, top: 160, width: 400, height: 320 },
+        rightBox: { left: 500, top: 160, width: 400, height: 320 }
+    },
+    processSlide: {
+        headerLogo: { right: 30, top: 30, width: 80 },
+        title: { left: 60, top: 30, width: 840, height: 70 },
+        titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+        subhead: { left: 60, top: 110, width: 840, height: 30 },
+        area: { left: 60, top: 160, width: 840, height: 320 }
+    },
+    timelineSlide: {
+        headerLogo: { right: 30, top: 30, width: 80 },
+        title: { left: 60, top: 30, width: 840, height: 70 },
+        titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+        subhead: { left: 60, top: 110, width: 840, height: 30 },
+        area: { left: 60, top: 160, width: 840, height: 320 }
+    },
+    diagramSlide: {
+        headerLogo: { right: 30, top: 30, width: 80 },
+        title: { left: 60, top: 30, width: 840, height: 70 },
+        titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+        subhead: { left: 60, top: 110, width: 840, height: 30 },
+        lanesArea: { left: 60, top: 160, width: 840, height: 320 }
+    },
+    cardsSlide: {
+        headerLogo: { right: 30, top: 30, width: 80 },
+        title: { left: 60, top: 30, width: 840, height: 70 },
+        titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+        subhead: { left: 60, top: 110, width: 840, height: 30 },
+        gridArea: { left: 60, top: 160, width: 840, height: 320 }
+    },
+    tableSlide: {
+        headerLogo: { right: 30, top: 30, width: 80 },
+        title: { left: 60, top: 30, width: 840, height: 70 },
+        titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+        subhead: { left: 60, top: 110, width: 840, height: 30 },
+        area: { left: 60, top: 160, width: 840, height: 320 }
+    },
+    progressSlide: {
+        headerLogo: { right: 30, top: 30, width: 80 },
+        title: { left: 60, top: 30, width: 840, height: 70 },
+        titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+        subhead: { left: 60, top: 110, width: 840, height: 30 },
+        area: { left: 60, top: 160, width: 840, height: 320 }
+    },
+    kpiSlide: {
+        headerLogo: { right: 30, top: 30, width: 80 },
+        title: { left: 60, top: 30, width: 840, height: 70 },
+        titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+        subhead: { left: 60, top: 110, width: 840, height: 30 },
+        area: { left: 60, top: 160, width: 840, height: 320 }
+    },
+    agendaSlide: {
+        headerLogo: { right: 30, top: 30, width: 80 },
+        title: { left: 60, top: 30, width: 840, height: 70 },
+        titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+        subhead: { left: 60, top: 110, width: 840, height: 30 },
+        body: { left: 60, top: 160, width: 840, height: 320 }
+    },
+    sectionSlide: {
+        ghostNum: { left: 400, top: 100, width: 550, height: 350 }, // Adjusted
+        title: { left: 60, top: 180, width: 700, height: 140 }
+    },
+    closingSlide: {
+        logo: { left: 380, top: 150, width: 200 },
+        message: { left: 60, top: 350, width: 840, height: 80 }
+    },
+    quoteSlide: {
+        headerLogo: { right: 30, top: 30, width: 80 },
+        title: { left: 60, top: 30, width: 840, height: 70 },
+        titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+        subhead: { left: 60, top: 110, width: 840, height: 30 },
+        quoteBox: { left: 100, top: 160, width: 760, height: 260 },
+        authorBox: { left: 500, top: 440, width: 400, height: 40 }
+    },
+    faqSlide: {
+        headerLogo: { right: 30, top: 30, width: 80 },
+        title: { left: 60, top: 30, width: 840, height: 70 },
+        titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+        subhead: { left: 60, top: 110, width: 840, height: 30 },
+        area: { left: 60, top: 160, width: 840, height: 320 }
+    },
+    imageTextSlide: {
+        headerLogo: { right: 30, top: 30, width: 80 },
+        title: { left: 60, top: 30, width: 840, height: 70 },
+        titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+        subhead: { left: 60, top: 110, width: 840, height: 30 },
+        imageArea: { left: 60, top: 160, width: 400, height: 320 },
+        textArea: { left: 500, top: 160, width: 400, height: 320 }
+    },
+    cycleSlide: {
+        headerLogo: { right: 30, top: 30, width: 80 },
+        title: { left: 60, top: 30, width: 840, height: 70 },
+        titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+        subhead: { left: 60, top: 110, width: 840, height: 30 },
+        area: { left: 60, top: 160, width: 840, height: 320 }
+    },
+    triangleSlide: {
+        headerLogo: { right: 30, top: 30, width: 80 },
+        title: { left: 60, top: 30, width: 840, height: 70 },
+        titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+        subhead: { left: 60, top: 110, width: 840, height: 30 },
+        area: { left: 60, top: 160, width: 840, height: 320 }
+    },
+    pyramidSlide: {
+        headerLogo: { right: 30, top: 30, width: 80 },
+        title: { left: 60, top: 30, width: 840, height: 70 },
+        titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+        subhead: { left: 60, top: 110, width: 840, height: 30 },
+        area: { left: 60, top: 160, width: 840, height: 320 }
+    },
+    stepUpSlide: {
+        headerLogo: { right: 30, top: 30, width: 80 },
+        title: { left: 60, top: 30, width: 840, height: 70 },
+        titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+        subhead: { left: 60, top: 110, width: 840, height: 30 },
+        area: { left: 60, top: 160, width: 840, height: 320 }
+    },
+    flowChartSlide: {
+        headerLogo: { right: 30, top: 30, width: 80 },
+        title: { left: 60, top: 30, width: 840, height: 70 },
+        titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+        subhead: { left: 60, top: 110, width: 840, height: 30 },
+        area: { left: 60, top: 160, width: 840, height: 320 }
+    },
+    headerCardsSlide: {
+        headerLogo: { right: 30, top: 30, width: 80 },
+        title: { left: 60, top: 30, width: 840, height: 70 },
+        titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+        subhead: { left: 60, top: 110, width: 840, height: 30 },
+        gridArea: { left: 60, top: 160, width: 840, height: 320 }
+    },
+    statsCompareSlide: {
+        headerLogo: { right: 30, top: 30, width: 80 },
+        title: { left: 60, top: 30, width: 840, height: 70 },
+        titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+        subhead: { left: 60, top: 110, width: 840, height: 30 },
+        leftHeader: { left: 60, top: 160, width: 400, height: 35 },
+        rightHeader: { left: 500, top: 160, width: 400, height: 35 },
+        leftBox: { left: 60, top: 200, width: 400, height: 280 },
+        rightBox: { left: 500, top: 200, width: 400, height: 280 }
+    },
+    barCompareSlide: {
+        headerLogo: { right: 30, top: 30, width: 80 },
+        title: { left: 60, top: 30, width: 840, height: 70 },
+        titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+        subhead: { left: 60, top: 110, width: 840, height: 30 },
+        area: { left: 60, top: 160, width: 840, height: 320 }
+    },
+    footer: {
+        leftText: { left: 60, top: 510, width: 400, height: 20 },
+        creditImage: { left: 430, top: 512, width: 100, height: 16 },
+        rightPage: { right: 60, top: 510, width: 50, height: 20 }
+    },
+    bottomBar: {
+        bar: { left: 0, top: 536, width: 960, height: 4 }
+    }
+};
+
+const BASE_THEME_OPTS = {
     basePx: {
         width: 960,
         height: 540
@@ -218,22 +402,6 @@ export const DEFAULT_THEME: SlideTheme = {
             ghostNum: 250
         }
     },
-    colors: {
-        primary: "#8FB130",     // Brand Main (Vibrant Leaf Green)
-        deepPrimary: "#526717", // Brand Deep (Moss Green)
-        textPrimary: "#333333", // Soft Black
-        textSmallFont: "#545454", // Slightly warmer gray for text
-        backgroundWhite: "#FFFFFF",
-        cardBg: "#FFFFFF",
-        backgroundGray: "#F8F9FA", // Keep neutral background for logos
-        faintGray: "#F8F9FA",
-        ghostGray: "#E2E4E6",   // 
-        tableHeaderBg: "#E8EAE6", // Hint of green in gray
-        laneBorder: "#E0E0E0",
-        cardBorder: "#E0E0E0",
-        neutralGray: "#9E9E9E",
-        processArrow: "#526717" // Use Deep color for contrast
-    },
     diagram: {
         laneGapPx: 30,          // Wider gaps
         lanePadPx: 20,          // More padding
@@ -249,185 +417,7 @@ export const DEFAULT_THEME: SlideTheme = {
         closing: ""
     },
     footerText: "",
-    positions: {
-        // Updated positions for "Editorial" look - wider margins (60px side margins)
-        titleSlide: {
-            logo: { left: 60, top: 60, width: 150 },
-            title: { left: 60, top: 200, width: 840, height: 120 },
-            date: { left: 60, top: 480, width: 300, height: 40 }
-        },
-        contentSlide: {
-            headerLogo: { right: 30, top: 30, width: 80 },
-            title: { left: 60, top: 30, width: 840, height: 70 },
-            titleUnderline: { left: 60, top: 100, width: 80, height: 3 }, // Short elegant underline
-            subhead: { left: 60, top: 110, width: 840, height: 30 },
-            body: { left: 60, top: 160, width: 840, height: 320 },
-            twoColLeft: { left: 60, top: 160, width: 400, height: 320 }, // 40px gap
-            twoColRight: { left: 500, top: 160, width: 400, height: 320 }
-        },
-        compareSlide: {
-            headerLogo: { right: 30, top: 30, width: 80 },
-            title: { left: 60, top: 30, width: 840, height: 70 },
-            titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
-            subhead: { left: 60, top: 110, width: 840, height: 30 },
-            leftBox: { left: 60, top: 160, width: 400, height: 320 },
-            rightBox: { left: 500, top: 160, width: 400, height: 320 }
-        },
-        processSlide: {
-            headerLogo: { right: 30, top: 30, width: 80 },
-            title: { left: 60, top: 30, width: 840, height: 70 },
-            titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
-            subhead: { left: 60, top: 110, width: 840, height: 30 },
-            area: { left: 60, top: 160, width: 840, height: 320 }
-        },
-        timelineSlide: {
-            headerLogo: { right: 30, top: 30, width: 80 },
-            title: { left: 60, top: 30, width: 840, height: 70 },
-            titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
-            subhead: { left: 60, top: 110, width: 840, height: 30 },
-            area: { left: 60, top: 160, width: 840, height: 320 }
-        },
-        diagramSlide: {
-            headerLogo: { right: 30, top: 30, width: 80 },
-            title: { left: 60, top: 30, width: 840, height: 70 },
-            titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
-            subhead: { left: 60, top: 110, width: 840, height: 30 },
-            lanesArea: { left: 60, top: 160, width: 840, height: 320 }
-        },
-        cardsSlide: {
-            headerLogo: { right: 30, top: 30, width: 80 },
-            title: { left: 60, top: 30, width: 840, height: 70 },
-            titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
-            subhead: { left: 60, top: 110, width: 840, height: 30 },
-            gridArea: { left: 60, top: 160, width: 840, height: 320 }
-        },
-        tableSlide: {
-            headerLogo: { right: 30, top: 30, width: 80 },
-            title: { left: 60, top: 30, width: 840, height: 70 },
-            titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
-            subhead: { left: 60, top: 110, width: 840, height: 30 },
-            area: { left: 60, top: 160, width: 840, height: 320 }
-        },
-        progressSlide: {
-            headerLogo: { right: 30, top: 30, width: 80 },
-            title: { left: 60, top: 30, width: 840, height: 70 },
-            titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
-            subhead: { left: 60, top: 110, width: 840, height: 30 },
-            area: { left: 60, top: 160, width: 840, height: 320 }
-        },
-        kpiSlide: {
-            headerLogo: { right: 30, top: 30, width: 80 },
-            title: { left: 60, top: 30, width: 840, height: 70 },
-            titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
-            subhead: { left: 60, top: 110, width: 840, height: 30 },
-            area: { left: 60, top: 160, width: 840, height: 320 }
-        },
-        agendaSlide: {
-            headerLogo: { right: 30, top: 30, width: 80 },
-            title: { left: 60, top: 30, width: 840, height: 70 },
-            titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
-            subhead: { left: 60, top: 110, width: 840, height: 30 },
-            body: { left: 60, top: 160, width: 840, height: 320 }
-        },
-        sectionSlide: {
-            ghostNum: { left: 400, top: 100, width: 550, height: 350 }, // Adjusted
-            title: { left: 60, top: 180, width: 700, height: 140 }
-        },
-        closingSlide: {
-            logo: { left: 380, top: 150, width: 200 },
-            message: { left: 60, top: 350, width: 840, height: 80 }
-        },
-        quoteSlide: {
-            headerLogo: { right: 30, top: 30, width: 80 },
-            title: { left: 60, top: 30, width: 840, height: 70 },
-            titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
-            subhead: { left: 60, top: 110, width: 840, height: 30 },
-            quoteBox: { left: 100, top: 160, width: 760, height: 260 },
-            authorBox: { left: 500, top: 440, width: 400, height: 40 }
-        },
-        faqSlide: {
-            headerLogo: { right: 30, top: 30, width: 80 },
-            title: { left: 60, top: 30, width: 840, height: 70 },
-            titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
-            subhead: { left: 60, top: 110, width: 840, height: 30 },
-            area: { left: 60, top: 160, width: 840, height: 320 }
-        },
-        imageTextSlide: {
-            headerLogo: { right: 30, top: 30, width: 80 },
-            title: { left: 60, top: 30, width: 840, height: 70 },
-            titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
-            subhead: { left: 60, top: 110, width: 840, height: 30 },
-            imageArea: { left: 60, top: 160, width: 400, height: 320 },
-            textArea: { left: 500, top: 160, width: 400, height: 320 }
-        },
-        cycleSlide: {
-            headerLogo: { right: 30, top: 30, width: 80 },
-            title: { left: 60, top: 30, width: 840, height: 70 },
-            titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
-            subhead: { left: 60, top: 110, width: 840, height: 30 },
-            area: { left: 60, top: 160, width: 840, height: 320 }
-        },
-        triangleSlide: {
-            headerLogo: { right: 30, top: 30, width: 80 },
-            title: { left: 60, top: 30, width: 840, height: 70 },
-            titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
-            subhead: { left: 60, top: 110, width: 840, height: 30 },
-            area: { left: 60, top: 160, width: 840, height: 320 }
-        },
-        pyramidSlide: {
-            headerLogo: { right: 30, top: 30, width: 80 },
-            title: { left: 60, top: 30, width: 840, height: 70 },
-            titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
-            subhead: { left: 60, top: 110, width: 840, height: 30 },
-            area: { left: 60, top: 160, width: 840, height: 320 }
-        },
-        stepUpSlide: {
-            headerLogo: { right: 30, top: 30, width: 80 },
-            title: { left: 60, top: 30, width: 840, height: 70 },
-            titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
-            subhead: { left: 60, top: 110, width: 840, height: 30 },
-            area: { left: 60, top: 160, width: 840, height: 320 }
-        },
-        flowChartSlide: {
-            headerLogo: { right: 30, top: 30, width: 80 },
-            title: { left: 60, top: 30, width: 840, height: 70 },
-            titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
-            subhead: { left: 60, top: 110, width: 840, height: 30 },
-            area: { left: 60, top: 160, width: 840, height: 320 }
-        },
-        headerCardsSlide: {
-            headerLogo: { right: 30, top: 30, width: 80 },
-            title: { left: 60, top: 30, width: 840, height: 70 },
-            titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
-            subhead: { left: 60, top: 110, width: 840, height: 30 },
-            gridArea: { left: 60, top: 160, width: 840, height: 320 }
-        },
-        statsCompareSlide: {
-            headerLogo: { right: 30, top: 30, width: 80 },
-            title: { left: 60, top: 30, width: 840, height: 70 },
-            titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
-            subhead: { left: 60, top: 110, width: 840, height: 30 },
-            leftHeader: { left: 60, top: 160, width: 400, height: 35 },
-            rightHeader: { left: 500, top: 160, width: 400, height: 35 },
-            leftBox: { left: 60, top: 200, width: 400, height: 280 },
-            rightBox: { left: 500, top: 200, width: 400, height: 280 }
-        },
-        barCompareSlide: {
-            headerLogo: { right: 30, top: 30, width: 80 },
-            title: { left: 60, top: 30, width: 840, height: 70 },
-            titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
-            subhead: { left: 60, top: 110, width: 840, height: 30 },
-            area: { left: 60, top: 160, width: 840, height: 320 }
-        },
-        footer: {
-            leftText: { left: 60, top: 510, width: 400, height: 20 },
-            creditImage: { left: 430, top: 512, width: 100, height: 16 },
-            rightPage: { right: 60, top: 510, width: 50, height: 20 }
-        },
-        bottomBar: {
-            bar: { left: 0, top: 536, width: 960, height: 4 }
-        }
-    },
+    positions: BASE_POSITIONS,
     backgroundImages: {
         title: "",
         closing: "",
@@ -435,4 +425,97 @@ export const DEFAULT_THEME: SlideTheme = {
         main: ""
     }
 };
+
+// ============================================================
+// Themes
+// ============================================================
+
+export const THEME_GREEN: SlideTheme = {
+    ...BASE_THEME_OPTS,
+    colors: {
+        primary: "#8FB130",     // Brand Main (Vibrant Leaf Green)
+        deepPrimary: "#526717", // Brand Deep (Moss Green)
+        textPrimary: "#333333", // Soft Black
+        textSmallFont: "#545454", // Slightly warmer gray for text
+        backgroundWhite: "#FFFFFF",
+        cardBg: "#FFFFFF",
+        backgroundGray: "#F8F9FA", // Keep neutral background for logos
+        faintGray: "#F8F9FA",
+        ghostGray: "#E2E4E6",   // 
+        tableHeaderBg: "#E8EAE6", // Hint of green in gray
+        laneBorder: "#E0E0E0",
+        cardBorder: "#E0E0E0",
+        neutralGray: "#9E9E9E",
+        processArrow: "#526717" // Use Deep color for contrast
+    }
+};
+
+export const THEME_BLUE: SlideTheme = {
+    ...BASE_THEME_OPTS,
+    colors: {
+        primary: "#3498DB",     // Standard Blue
+        deepPrimary: "#2C3E50", // Dark Blue
+        textPrimary: "#333333",
+        textSmallFont: "#555555",
+        backgroundWhite: "#FFFFFF",
+        cardBg: "#FFFFFF",
+        backgroundGray: "#F4F6F7",
+        faintGray: "#ECF0F1",
+        ghostGray: "#BDC3C7",
+        tableHeaderBg: "#ECF0F1",
+        laneBorder: "#BDC3C7",
+        cardBorder: "#E0E0E0",
+        neutralGray: "#95A5A6",
+        processArrow: "#2C3E50"
+    }
+};
+export const THEME_RED: SlideTheme = {
+    ...BASE_THEME_OPTS,
+    colors: {
+        primary: "#E74C3C",     // Red
+        deepPrimary: "#C0392B", // Dark Red
+        textPrimary: "#333333",
+        textSmallFont: "#555555",
+        backgroundWhite: "#FFFFFF",
+        cardBg: "#FFFFFF",
+        backgroundGray: "#F4F6F7",
+        faintGray: "#ECF0F1",
+        ghostGray: "#BDC3C7",
+        tableHeaderBg: "#ECF0F1",
+        laneBorder: "#BDC3C7",
+        cardBorder: "#E0E0E0",
+        neutralGray: "#95A5A6",
+        processArrow: "#C0392B"
+    }
+};
+
+export const THEME_GRAYSCALE: SlideTheme = {
+    ...BASE_THEME_OPTS,
+    colors: {
+        primary: "#666666",
+        deepPrimary: "#333333",
+        textPrimary: "#000000",
+        textSmallFont: "#666666",
+        backgroundWhite: "#FFFFFF",
+        cardBg: "#FFFFFF",
+        backgroundGray: "#EEEEEE",
+        faintGray: "#EEEEEE",
+        ghostGray: "#CCCCCC",
+        tableHeaderBg: "#DDDDDD",
+        laneBorder: "#BBBBBB",
+        cardBorder: "#CCCCCC",
+        neutralGray: "#999999",
+        processArrow: "#333333"
+    }
+};
+
+export const DEFAULT_THEME = THEME_GREEN;
+
+export const AVAILABLE_THEMES = {
+    "Green": THEME_GREEN,
+    "Blue": THEME_BLUE,
+    "Red": THEME_RED,
+    "Grayscale": THEME_GRAYSCALE
+};
+
 

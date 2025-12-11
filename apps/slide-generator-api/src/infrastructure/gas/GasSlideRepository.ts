@@ -5,7 +5,7 @@ import { GasTitleSlideGenerator } from './generators/GasTitleSlideGenerator';
 import { GasSectionSlideGenerator } from './generators/GasSectionSlideGenerator';
 import { GasContentSlideGenerator } from './generators/GasContentSlideGenerator';
 import { GasDiagramSlideGenerator } from './generators/GasDiagramSlideGenerator';
-import { DEFAULT_THEME } from '../../common/config/DefaultTheme';
+import { DEFAULT_THEME, AVAILABLE_THEMES } from '../../common/config/DefaultTheme';
 
 // This class acts as an Anti-Corruption Layer (ACL) adaptation
 // It translates Domain objects into GAS API calls.
@@ -45,10 +45,19 @@ export class GasSlideRepository implements ISlideRepository {
 
         const templateSlides = pres.getSlides();
 
-        // Initialize LayoutManager
+        // Initialize LayoutManager with Selected Theme
         const pageWidth = pres.getPageWidth();
         const pageHeight = pres.getPageHeight();
-        const layoutManager = new LayoutManager(pageWidth, pageHeight);
+
+        // Determine Theme based on settingsOverride (e.g. { theme: 'Blue' })
+        const themeName = settingsOverride && settingsOverride.theme ? settingsOverride.theme : 'Green';
+        // Fallback to DEFAULT_THEME if name not found, but check AVAILABLE_THEMES first
+        // Note: user might pass "Blue" or "Green"
+        const selectedTheme = AVAILABLE_THEMES[themeName] || DEFAULT_THEME;
+
+        Logger.log(`Using Theme: ${themeName}`);
+
+        const layoutManager = new LayoutManager(pageWidth, pageHeight, selectedTheme);
 
         // Initialize Generators
         // TODO: Pass actual credit image if we have it (e.g. from user properties or drive)
@@ -130,6 +139,18 @@ export class GasSlideRepository implements ISlideRepository {
 
             // Dispatch to Generators
             const rawType = (slideModel.rawData?.type || '').toLowerCase(); // Original JSON type
+
+            // Debug Info: Add slide type via hidden shape (Metadata workaround)
+            try {
+                const debugShape = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, 0, 0, 50, 50); // Small shape
+                debugShape.getBorder().setTransparent();
+                debugShape.getFill().setTransparent();
+                debugShape.setTitle('SLIDE_METADATA');
+                debugShape.setDescription(rawType || layoutType);
+                debugShape.sendToBack();
+            } catch (e) {
+                Logger.log(`Warning: Could not add debug metadata shape. ${e}`);
+            }
 
             Logger.log(`Dispatching Slide ${index + 1}: LayoutType=${layoutType}, RawType=${rawType}`);
 

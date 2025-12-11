@@ -1,11 +1,11 @@
 import { IDiagramRenderer } from './IDiagramRenderer';
 import { LayoutManager } from '../../../../common/utils/LayoutManager';
-import { DEFAULT_THEME } from '../../../../common/config/DefaultTheme';
 import { setStyledText } from '../../../../common/utils/SlideUtils';
 import { generateProcessColors } from '../../../../common/utils/ColorUtils';
 
 export class ProcessDiagramRenderer implements IDiagramRenderer {
     render(slide: GoogleAppsScript.Slides.Slide, data: any, area: any, settings: any, layout: LayoutManager): void {
+        const theme = layout.getTheme();
         const steps = data.steps || data.items || [];
         if (!steps.length) return;
 
@@ -40,9 +40,9 @@ export class ProcessDiagramRenderer implements IDiagramRenderer {
             setStyledText(numShape, numStr, {
                 size: 28, // Slightly smaller but Bold
                 bold: true,
-                color: settings.primaryColor || DEFAULT_THEME.colors.primary,
+                color: settings.primaryColor || theme.colors.primary,
                 align: SlidesApp.ParagraphAlignment.END // Align right towards the text
-            });
+            }, theme);
             try { numShape.setContentAlignment(SlidesApp.ContentAlignment.TOP); } catch (e) { }
 
             // 2. Content Text (Closer to Number)
@@ -51,10 +51,10 @@ export class ProcessDiagramRenderer implements IDiagramRenderer {
 
             setStyledText(textShape, cleanText, {
                 size: 14,
-                color: DEFAULT_THEME.colors.textPrimary,
+                color: theme.colors.textPrimary,
                 align: SlidesApp.ParagraphAlignment.START,
                 bold: true // Title-like weight for the step content
-            });
+            }, theme);
             try { textShape.setContentAlignment(SlidesApp.ContentAlignment.TOP); } catch (e) { }
 
             // 3. Separator (Vertical flow guide)
@@ -65,7 +65,7 @@ export class ProcessDiagramRenderer implements IDiagramRenderer {
                 const lineY = currentY + actualItemH - margin / 2;
                 // Indent line to start at text, keeping numbers in a "gutter"
                 const line = slide.insertLine(SlidesApp.LineCategory.STRAIGHT, textLeft, lineY, area.left + area.width, lineY);
-                line.getLineFill().setSolidFill(DEFAULT_THEME.colors.faintGray);
+                line.getLineFill().setSolidFill(theme.colors.faintGray);
                 line.setWeight(0.5);
             }
 

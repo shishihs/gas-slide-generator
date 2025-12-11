@@ -1,11 +1,11 @@
 import { IDiagramRenderer } from './IDiagramRenderer';
 import { LayoutManager } from '../../../../common/utils/LayoutManager';
-import { DEFAULT_THEME } from '../../../../common/config/DefaultTheme';
 import { setStyledText } from '../../../../common/utils/SlideUtils';
 import { generateCompareColors } from '../../../../common/utils/ColorUtils';
 
 export class StatsCompareDiagramRenderer implements IDiagramRenderer {
     render(slide: GoogleAppsScript.Slides.Slide, data: any, area: any, settings: any, layout: LayoutManager): void {
+        const theme = layout.getTheme();
         const leftTitle = data.leftTitle || '導入前';
         const rightTitle = data.rightTitle || '導入後';
         const stats = data.stats || [];
@@ -23,7 +23,7 @@ export class StatsCompareDiagramRenderer implements IDiagramRenderer {
         const leftHeader = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, leftHeaderX, area.top, valueColW, headerH);
         leftHeader.getFill().setSolidFill(compareColors.left);
         leftHeader.getBorder().setTransparent();
-        setStyledText(leftHeader, leftTitle, { size: 14, bold: true, color: DEFAULT_THEME.colors.backgroundGray, align: SlidesApp.ParagraphAlignment.CENTER });
+        setStyledText(leftHeader, leftTitle, { size: 14, bold: true, color: theme.colors.backgroundGray, align: SlidesApp.ParagraphAlignment.CENTER }, theme);
         try { leftHeader.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
 
         // Right Title Header
@@ -31,7 +31,7 @@ export class StatsCompareDiagramRenderer implements IDiagramRenderer {
         const rightHeader = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, rightHeaderX, area.top, valueColW, headerH);
         rightHeader.getFill().setSolidFill(compareColors.right);
         rightHeader.getBorder().setTransparent();
-        setStyledText(rightHeader, rightTitle, { size: 14, bold: true, color: DEFAULT_THEME.colors.backgroundGray, align: SlidesApp.ParagraphAlignment.CENTER });
+        setStyledText(rightHeader, rightTitle, { size: 14, bold: true, color: theme.colors.backgroundGray, align: SlidesApp.ParagraphAlignment.CENTER }, theme);
         try { rightHeader.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
 
         // Data rows
@@ -46,27 +46,27 @@ export class StatsCompareDiagramRenderer implements IDiagramRenderer {
             const trend = stat.trend || null;
 
             // Alternate row background
-            const rowBg = index % 2 === 0 ? DEFAULT_THEME.colors.backgroundGray : '#FFFFFF';
+            const rowBg = index % 2 === 0 ? theme.colors.backgroundGray : '#FFFFFF';
 
             // Label cell
             const labelCell = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, area.left, currentY, labelColW, rowHeight);
             labelCell.getFill().setSolidFill(rowBg);
-            labelCell.getBorder().getLineFill().setSolidFill(DEFAULT_THEME.colors.faintGray);
-            setStyledText(labelCell, label, { size: DEFAULT_THEME.fonts.sizes.body, bold: true, align: SlidesApp.ParagraphAlignment.START });
+            labelCell.getBorder().getLineFill().setSolidFill(theme.colors.faintGray);
+            setStyledText(labelCell, label, { size: theme.fonts.sizes.body, bold: true, align: SlidesApp.ParagraphAlignment.START }, theme);
             try { labelCell.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
 
             // Left value cell
             const leftCell = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, leftHeaderX, currentY, valueColW, rowHeight);
             leftCell.getFill().setSolidFill(rowBg);
-            leftCell.getBorder().getLineFill().setSolidFill(DEFAULT_THEME.colors.faintGray);
-            setStyledText(leftCell, leftValue, { size: DEFAULT_THEME.fonts.sizes.body, align: SlidesApp.ParagraphAlignment.CENTER, color: compareColors.left });
+            leftCell.getBorder().getLineFill().setSolidFill(theme.colors.faintGray);
+            setStyledText(leftCell, leftValue, { size: theme.fonts.sizes.body, align: SlidesApp.ParagraphAlignment.CENTER, color: compareColors.left }, theme);
             try { leftCell.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
 
             // Right value cell
             const rightCell = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, rightHeaderX, currentY, valueColW - (trend ? layout.pxToPt(40) : 0), rowHeight);
             rightCell.getFill().setSolidFill(rowBg);
-            rightCell.getBorder().getLineFill().setSolidFill(DEFAULT_THEME.colors.faintGray);
-            setStyledText(rightCell, rightValue, { size: DEFAULT_THEME.fonts.sizes.body, align: SlidesApp.ParagraphAlignment.CENTER, color: compareColors.right });
+            rightCell.getBorder().getLineFill().setSolidFill(theme.colors.faintGray);
+            setStyledText(rightCell, rightValue, { size: theme.fonts.sizes.body, align: SlidesApp.ParagraphAlignment.CENTER, color: compareColors.right }, theme);
             try { rightCell.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
 
             // Trend indicator (optional)
@@ -77,7 +77,7 @@ export class StatsCompareDiagramRenderer implements IDiagramRenderer {
                 const trendColor = isUp ? '#28a745' : '#dc3545';  // Green for up, Red for down
                 trendShape.getFill().setSolidFill(trendColor);
                 trendShape.getBorder().setTransparent();
-                setStyledText(trendShape, isUp ? '↑' : '↓', { size: 12, color: '#FFFFFF', bold: true, align: SlidesApp.ParagraphAlignment.CENTER });
+                setStyledText(trendShape, isUp ? '↑' : '↓', { size: 12, color: '#FFFFFF', bold: true, align: SlidesApp.ParagraphAlignment.CENTER }, theme);
                 try { trendShape.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
             }
 

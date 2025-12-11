@@ -1,1645 +1,1648 @@
-[
-    {
-        "_comment": "=== TITLE SLIDE ===",
-        "type": "title",
-        "title": "包括的動作確認テスト用スライドデータ",
-        "date": "2025.12.09",
-        "notes": "これはタイトルスライドのスピーカーノートです。プレーンテキストのみ使用可能です。"
-    },
-    {
-        "_comment": "TITLE: 最大文字数テスト (35文字)",
-        "type": "title",
-        "title": "あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめも",
-        "date": "2024.01.01"
-    },
-    {
-        "_comment": "=== AGENDA SLIDE ===",
-        "type": "agenda",
-        "title": "本日のアジェンダ",
-        "subhead": "全機能の動作確認を行います",
-        "items": [
-            "基本スライドタイプの確認",
-            "比較系パターンのテスト",
-            "プロセス・タイムライン系パターン",
-            "データビジュアライゼーション",
-            "グラフ描画機能の検証"
-        ],
-        "notes": "本日は5つの章に分けて、すべてのスライドパターンとグラフ機能をテストします。"
-    },
-    {
-        "_comment": "AGENDA: subhead無し・最小項目数",
-        "type": "agenda",
-        "title": "シンプルなアジェンダ",
-        "items": [
-            "項目A",
-            "項目B",
-            "項目C"
-        ]
-    },
-    {
-        "_comment": "=== SECTION SLIDE ===",
-        "type": "section",
-        "title": "第1章：基本スライドタイプ",
-        "sectionNo": 1,
-        "notes": "まずは基本的なスライドタイプから確認していきましょう。"
-    },
-    {
-        "_comment": "SECTION: sectionNo省略（自動連番）",
-        "type": "section",
-        "title": "自動連番テスト用セクション"
-    },
-    {
-        "_comment": "SECTION: 最大文字数テスト (30文字)",
-        "type": "section",
-        "title": "あいうえおかきくけこさしすせそたちつてとなにぬねのはひふ",
-        "sectionNo": 99
-    },
-    {
-        "_comment": "=== CONTENT SLIDE (1カラム) ===",
-        "type": "content",
-        "title": "1カラムコンテンツスライド",
-        "subhead": "基本的な箇条書きレイアウト",
-        "points": [
-            "第1ポイント：基本的なテキスト表示",
-            "第2ポイント：**太字テキスト**のテスト",
-            "第3ポイント：[[重要語]]の強調表示テスト",
-            "第4ポイント：**太字**と[[強調語]]の組み合わせ"
-        ],
-        "notes": "1カラムレイアウトの基本的な使い方を説明します。太字と強調語のマークアップも確認してください。"
-    },
-    {
-        "_comment": "CONTENT: 2カラムレイアウト",
-        "type": "content",
-        "title": "2カラムコンテンツスライド",
-        "subhead": "左右に分割されたレイアウト",
-        "twoColumn": true,
-        "columns": [
-            [
-                "左カラム項目1",
-                "左カラム項目2",
-                "左カラム項目3"
+{
+    "theme": "Green",
+    "slides": [
+        {
+            "_comment": "=== TITLE SLIDE ===",
+            "type": "title",
+            "title": "包括的動作確認テスト用スライドデータ",
+            "date": "2025.12.09",
+            "notes": "これはタイトルスライドのスピーカーノートです。プレーンテキストのみ使用可能です。"
+        },
+        {
+            "_comment": "TITLE: 最大文字数テスト (35文字)",
+            "type": "title",
+            "title": "あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめも",
+            "date": "2024.01.01"
+        },
+        {
+            "_comment": "=== AGENDA SLIDE ===",
+            "type": "agenda",
+            "title": "本日のアジェンダ",
+            "subhead": "全機能の動作確認を行います",
+            "items": [
+                "基本スライドタイプの確認",
+                "比較系パターンのテスト",
+                "プロセス・タイムライン系パターン",
+                "データビジュアライゼーション",
+                "グラフ描画機能の検証"
             ],
-            [
-                "右カラム項目1",
-                "右カラム項目2",
-                "右カラム項目3"
-            ]
-        ],
-        "notes": "2カラムレイアウトでは、情報を左右に分けて表示できます。"
-    },
-    {
-        "_comment": "CONTENT: subhead・notes無し・最小構成",
-        "type": "content",
-        "title": "最小構成コンテンツ",
-        "points": [
-            "シンプルな1行のみ"
-        ]
-    },
-    {
-        "_comment": "CONTENT: 長文テスト（90文字境界）",
-        "type": "content",
-        "title": "長文境界値テスト",
-        "points": [
-            "これは90文字に近い長さのテキストです。スライド上で適切に表示されるか、折り返しが正常に機能するかを確認するためのテストデータです。あいうえおかきくけこ"
-        ]
-    },
-    {
-        "_comment": "=== CARDS SLIDE ===",
-        "type": "cards",
-        "title": "シンプルカード（文字列配列）",
-        "subhead": "最もシンプルなカード表示",
-        "columns": 3,
-        "items": [
-            "カードA",
-            "カードB",
-            "カードC",
-            "カードD",
-            "カードE",
-            "カードF"
-        ],
-        "notes": "6枚のシンプルカードを3列×2行で表示します。"
-    },
-    {
-        "_comment": "CARDS: オブジェクト配列・2列",
-        "type": "cards",
-        "title": "カード（オブジェクト配列）",
-        "columns": 2,
-        "items": [
-            {
-                "title": "機能A",
-                "desc": "機能Aの説明テキスト"
-            },
-            {
-                "title": "機能B",
-                "desc": "機能Bの説明テキスト"
-            },
-            {
-                "title": "機能C"
-            },
-            {
-                "title": "機能D",
-                "desc": "descは省略可能"
-            }
-        ]
-    },
-    {
-        "_comment": "CARDS: columns省略・混合配列",
-        "type": "cards",
-        "title": "混合カード（文字列とオブジェクト）",
-        "items": [
-            "文字列カード1",
-            {
-                "title": "オブジェクトカード",
-                "desc": "説明付き"
-            },
-            "文字列カード2"
-        ]
-    },
-    {
-        "_comment": "=== HEADER CARDS SLIDE ===",
-        "type": "headerCards",
-        "title": "ヘッダー付きカード（3列）",
-        "subhead": "色付きヘッダーのカード表示",
-        "columns": 3,
-        "items": [
-            {
-                "title": "ヘッダー1",
-                "desc": "カード1の説明文。ヘッダーは白文字で表示されます"
-            },
-            {
-                "title": "ヘッダー2",
-                "desc": "カード2の説明文"
-            },
-            {
-                "title": "ヘッダー3",
-                "desc": "カード3の説明文"
-            },
-            {
-                "title": "ヘッダー4",
-                "desc": "カード4の説明文"
-            },
-            {
-                "title": "ヘッダー5",
-                "desc": "カード5の説明文"
-            },
-            {
-                "title": "ヘッダー6",
-                "desc": "カード6の説明文"
-            }
-        ],
-        "notes": "ヘッダーカードは色付きの背景に白文字で表示されます。"
-    },
-    {
-        "_comment": "HEADER CARDS: 2列・desc省略あり",
-        "type": "headerCards",
-        "title": "ヘッダーカード（2列）",
-        "columns": 2,
-        "items": [
-            {
-                "title": "項目1",
-                "desc": "説明あり"
-            },
-            {
-                "title": "項目2"
-            },
-            {
-                "title": "項目3",
-                "desc": "説明あり"
-            },
-            {
-                "title": "項目4"
-            }
-        ]
-    },
-    {
-        "_comment": "=== BULLET CARDS SLIDE ===",
-        "type": "bulletCards",
-        "title": "箇条書きカード（最大3枚）",
-        "subhead": "詳細な説明を含むカード",
-        "items": [
-            {
-                "title": "ポイント1",
-                "desc": "第1ポイントの詳細な説明文。[[重要な部分]]を強調できます"
-            },
-            {
-                "title": "ポイント2",
-                "desc": "第2ポイントの詳細な説明文。**太字**も使用可能"
-            },
-            {
-                "title": "ポイント3",
-                "desc": "第3ポイントの詳細な説明文"
-            }
-        ],
-        "notes": "箇条書きカードは最大3枚まで配置可能です。"
-    },
-    {
-        "_comment": "BULLET CARDS: 最小構成（1枚）",
-        "type": "bulletCards",
-        "title": "箇条書きカード（1枚のみ）",
-        "items": [
-            {
-                "title": "単一カード",
-                "desc": "1枚だけのカード表示"
-            }
-        ]
-    },
-    {
-        "_comment": "=== TABLE SLIDE ===",
-        "type": "table",
-        "title": "テーブルスライド",
-        "subhead": "表形式でのデータ表示",
-        "headers": [
-            "項目",
-            "値",
-            "備考"
-        ],
-        "rows": [
-            [
+            "notes": "本日は5つの章に分けて、すべてのスライドパターンとグラフ機能をテストします。"
+        },
+        {
+            "_comment": "AGENDA: subhead無し・最小項目数",
+            "type": "agenda",
+            "title": "シンプルなアジェンダ",
+            "items": [
                 "項目A",
-                "100",
-                "正常"
-            ],
-            [
                 "項目B",
-                "200",
-                "注意"
-            ],
-            [
-                "項目C",
-                "300",
-                "警告"
-            ],
-            [
-                "項目D",
-                "400",
-                "正常"
+                "項目C"
             ]
-        ],
-        "notes": "テーブル形式でデータを整理して表示します。"
-    },
-    {
-        "_comment": "TABLE: 5列テスト",
-        "type": "table",
-        "title": "5列テーブル",
-        "headers": [
-            "No.",
-            "名前",
-            "部署",
-            "役職",
-            "電話番号"
-        ],
-        "rows": [
-            [
-                "1",
-                "田中太郎",
-                "営業部",
-                "部長",
-                "03-1234-5678"
+        },
+        {
+            "_comment": "=== SECTION SLIDE ===",
+            "type": "section",
+            "title": "第1章：基本スライドタイプ",
+            "sectionNo": 1,
+            "notes": "まずは基本的なスライドタイプから確認していきましょう。"
+        },
+        {
+            "_comment": "SECTION: sectionNo省略（自動連番）",
+            "type": "section",
+            "title": "自動連番テスト用セクション"
+        },
+        {
+            "_comment": "SECTION: 最大文字数テスト (30文字)",
+            "type": "section",
+            "title": "あいうえおかきくけこさしすせそたちつてとなにぬねのはひふ",
+            "sectionNo": 99
+        },
+        {
+            "_comment": "=== CONTENT SLIDE (1カラム) ===",
+            "type": "content",
+            "title": "1カラムコンテンツスライド",
+            "subhead": "基本的な箇条書きレイアウト",
+            "points": [
+                "第1ポイント：基本的なテキスト表示",
+                "第2ポイント：**太字テキスト**のテスト",
+                "第3ポイント：[[重要語]]の強調表示テスト",
+                "第4ポイント：**太字**と[[強調語]]の組み合わせ"
             ],
-            [
-                "2",
-                "鈴木花子",
-                "経理部",
-                "課長",
-                "03-2345-6789"
+            "notes": "1カラムレイアウトの基本的な使い方を説明します。太字と強調語のマークアップも確認してください。"
+        },
+        {
+            "_comment": "CONTENT: 2カラムレイアウト",
+            "type": "content",
+            "title": "2カラムコンテンツスライド",
+            "subhead": "左右に分割されたレイアウト",
+            "twoColumn": true,
+            "columns": [
+                [
+                    "左カラム項目1",
+                    "左カラム項目2",
+                    "左カラム項目3"
+                ],
+                [
+                    "右カラム項目1",
+                    "右カラム項目2",
+                    "右カラム項目3"
+                ]
             ],
-            [
-                "3",
-                "佐藤次郎",
-                "開発部",
-                "主任",
-                "03-3456-7890"
+            "notes": "2カラムレイアウトでは、情報を左右に分けて表示できます。"
+        },
+        {
+            "_comment": "CONTENT: subhead・notes無し・最小構成",
+            "type": "content",
+            "title": "最小構成コンテンツ",
+            "points": [
+                "シンプルな1行のみ"
             ]
-        ]
-    },
-    {
-        "_comment": "=== SECTION: 比較系パターン ===",
-        "type": "section",
-        "title": "第2章：比較系パターン",
-        "sectionNo": 2
-    },
-    {
-        "_comment": "=== COMPARE SLIDE ===",
-        "type": "compare",
-        "title": "左右比較スライド",
-        "subhead": "2つの選択肢を比較",
-        "leftTitle": "プランA",
-        "rightTitle": "プランB",
-        "leftItems": [
-            "コスト効率が高い",
-            "導入が容易",
-            "サポート体制が充実"
-        ],
-        "rightItems": [
-            "機能が豊富",
-            "拡張性が高い",
-            "カスタマイズ可能"
-        ],
-        "notes": "プランAとプランBを直接比較しています。"
-    },
-    {
-        "_comment": "COMPARE: メリット/デメリット比較",
-        "type": "compare",
-        "title": "メリット・デメリット比較",
-        "leftTitle": "メリット",
-        "rightTitle": "デメリット",
-        "leftItems": [
-            "24時間提出可能",
-            "書類の一部を省略可能",
-            "進捗状況をリアルタイムで確認"
-        ],
-        "rightItems": [
-            "初期設定が必要",
-            "電子証明書の取得が必要",
-            "システム障害時は利用不可"
-        ]
-    },
-    {
-        "_comment": "=== STATS COMPARE SLIDE ===",
-        "type": "statsCompare",
-        "title": "数値比較（テーブル形式）",
-        "subhead": "Before/Afterの数値比較",
-        "leftTitle": "導入前",
-        "rightTitle": "導入後",
-        "stats": [
-            {
-                "label": "処理時間",
-                "leftValue": "4時間",
-                "rightValue": "30分",
-                "trend": "down"
-            },
-            {
-                "label": "エラー率",
-                "leftValue": "5.2%",
-                "rightValue": "0.3%",
-                "trend": "down"
-            },
-            {
-                "label": "満足度",
-                "leftValue": "62%",
-                "rightValue": "94%",
-                "trend": "up"
-            },
-            {
-                "label": "コスト",
-                "leftValue": "100万円",
-                "rightValue": "80万円",
-                "trend": "down"
-            }
-        ],
-        "notes": "導入前後の主要指標を比較しています。すべての指標で改善が見られます。"
-    },
-    {
-        "_comment": "STATS COMPARE: trend省略",
-        "type": "statsCompare",
-        "title": "シンプルな数値比較",
-        "leftTitle": "A社",
-        "rightTitle": "B社",
-        "stats": [
-            {
-                "label": "売上高",
-                "leftValue": "500億円",
-                "rightValue": "480億円"
-            },
-            {
-                "label": "従業員数",
-                "leftValue": "1,200名",
-                "rightValue": "980名"
-            },
-            {
-                "label": "拠点数",
-                "leftValue": "15",
-                "rightValue": "12"
-            }
-        ]
-    },
-    {
-        "_comment": "=== BAR COMPARE SLIDE ===",
-        "type": "barCompare",
-        "title": "棒グラフ比較",
-        "subhead": "視覚的な数値比較",
-        "stats": [
-            {
-                "label": "売上",
-                "leftValue": "120",
-                "rightValue": "150",
-                "trend": "up"
-            },
-            {
-                "label": "利益",
-                "leftValue": "30",
-                "rightValue": "45",
-                "trend": "up"
-            },
-            {
-                "label": "コスト",
-                "leftValue": "90",
-                "rightValue": "75",
-                "trend": "down"
-            }
-        ],
-        "showTrends": true,
-        "notes": "横棒グラフで視覚的に比較を表示します。"
-    },
-    {
-        "_comment": "BAR COMPARE: showTrends省略（デフォルトfalse）",
-        "type": "barCompare",
-        "title": "トレンド無し棒グラフ",
-        "stats": [
-            {
-                "label": "項目A",
-                "leftValue": "80",
-                "rightValue": "90"
-            },
-            {
-                "label": "項目B",
-                "leftValue": "70",
-                "rightValue": "85"
-            }
-        ]
-    },
-    {
-        "_comment": "=== SECTION: プロセス・タイムライン系 ===",
-        "type": "section",
-        "title": "第3章：プロセス・タイムライン系",
-        "sectionNo": 3
-    },
-    {
-        "_comment": "=== PROCESS SLIDE ===",
-        "type": "process",
-        "title": "プロセススライド（視覚的形式）",
-        "subhead": "最大4ステップの工程表示",
-        "steps": [
-            "要件定義",
-            "設計",
-            "実装",
-            "テスト"
-        ],
-        "notes": "ソフトウェア開発の基本的なプロセスを4ステップで示しています。"
-    },
-    {
-        "_comment": "PROCESS: 2ステップ（最小）",
-        "type": "process",
-        "title": "シンプルプロセス",
-        "steps": [
-            "インプット",
-            "アウトプット"
-        ]
-    },
-    {
-        "_comment": "=== PROCESS LIST SLIDE ===",
-        "type": "processList",
-        "title": "プロセスリスト（リスト形式）",
-        "subhead": "詳細な手順リスト",
-        "steps": [
-            "アカウントを作成する",
-            "必要情報を入力する",
-            "本人確認書類をアップロードする",
-            "審査結果を待つ",
-            "承認後、サービスを利用開始する"
-        ],
-        "notes": "5つのステップでサービス利用開始までの流れを説明します。"
-    },
-    {
-        "_comment": "=== TIMELINE SLIDE ===",
-        "type": "timeline",
-        "title": "タイムラインスライド",
-        "subhead": "プロジェクトの進捗状況",
-        "milestones": [
-            {
-                "label": "企画立案完了",
-                "date": "2024年1月",
-                "state": "done"
-            },
-            {
-                "label": "設計フェーズ終了",
-                "date": "2024年3月",
-                "state": "done"
-            },
-            {
-                "label": "開発フェーズ",
-                "date": "2024年6月",
-                "state": "next"
-            },
-            {
-                "label": "テストフェーズ",
-                "date": "2024年9月",
-                "state": "todo"
-            },
-            {
-                "label": "リリース",
-                "date": "2024年12月",
-                "state": "todo"
-            }
-        ],
-        "notes": "現在、開発フェーズに入っています。予定通り進行中です。"
-    },
-    {
-        "_comment": "TIMELINE: state省略",
-        "type": "timeline",
-        "title": "シンプルタイムライン",
-        "milestones": [
-            {
-                "label": "フェーズ1",
-                "date": "Q1"
-            },
-            {
-                "label": "フェーズ2",
-                "date": "Q2"
-            },
-            {
-                "label": "フェーズ3",
-                "date": "Q3"
-            }
-        ]
-    },
-    {
-        "_comment": "=== FLOW CHART SLIDE ===",
-        "type": "flowChart",
-        "title": "フローチャート（1行）",
-        "subhead": "左から右への流れを表現",
-        "flows": [
-            {
-                "steps": [
-                    "受付",
-                    "審査",
-                    "承認",
-                    "完了"
-                ]
-            }
-        ],
-        "notes": "申請から完了までの流れを1行で表示します。"
-    },
-    {
-        "_comment": "FLOW CHART: 2行",
-        "type": "flowChart",
-        "title": "フローチャート（2行）",
-        "subhead": "複雑なフローを2行で表現",
-        "flows": [
-            {
-                "steps": [
-                    "企画",
-                    "設計",
-                    "開発",
-                    "テスト"
-                ]
-            },
-            {
-                "steps": [
-                    "デプロイ",
-                    "監視",
-                    "改善"
-                ]
-            }
-        ]
-    },
-    {
-        "_comment": "FLOW CHART: 最小構成（2ステップ）",
-        "type": "flowChart",
-        "title": "シンプルフロー",
-        "flows": [
-            {
-                "steps": [
-                    "開始",
-                    "終了"
-                ]
-            }
-        ]
-    },
-    {
-        "_comment": "=== STEP UP SLIDE ===",
-        "type": "stepUp",
-        "title": "ステップアップ（成長・進化）",
-        "subhead": "段階的な成長を視覚化",
-        "items": [
-            {
-                "title": "初級",
-                "desc": "基礎知識の習得"
-            },
-            {
-                "title": "中級",
-                "desc": "応用力の向上"
-            },
-            {
-                "title": "上級",
-                "desc": "専門性の確立"
-            },
-            {
-                "title": "エキスパート",
-                "desc": "指導者レベル"
-            },
-            {
-                "title": "マスター",
-                "desc": "業界トップレベル"
-            }
-        ],
-        "notes": "5段階のスキルレベルを階段状に表示します。"
-    },
-    {
-        "_comment": "STEP UP: 最小構成（2ステップ）",
-        "type": "stepUp",
-        "title": "シンプルステップアップ",
-        "items": [
-            {
-                "title": "現状",
-                "desc": "課題がある状態"
-            },
-            {
-                "title": "目標",
-                "desc": "理想の状態"
-            }
-        ]
-    },
-    {
-        "_comment": "=== SECTION: 図解系パターン ===",
-        "type": "section",
-        "title": "第4章：図解系パターン",
-        "sectionNo": 4
-    },
-    {
-        "_comment": "=== DIAGRAM SLIDE ===",
-        "type": "diagram",
-        "title": "レーン図（スイムレーン）",
-        "subhead": "役割別の作業分担を表示",
-        "lanes": [
-            {
-                "title": "営業部",
-                "items": [
-                    "顧客訪問",
-                    "提案書作成",
-                    "契約締結"
-                ]
-            },
-            {
-                "title": "開発部",
-                "items": [
-                    "要件定義",
-                    "システム開発",
-                    "テスト実施"
-                ]
-            },
-            {
-                "title": "運用部",
-                "items": [
-                    "環境構築",
-                    "監視設定",
-                    "運用開始"
-                ]
-            }
-        ],
-        "notes": "3つの部署それぞれの担当業務を示しています。"
-    },
-    {
-        "_comment": "DIAGRAM: 2レーン",
-        "type": "diagram",
-        "title": "シンプルレーン図",
-        "lanes": [
-            {
-                "title": "フロントエンド",
-                "items": [
-                    "UI設計",
-                    "コーディング"
-                ]
-            },
-            {
-                "title": "バックエンド",
-                "items": [
-                    "API設計",
-                    "DB設計"
-                ]
-            }
-        ]
-    },
-    {
-        "_comment": "=== CYCLE SLIDE ===",
-        "type": "cycle",
-        "title": "サイクル図（4項目固定）",
-        "subhead": "PDCAサイクルの例",
-        "items": [
-            {
-                "label": "Plan",
-                "subLabel": "計画"
-            },
-            {
-                "label": "Do",
-                "subLabel": "実行"
-            },
-            {
-                "label": "Check",
-                "subLabel": "評価"
-            },
-            {
-                "label": "Act",
-                "subLabel": "改善"
-            }
-        ],
-        "centerText": "PDCA",
-        "notes": "PDCAサイクルを循環図で表現しています。"
-    },
-    {
-        "_comment": "CYCLE: subLabel・centerText省略",
-        "type": "cycle",
-        "title": "シンプルサイクル",
-        "items": [
-            {
-                "label": "収集"
-            },
-            {
-                "label": "分析"
-            },
-            {
-                "label": "実行"
-            },
-            {
-                "label": "検証"
-            }
-        ]
-    },
-    {
-        "_comment": "=== TRIANGLE SLIDE ===",
-        "type": "triangle",
-        "title": "トライアングル図（3項目固定）",
-        "subhead": "3つの要素の関係性を視覚化",
-        "items": [
-            {
-                "title": "品質",
-                "desc": "高品質な成果物"
-            },
-            {
-                "title": "コスト",
-                "desc": "予算内での実現"
-            },
-            {
-                "title": "納期",
-                "desc": "期限内の完了"
-            }
-        ],
-        "notes": "プロジェクト管理の3つの制約を三角形で表現しています。"
-    },
-    {
-        "_comment": "TRIANGLE: desc省略",
-        "type": "triangle",
-        "title": "シンプルトライアングル",
-        "items": [
-            {
-                "title": "ヒト"
-            },
-            {
-                "title": "モノ"
-            },
-            {
-                "title": "カネ"
-            }
-        ]
-    },
-    {
-        "_comment": "=== PYRAMID SLIDE ===",
-        "type": "pyramid",
-        "title": "ピラミッド図（階層構造）",
-        "subhead": "マズローの欲求階層説",
-        "levels": [
-            {
-                "title": "自己実現",
-                "description": "自己の可能性を最大限に発揮"
-            },
-            {
-                "title": "承認欲求",
-                "description": "他者からの評価や尊敬"
-            },
-            {
-                "title": "社会的欲求",
-                "description": "所属や愛情への欲求"
-            },
-            {
-                "title": "安全欲求",
-                "description": "安心・安全への欲求"
-            }
-        ],
-        "notes": "人間の欲求を4段階のピラミッドで表現しています。"
-    },
-    {
-        "_comment": "PYRAMID: 3段階（最小）",
-        "type": "pyramid",
-        "title": "3段階ピラミッド",
-        "levels": [
-            {
-                "title": "戦略",
-                "description": "長期的な方向性"
-            },
-            {
-                "title": "戦術",
-                "description": "中期的な施策"
-            },
-            {
-                "title": "実行",
-                "description": "日々の業務"
-            }
-        ]
-    },
-    {
-        "_comment": "=== SECTION: データ・指標系 ===",
-        "type": "section",
-        "title": "第5章：データ・指標系パターン",
-        "sectionNo": 5
-    },
-    {
-        "_comment": "=== KPI SLIDE ===",
-        "type": "kpi",
-        "title": "KPIダッシュボード",
-        "subhead": "主要業績評価指標",
-        "columns": 4,
-        "items": [
-            {
-                "label": "売上高",
-                "value": "12.5億円",
-                "change": "+15%",
-                "status": "good"
-            },
-            {
-                "label": "利益率",
-                "value": "8.2%",
-                "change": "-2%",
-                "status": "bad"
-            },
-            {
-                "label": "顧客数",
-                "value": "1,250",
-                "change": "+120",
-                "status": "good"
-            },
-            {
-                "label": "解約率",
-                "value": "2.1%",
-                "change": "±0%",
-                "status": "neutral"
-            }
-        ],
-        "notes": "4つの主要KPIを表示しています。利益率のみ減少傾向にあります。"
-    },
-    {
-        "_comment": "KPI: 2列・2項目",
-        "type": "kpi",
-        "title": "シンプルKPI",
-        "columns": 2,
-        "items": [
-            {
-                "label": "達成率",
-                "value": "87%",
-                "change": "+5%",
-                "status": "good"
-            },
-            {
-                "label": "残タスク",
-                "value": "23件",
-                "change": "-8件",
-                "status": "good"
-            }
-        ]
-    },
-    {
-        "_comment": "KPI: 3列",
-        "type": "kpi",
-        "title": "3列KPI",
-        "columns": 3,
-        "items": [
-            {
-                "label": "PV",
-                "value": "50,000",
-                "change": "+12%",
-                "status": "good"
-            },
-            {
-                "label": "UU",
-                "value": "8,500",
-                "change": "+8%",
-                "status": "good"
-            },
-            {
-                "label": "CVR",
-                "value": "3.2%",
-                "change": "-0.5%",
-                "status": "bad"
-            }
-        ]
-    },
-    {
-        "_comment": "=== PROGRESS SLIDE ===",
-        "type": "progress",
-        "title": "進捗状況",
-        "subhead": "プロジェクト各フェーズの進捗",
-        "items": [
-            {
-                "label": "要件定義",
-                "percent": 100
-            },
-            {
-                "label": "設計",
-                "percent": 100
-            },
-            {
-                "label": "開発",
-                "percent": 75
-            },
-            {
-                "label": "テスト",
-                "percent": 30
-            },
-            {
-                "label": "リリース準備",
-                "percent": 0
-            }
-        ],
-        "notes": "開発フェーズは75%完了。テストフェーズも並行して進行中です。"
-    },
-    {
-        "_comment": "PROGRESS: 境界値テスト",
-        "type": "progress",
-        "title": "進捗境界値テスト",
-        "items": [
-            {
-                "label": "0%テスト",
-                "percent": 0
-            },
-            {
-                "label": "50%テスト",
-                "percent": 50
-            },
-            {
-                "label": "100%テスト",
-                "percent": 100
-            }
-        ]
-    },
-    {
-        "_comment": "=== QUOTE SLIDE ===",
-        "type": "quote",
-        "title": "引用スライド",
-        "subhead": "著名人の言葉",
-        "text": "Stay hungry, stay foolish.",
-        "author": "Steve Jobs",
-        "notes": "スティーブ・ジョブズの有名なスピーチからの引用です。"
-    },
-    {
-        "_comment": "QUOTE: 日本語引用",
-        "type": "quote",
-        "title": "日本語引用テスト",
-        "text": "継続は力なり。諦めずに続けることで、必ず結果はついてくる。",
-        "author": "著者不明"
-    },
-    {
-        "_comment": "=== FAQ SLIDE ===",
-        "type": "faq",
-        "title": "よくある質問",
-        "subhead": "お客様からのご質問",
-        "items": [
-            {
-                "q": "料金はいくらですか？",
-                "a": "月額5,000円からご利用いただけます"
-            },
-            {
-                "q": "無料トライアルはありますか？",
-                "a": "14日間の無料トライアルをご用意しています"
-            },
-            {
-                "q": "解約は簡単にできますか？",
-                "a": "いつでもオンラインで即時解約可能です"
-            },
-            {
-                "q": "サポート体制は？",
-                "a": "平日9時から18時まで電話・チャット対応"
-            }
-        ],
-        "notes": "よくある4つの質問とその回答を掲載しています。"
-    },
-    {
-        "_comment": "FAQ: 最小構成（1項目）",
-        "type": "faq",
-        "title": "シンプルFAQ",
-        "items": [
-            {
-                "q": "質問は何ですか？",
-                "a": "これが回答です"
-            }
-        ]
-    },
-    {
-        "_comment": "=== IMAGE TEXT SLIDE ===",
-        "type": "imageText",
-        "title": "画像テキストスライド（URL）",
-        "subhead": "画像と説明文の組み合わせ",
-        "image": "https://picsum.photos/400/300",
-        "imageCaption": "サンプル画像",
-        "imagePosition": "left",
-        "points": [
-            "画像は左側に配置",
-            "テキストは右側に表示",
-            "キャプションも設定可能"
-        ],
-        "notes": "外部URLから画像を読み込んで表示します。"
-    },
-    {
-        "_comment": "IMAGE TEXT: 右配置・オプション省略",
-        "type": "imageText",
-        "title": "画像テキスト（右配置）",
-        "image": "https://picsum.photos/400/300?random=2",
-        "imagePosition": "right",
-        "points": [
-            "画像は右側に配置",
-            "テキストは左側に表示"
-        ]
-    },
-    {
-        "_comment": "IMAGE TEXT: 動画タイムスタンプ",
-        "type": "imageText",
-        "title": "動画からのキャプチャ",
-        "image": "01:23.4",
-        "imageCaption": "動画の1分23.4秒時点",
-        "points": [
-            "動画のタイムスタンプを指定",
-            "mm:ss.S形式で入力"
-        ]
-    },
-    {
-        "_comment": "IMAGE TEXT: 添付画像の説明",
-        "type": "imageText",
-        "title": "添付画像の利用",
-        "image": "青い空と白い雲が広がる風景写真",
-        "points": [
-            "添付画像を使用する場合",
-            "30文字程度で画像内容を説明"
-        ]
-    },
-    {
-        "_comment": "=== IMAGE TEXT WITH CHART: 折れ線グラフ ===",
-        "type": "imageText",
-        "title": "チャート表示テスト（折れ線）",
-        "subhead": "グラフを画像として表示",
-        "image": {
-            "chartType": "line",
-            "data": {
-                "title": "月間売上推移",
-                "subtitle": "（2024年度）",
-                "source": "社内データ",
-                "yAxisUnitLabel": "（万円）",
-                "items": [
-                    {
-                        "label": "4月",
-                        "value": 120
-                    },
-                    {
-                        "label": "5月",
-                        "value": 135
-                    },
-                    {
-                        "label": "6月",
-                        "value": 150
-                    },
-                    {
-                        "label": "7月",
-                        "value": 145
-                    },
-                    {
-                        "label": "8月",
-                        "value": 160
-                    },
-                    {
-                        "label": "9月",
-                        "value": 175
-                    }
-                ],
-                "color": {
-                    "start": "#e68a9c",
-                    "end": "#b469b8",
-                    "line": "#b469b8",
-                    "label": "#8c4fc8"
-                },
-                "layout": {
-                    "width": 600,
-                    "height": 465,
-                    "marginTop": 100,
-                    "marginBottom": 85,
-                    "marginLeft": 75,
-                    "marginRight": 25
-                },
-                "yAxis": {
-                    "max": 200,
-                    "min": 0,
-                    "tickCount": 4
-                },
-                "lineOptions": {
-                    "markerRadius": 5,
-                    "dataLabelOffsetY": 15,
-                    "horizontalPadding": 30
-                }
-            }
         },
-        "points": [
-            "単一系列の折れ線グラフ",
-            "グラデーション付きエリア表示",
-            "データラベル表示対応"
-        ],
-        "notes": "月間売上の推移を折れ線グラフで表示しています。"
-    },
-    {
-        "_comment": "=== IMAGE TEXT WITH CHART: 複数系列折れ線 ===",
-        "type": "imageText",
-        "title": "複数系列折れ線グラフ",
-        "image": {
-            "chartType": "multi-line",
-            "data": {
-                "title": "部門別売上比較",
-                "subtitle": "（四半期推移）",
-                "source": "社内データ",
-                "yAxisUnitLabel": "（億円）",
-                "xAxisLabels": [
-                    "Q1",
-                    "Q2",
-                    "Q3",
-                    "Q4"
+        {
+            "_comment": "CONTENT: 長文テスト（90文字境界）",
+            "type": "content",
+            "title": "長文境界値テスト",
+            "points": [
+                "これは90文字に近い長さのテキストです。スライド上で適切に表示されるか、折り返しが正常に機能するかを確認するためのテストデータです。あいうえおかきくけこ"
+            ]
+        },
+        {
+            "_comment": "=== CARDS SLIDE ===",
+            "type": "cards",
+            "title": "シンプルカード（文字列配列）",
+            "subhead": "最もシンプルなカード表示",
+            "columns": 3,
+            "items": [
+                "カードA",
+                "カードB",
+                "カードC",
+                "カードD",
+                "カードE",
+                "カードF"
+            ],
+            "notes": "6枚のシンプルカードを3列×2行で表示します。"
+        },
+        {
+            "_comment": "CARDS: オブジェクト配列・2列",
+            "type": "cards",
+            "title": "カード（オブジェクト配列）",
+            "columns": 2,
+            "items": [
+                {
+                    "title": "機能A",
+                    "desc": "機能Aの説明テキスト"
+                },
+                {
+                    "title": "機能B",
+                    "desc": "機能Bの説明テキスト"
+                },
+                {
+                    "title": "機能C"
+                },
+                {
+                    "title": "機能D",
+                    "desc": "descは省略可能"
+                }
+            ]
+        },
+        {
+            "_comment": "CARDS: columns省略・混合配列",
+            "type": "cards",
+            "title": "混合カード（文字列とオブジェクト）",
+            "items": [
+                "文字列カード1",
+                {
+                    "title": "オブジェクトカード",
+                    "desc": "説明付き"
+                },
+                "文字列カード2"
+            ]
+        },
+        {
+            "_comment": "=== HEADER CARDS SLIDE ===",
+            "type": "headerCards",
+            "title": "ヘッダー付きカード（3列）",
+            "subhead": "色付きヘッダーのカード表示",
+            "columns": 3,
+            "items": [
+                {
+                    "title": "ヘッダー1",
+                    "desc": "カード1の説明文。ヘッダーは白文字で表示されます"
+                },
+                {
+                    "title": "ヘッダー2",
+                    "desc": "カード2の説明文"
+                },
+                {
+                    "title": "ヘッダー3",
+                    "desc": "カード3の説明文"
+                },
+                {
+                    "title": "ヘッダー4",
+                    "desc": "カード4の説明文"
+                },
+                {
+                    "title": "ヘッダー5",
+                    "desc": "カード5の説明文"
+                },
+                {
+                    "title": "ヘッダー6",
+                    "desc": "カード6の説明文"
+                }
+            ],
+            "notes": "ヘッダーカードは色付きの背景に白文字で表示されます。"
+        },
+        {
+            "_comment": "HEADER CARDS: 2列・desc省略あり",
+            "type": "headerCards",
+            "title": "ヘッダーカード（2列）",
+            "columns": 2,
+            "items": [
+                {
+                    "title": "項目1",
+                    "desc": "説明あり"
+                },
+                {
+                    "title": "項目2"
+                },
+                {
+                    "title": "項目3",
+                    "desc": "説明あり"
+                },
+                {
+                    "title": "項目4"
+                }
+            ]
+        },
+        {
+            "_comment": "=== BULLET CARDS SLIDE ===",
+            "type": "bulletCards",
+            "title": "箇条書きカード（最大3枚）",
+            "subhead": "詳細な説明を含むカード",
+            "items": [
+                {
+                    "title": "ポイント1",
+                    "desc": "第1ポイントの詳細な説明文。[[重要な部分]]を強調できます"
+                },
+                {
+                    "title": "ポイント2",
+                    "desc": "第2ポイントの詳細な説明文。**太字**も使用可能"
+                },
+                {
+                    "title": "ポイント3",
+                    "desc": "第3ポイントの詳細な説明文"
+                }
+            ],
+            "notes": "箇条書きカードは最大3枚まで配置可能です。"
+        },
+        {
+            "_comment": "BULLET CARDS: 最小構成（1枚）",
+            "type": "bulletCards",
+            "title": "箇条書きカード（1枚のみ）",
+            "items": [
+                {
+                    "title": "単一カード",
+                    "desc": "1枚だけのカード表示"
+                }
+            ]
+        },
+        {
+            "_comment": "=== TABLE SLIDE ===",
+            "type": "table",
+            "title": "テーブルスライド",
+            "subhead": "表形式でのデータ表示",
+            "headers": [
+                "項目",
+                "値",
+                "備考"
+            ],
+            "rows": [
+                [
+                    "項目A",
+                    "100",
+                    "正常"
                 ],
-                "series": [
-                    {
-                        "id": "A",
-                        "label": "営業1部",
-                        "values": [
-                            10,
-                            12,
-                            15,
-                            18
-                        ]
-                    },
-                    {
-                        "id": "B",
-                        "label": "営業2部",
-                        "values": [
-                            8,
-                            10,
-                            11,
-                            14
-                        ]
-                    },
-                    {
-                        "id": "C",
-                        "label": "営業3部",
-                        "values": [
-                            5,
-                            7,
-                            9,
-                            12
-                        ]
-                    }
+                [
+                    "項目B",
+                    "200",
+                    "注意"
                 ],
-                "colors": [
-                    {
-                        "id": "A",
+                [
+                    "項目C",
+                    "300",
+                    "警告"
+                ],
+                [
+                    "項目D",
+                    "400",
+                    "正常"
+                ]
+            ],
+            "notes": "テーブル形式でデータを整理して表示します。"
+        },
+        {
+            "_comment": "TABLE: 5列テスト",
+            "type": "table",
+            "title": "5列テーブル",
+            "headers": [
+                "No.",
+                "名前",
+                "部署",
+                "役職",
+                "電話番号"
+            ],
+            "rows": [
+                [
+                    "1",
+                    "田中太郎",
+                    "営業部",
+                    "部長",
+                    "03-1234-5678"
+                ],
+                [
+                    "2",
+                    "鈴木花子",
+                    "経理部",
+                    "課長",
+                    "03-2345-6789"
+                ],
+                [
+                    "3",
+                    "佐藤次郎",
+                    "開発部",
+                    "主任",
+                    "03-3456-7890"
+                ]
+            ]
+        },
+        {
+            "_comment": "=== SECTION: 比較系パターン ===",
+            "type": "section",
+            "title": "第2章：比較系パターン",
+            "sectionNo": 2
+        },
+        {
+            "_comment": "=== COMPARE SLIDE ===",
+            "type": "compare",
+            "title": "左右比較スライド",
+            "subhead": "2つの選択肢を比較",
+            "leftTitle": "プランA",
+            "rightTitle": "プランB",
+            "leftItems": [
+                "コスト効率が高い",
+                "導入が容易",
+                "サポート体制が充実"
+            ],
+            "rightItems": [
+                "機能が豊富",
+                "拡張性が高い",
+                "カスタマイズ可能"
+            ],
+            "notes": "プランAとプランBを直接比較しています。"
+        },
+        {
+            "_comment": "COMPARE: メリット/デメリット比較",
+            "type": "compare",
+            "title": "メリット・デメリット比較",
+            "leftTitle": "メリット",
+            "rightTitle": "デメリット",
+            "leftItems": [
+                "24時間提出可能",
+                "書類の一部を省略可能",
+                "進捗状況をリアルタイムで確認"
+            ],
+            "rightItems": [
+                "初期設定が必要",
+                "電子証明書の取得が必要",
+                "システム障害時は利用不可"
+            ]
+        },
+        {
+            "_comment": "=== STATS COMPARE SLIDE ===",
+            "type": "statsCompare",
+            "title": "数値比較（テーブル形式）",
+            "subhead": "Before/Afterの数値比較",
+            "leftTitle": "導入前",
+            "rightTitle": "導入後",
+            "stats": [
+                {
+                    "label": "処理時間",
+                    "leftValue": "4時間",
+                    "rightValue": "30分",
+                    "trend": "down"
+                },
+                {
+                    "label": "エラー率",
+                    "leftValue": "5.2%",
+                    "rightValue": "0.3%",
+                    "trend": "down"
+                },
+                {
+                    "label": "満足度",
+                    "leftValue": "62%",
+                    "rightValue": "94%",
+                    "trend": "up"
+                },
+                {
+                    "label": "コスト",
+                    "leftValue": "100万円",
+                    "rightValue": "80万円",
+                    "trend": "down"
+                }
+            ],
+            "notes": "導入前後の主要指標を比較しています。すべての指標で改善が見られます。"
+        },
+        {
+            "_comment": "STATS COMPARE: trend省略",
+            "type": "statsCompare",
+            "title": "シンプルな数値比較",
+            "leftTitle": "A社",
+            "rightTitle": "B社",
+            "stats": [
+                {
+                    "label": "売上高",
+                    "leftValue": "500億円",
+                    "rightValue": "480億円"
+                },
+                {
+                    "label": "従業員数",
+                    "leftValue": "1,200名",
+                    "rightValue": "980名"
+                },
+                {
+                    "label": "拠点数",
+                    "leftValue": "15",
+                    "rightValue": "12"
+                }
+            ]
+        },
+        {
+            "_comment": "=== BAR COMPARE SLIDE ===",
+            "type": "barCompare",
+            "title": "棒グラフ比較",
+            "subhead": "視覚的な数値比較",
+            "stats": [
+                {
+                    "label": "売上",
+                    "leftValue": "120",
+                    "rightValue": "150",
+                    "trend": "up"
+                },
+                {
+                    "label": "利益",
+                    "leftValue": "30",
+                    "rightValue": "45",
+                    "trend": "up"
+                },
+                {
+                    "label": "コスト",
+                    "leftValue": "90",
+                    "rightValue": "75",
+                    "trend": "down"
+                }
+            ],
+            "showTrends": true,
+            "notes": "横棒グラフで視覚的に比較を表示します。"
+        },
+        {
+            "_comment": "BAR COMPARE: showTrends省略（デフォルトfalse）",
+            "type": "barCompare",
+            "title": "トレンド無し棒グラフ",
+            "stats": [
+                {
+                    "label": "項目A",
+                    "leftValue": "80",
+                    "rightValue": "90"
+                },
+                {
+                    "label": "項目B",
+                    "leftValue": "70",
+                    "rightValue": "85"
+                }
+            ]
+        },
+        {
+            "_comment": "=== SECTION: プロセス・タイムライン系 ===",
+            "type": "section",
+            "title": "第3章：プロセス・タイムライン系",
+            "sectionNo": 3
+        },
+        {
+            "_comment": "=== PROCESS SLIDE ===",
+            "type": "process",
+            "title": "プロセススライド（視覚的形式）",
+            "subhead": "最大4ステップの工程表示",
+            "steps": [
+                "要件定義",
+                "設計",
+                "実装",
+                "テスト"
+            ],
+            "notes": "ソフトウェア開発の基本的なプロセスを4ステップで示しています。"
+        },
+        {
+            "_comment": "PROCESS: 2ステップ（最小）",
+            "type": "process",
+            "title": "シンプルプロセス",
+            "steps": [
+                "インプット",
+                "アウトプット"
+            ]
+        },
+        {
+            "_comment": "=== PROCESS LIST SLIDE ===",
+            "type": "processList",
+            "title": "プロセスリスト（リスト形式）",
+            "subhead": "詳細な手順リスト",
+            "steps": [
+                "アカウントを作成する",
+                "必要情報を入力する",
+                "本人確認書類をアップロードする",
+                "審査結果を待つ",
+                "承認後、サービスを利用開始する"
+            ],
+            "notes": "5つのステップでサービス利用開始までの流れを説明します。"
+        },
+        {
+            "_comment": "=== TIMELINE SLIDE ===",
+            "type": "timeline",
+            "title": "タイムラインスライド",
+            "subhead": "プロジェクトの進捗状況",
+            "milestones": [
+                {
+                    "label": "企画立案完了",
+                    "date": "2024年1月",
+                    "state": "done"
+                },
+                {
+                    "label": "設計フェーズ終了",
+                    "date": "2024年3月",
+                    "state": "done"
+                },
+                {
+                    "label": "開発フェーズ",
+                    "date": "2024年6月",
+                    "state": "next"
+                },
+                {
+                    "label": "テストフェーズ",
+                    "date": "2024年9月",
+                    "state": "todo"
+                },
+                {
+                    "label": "リリース",
+                    "date": "2024年12月",
+                    "state": "todo"
+                }
+            ],
+            "notes": "現在、開発フェーズに入っています。予定通り進行中です。"
+        },
+        {
+            "_comment": "TIMELINE: state省略",
+            "type": "timeline",
+            "title": "シンプルタイムライン",
+            "milestones": [
+                {
+                    "label": "フェーズ1",
+                    "date": "Q1"
+                },
+                {
+                    "label": "フェーズ2",
+                    "date": "Q2"
+                },
+                {
+                    "label": "フェーズ3",
+                    "date": "Q3"
+                }
+            ]
+        },
+        {
+            "_comment": "=== FLOW CHART SLIDE ===",
+            "type": "flowChart",
+            "title": "フローチャート（1行）",
+            "subhead": "左から右への流れを表現",
+            "flows": [
+                {
+                    "steps": [
+                        "受付",
+                        "審査",
+                        "承認",
+                        "完了"
+                    ]
+                }
+            ],
+            "notes": "申請から完了までの流れを1行で表示します。"
+        },
+        {
+            "_comment": "FLOW CHART: 2行",
+            "type": "flowChart",
+            "title": "フローチャート（2行）",
+            "subhead": "複雑なフローを2行で表現",
+            "flows": [
+                {
+                    "steps": [
+                        "企画",
+                        "設計",
+                        "開発",
+                        "テスト"
+                    ]
+                },
+                {
+                    "steps": [
+                        "デプロイ",
+                        "監視",
+                        "改善"
+                    ]
+                }
+            ]
+        },
+        {
+            "_comment": "FLOW CHART: 最小構成（2ステップ）",
+            "type": "flowChart",
+            "title": "シンプルフロー",
+            "flows": [
+                {
+                    "steps": [
+                        "開始",
+                        "終了"
+                    ]
+                }
+            ]
+        },
+        {
+            "_comment": "=== STEP UP SLIDE ===",
+            "type": "stepUp",
+            "title": "ステップアップ（成長・進化）",
+            "subhead": "段階的な成長を視覚化",
+            "items": [
+                {
+                    "title": "初級",
+                    "desc": "基礎知識の習得"
+                },
+                {
+                    "title": "中級",
+                    "desc": "応用力の向上"
+                },
+                {
+                    "title": "上級",
+                    "desc": "専門性の確立"
+                },
+                {
+                    "title": "エキスパート",
+                    "desc": "指導者レベル"
+                },
+                {
+                    "title": "マスター",
+                    "desc": "業界トップレベル"
+                }
+            ],
+            "notes": "5段階のスキルレベルを階段状に表示します。"
+        },
+        {
+            "_comment": "STEP UP: 最小構成（2ステップ）",
+            "type": "stepUp",
+            "title": "シンプルステップアップ",
+            "items": [
+                {
+                    "title": "現状",
+                    "desc": "課題がある状態"
+                },
+                {
+                    "title": "目標",
+                    "desc": "理想の状態"
+                }
+            ]
+        },
+        {
+            "_comment": "=== SECTION: 図解系パターン ===",
+            "type": "section",
+            "title": "第4章：図解系パターン",
+            "sectionNo": 4
+        },
+        {
+            "_comment": "=== DIAGRAM SLIDE ===",
+            "type": "diagram",
+            "title": "レーン図（スイムレーン）",
+            "subhead": "役割別の作業分担を表示",
+            "lanes": [
+                {
+                    "title": "営業部",
+                    "items": [
+                        "顧客訪問",
+                        "提案書作成",
+                        "契約締結"
+                    ]
+                },
+                {
+                    "title": "開発部",
+                    "items": [
+                        "要件定義",
+                        "システム開発",
+                        "テスト実施"
+                    ]
+                },
+                {
+                    "title": "運用部",
+                    "items": [
+                        "環境構築",
+                        "監視設定",
+                        "運用開始"
+                    ]
+                }
+            ],
+            "notes": "3つの部署それぞれの担当業務を示しています。"
+        },
+        {
+            "_comment": "DIAGRAM: 2レーン",
+            "type": "diagram",
+            "title": "シンプルレーン図",
+            "lanes": [
+                {
+                    "title": "フロントエンド",
+                    "items": [
+                        "UI設計",
+                        "コーディング"
+                    ]
+                },
+                {
+                    "title": "バックエンド",
+                    "items": [
+                        "API設計",
+                        "DB設計"
+                    ]
+                }
+            ]
+        },
+        {
+            "_comment": "=== CYCLE SLIDE ===",
+            "type": "cycle",
+            "title": "サイクル図（4項目固定）",
+            "subhead": "PDCAサイクルの例",
+            "items": [
+                {
+                    "label": "Plan",
+                    "subLabel": "計画"
+                },
+                {
+                    "label": "Do",
+                    "subLabel": "実行"
+                },
+                {
+                    "label": "Check",
+                    "subLabel": "評価"
+                },
+                {
+                    "label": "Act",
+                    "subLabel": "改善"
+                }
+            ],
+            "centerText": "PDCA",
+            "notes": "PDCAサイクルを循環図で表現しています。"
+        },
+        {
+            "_comment": "CYCLE: subLabel・centerText省略",
+            "type": "cycle",
+            "title": "シンプルサイクル",
+            "items": [
+                {
+                    "label": "収集"
+                },
+                {
+                    "label": "分析"
+                },
+                {
+                    "label": "実行"
+                },
+                {
+                    "label": "検証"
+                }
+            ]
+        },
+        {
+            "_comment": "=== TRIANGLE SLIDE ===",
+            "type": "triangle",
+            "title": "トライアングル図（3項目固定）",
+            "subhead": "3つの要素の関係性を視覚化",
+            "items": [
+                {
+                    "title": "品質",
+                    "desc": "高品質な成果物"
+                },
+                {
+                    "title": "コスト",
+                    "desc": "予算内での実現"
+                },
+                {
+                    "title": "納期",
+                    "desc": "期限内の完了"
+                }
+            ],
+            "notes": "プロジェクト管理の3つの制約を三角形で表現しています。"
+        },
+        {
+            "_comment": "TRIANGLE: desc省略",
+            "type": "triangle",
+            "title": "シンプルトライアングル",
+            "items": [
+                {
+                    "title": "ヒト"
+                },
+                {
+                    "title": "モノ"
+                },
+                {
+                    "title": "カネ"
+                }
+            ]
+        },
+        {
+            "_comment": "=== PYRAMID SLIDE ===",
+            "type": "pyramid",
+            "title": "ピラミッド図（階層構造）",
+            "subhead": "マズローの欲求階層説",
+            "levels": [
+                {
+                    "title": "自己実現",
+                    "description": "自己の可能性を最大限に発揮"
+                },
+                {
+                    "title": "承認欲求",
+                    "description": "他者からの評価や尊敬"
+                },
+                {
+                    "title": "社会的欲求",
+                    "description": "所属や愛情への欲求"
+                },
+                {
+                    "title": "安全欲求",
+                    "description": "安心・安全への欲求"
+                }
+            ],
+            "notes": "人間の欲求を4段階のピラミッドで表現しています。"
+        },
+        {
+            "_comment": "PYRAMID: 3段階（最小）",
+            "type": "pyramid",
+            "title": "3段階ピラミッド",
+            "levels": [
+                {
+                    "title": "戦略",
+                    "description": "長期的な方向性"
+                },
+                {
+                    "title": "戦術",
+                    "description": "中期的な施策"
+                },
+                {
+                    "title": "実行",
+                    "description": "日々の業務"
+                }
+            ]
+        },
+        {
+            "_comment": "=== SECTION: データ・指標系 ===",
+            "type": "section",
+            "title": "第5章：データ・指標系パターン",
+            "sectionNo": 5
+        },
+        {
+            "_comment": "=== KPI SLIDE ===",
+            "type": "kpi",
+            "title": "KPIダッシュボード",
+            "subhead": "主要業績評価指標",
+            "columns": 4,
+            "items": [
+                {
+                    "label": "売上高",
+                    "value": "12.5億円",
+                    "change": "+15%",
+                    "status": "good"
+                },
+                {
+                    "label": "利益率",
+                    "value": "8.2%",
+                    "change": "-2%",
+                    "status": "bad"
+                },
+                {
+                    "label": "顧客数",
+                    "value": "1,250",
+                    "change": "+120",
+                    "status": "good"
+                },
+                {
+                    "label": "解約率",
+                    "value": "2.1%",
+                    "change": "±0%",
+                    "status": "neutral"
+                }
+            ],
+            "notes": "4つの主要KPIを表示しています。利益率のみ減少傾向にあります。"
+        },
+        {
+            "_comment": "KPI: 2列・2項目",
+            "type": "kpi",
+            "title": "シンプルKPI",
+            "columns": 2,
+            "items": [
+                {
+                    "label": "達成率",
+                    "value": "87%",
+                    "change": "+5%",
+                    "status": "good"
+                },
+                {
+                    "label": "残タスク",
+                    "value": "23件",
+                    "change": "-8件",
+                    "status": "good"
+                }
+            ]
+        },
+        {
+            "_comment": "KPI: 3列",
+            "type": "kpi",
+            "title": "3列KPI",
+            "columns": 3,
+            "items": [
+                {
+                    "label": "PV",
+                    "value": "50,000",
+                    "change": "+12%",
+                    "status": "good"
+                },
+                {
+                    "label": "UU",
+                    "value": "8,500",
+                    "change": "+8%",
+                    "status": "good"
+                },
+                {
+                    "label": "CVR",
+                    "value": "3.2%",
+                    "change": "-0.5%",
+                    "status": "bad"
+                }
+            ]
+        },
+        {
+            "_comment": "=== PROGRESS SLIDE ===",
+            "type": "progress",
+            "title": "進捗状況",
+            "subhead": "プロジェクト各フェーズの進捗",
+            "items": [
+                {
+                    "label": "要件定義",
+                    "percent": 100
+                },
+                {
+                    "label": "設計",
+                    "percent": 100
+                },
+                {
+                    "label": "開発",
+                    "percent": 75
+                },
+                {
+                    "label": "テスト",
+                    "percent": 30
+                },
+                {
+                    "label": "リリース準備",
+                    "percent": 0
+                }
+            ],
+            "notes": "開発フェーズは75%完了。テストフェーズも並行して進行中です。"
+        },
+        {
+            "_comment": "PROGRESS: 境界値テスト",
+            "type": "progress",
+            "title": "進捗境界値テスト",
+            "items": [
+                {
+                    "label": "0%テスト",
+                    "percent": 0
+                },
+                {
+                    "label": "50%テスト",
+                    "percent": 50
+                },
+                {
+                    "label": "100%テスト",
+                    "percent": 100
+                }
+            ]
+        },
+        {
+            "_comment": "=== QUOTE SLIDE ===",
+            "type": "quote",
+            "title": "引用スライド",
+            "subhead": "著名人の言葉",
+            "text": "Stay hungry, stay foolish.",
+            "author": "Steve Jobs",
+            "notes": "スティーブ・ジョブズの有名なスピーチからの引用です。"
+        },
+        {
+            "_comment": "QUOTE: 日本語引用",
+            "type": "quote",
+            "title": "日本語引用テスト",
+            "text": "継続は力なり。諦めずに続けることで、必ず結果はついてくる。",
+            "author": "著者不明"
+        },
+        {
+            "_comment": "=== FAQ SLIDE ===",
+            "type": "faq",
+            "title": "よくある質問",
+            "subhead": "お客様からのご質問",
+            "items": [
+                {
+                    "q": "料金はいくらですか？",
+                    "a": "月額5,000円からご利用いただけます"
+                },
+                {
+                    "q": "無料トライアルはありますか？",
+                    "a": "14日間の無料トライアルをご用意しています"
+                },
+                {
+                    "q": "解約は簡単にできますか？",
+                    "a": "いつでもオンラインで即時解約可能です"
+                },
+                {
+                    "q": "サポート体制は？",
+                    "a": "平日9時から18時まで電話・チャット対応"
+                }
+            ],
+            "notes": "よくある4つの質問とその回答を掲載しています。"
+        },
+        {
+            "_comment": "FAQ: 最小構成（1項目）",
+            "type": "faq",
+            "title": "シンプルFAQ",
+            "items": [
+                {
+                    "q": "質問は何ですか？",
+                    "a": "これが回答です"
+                }
+            ]
+        },
+        {
+            "_comment": "=== IMAGE TEXT SLIDE ===",
+            "type": "imageText",
+            "title": "画像テキストスライド（URL）",
+            "subhead": "画像と説明文の組み合わせ",
+            "image": "https://picsum.photos/400/300",
+            "imageCaption": "サンプル画像",
+            "imagePosition": "left",
+            "points": [
+                "画像は左側に配置",
+                "テキストは右側に表示",
+                "キャプションも設定可能"
+            ],
+            "notes": "外部URLから画像を読み込んで表示します。"
+        },
+        {
+            "_comment": "IMAGE TEXT: 右配置・オプション省略",
+            "type": "imageText",
+            "title": "画像テキスト（右配置）",
+            "image": "https://picsum.photos/400/300?random=2",
+            "imagePosition": "right",
+            "points": [
+                "画像は右側に配置",
+                "テキストは左側に表示"
+            ]
+        },
+        {
+            "_comment": "IMAGE TEXT: 動画タイムスタンプ",
+            "type": "imageText",
+            "title": "動画からのキャプチャ",
+            "image": "01:23.4",
+            "imageCaption": "動画の1分23.4秒時点",
+            "points": [
+                "動画のタイムスタンプを指定",
+                "mm:ss.S形式で入力"
+            ]
+        },
+        {
+            "_comment": "IMAGE TEXT: 添付画像の説明",
+            "type": "imageText",
+            "title": "添付画像の利用",
+            "image": "青い空と白い雲が広がる風景写真",
+            "points": [
+                "添付画像を使用する場合",
+                "30文字程度で画像内容を説明"
+            ]
+        },
+        {
+            "_comment": "=== IMAGE TEXT WITH CHART: 折れ線グラフ ===",
+            "type": "imageText",
+            "title": "チャート表示テスト（折れ線）",
+            "subhead": "グラフを画像として表示",
+            "image": {
+                "chartType": "line",
+                "data": {
+                    "title": "月間売上推移",
+                    "subtitle": "（2024年度）",
+                    "source": "社内データ",
+                    "yAxisUnitLabel": "（万円）",
+                    "items": [
+                        {
+                            "label": "4月",
+                            "value": 120
+                        },
+                        {
+                            "label": "5月",
+                            "value": 135
+                        },
+                        {
+                            "label": "6月",
+                            "value": 150
+                        },
+                        {
+                            "label": "7月",
+                            "value": 145
+                        },
+                        {
+                            "label": "8月",
+                            "value": 160
+                        },
+                        {
+                            "label": "9月",
+                            "value": 175
+                        }
+                    ],
+                    "color": {
                         "start": "#e68a9c",
-                        "end": "#d96d8f"
+                        "end": "#b469b8",
+                        "line": "#b469b8",
+                        "label": "#8c4fc8"
                     },
-                    {
-                        "id": "B",
-                        "start": "#b469b8",
-                        "end": "#a656ad"
+                    "layout": {
+                        "width": 600,
+                        "height": 465,
+                        "marginTop": 100,
+                        "marginBottom": 85,
+                        "marginLeft": 75,
+                        "marginRight": 25
                     },
-                    {
-                        "id": "C",
-                        "start": "#7c6ce8",
-                        "end": "#6b5ce0"
+                    "yAxis": {
+                        "max": 200,
+                        "min": 0,
+                        "tickCount": 4
+                    },
+                    "lineOptions": {
+                        "markerRadius": 5,
+                        "dataLabelOffsetY": 15,
+                        "horizontalPadding": 30
                     }
-                ],
-                "layout": {
-                    "width": 650,
-                    "height": 510,
-                    "marginTop": 140,
-                    "marginBottom": 80,
-                    "marginLeft": 75,
-                    "marginRight": 35,
-                    "horizontalPadding": 20
-                },
-                "yAxis": {
-                    "min": 0,
-                    "max": 20,
-                    "tickCount": 5
-                },
-                "lineOptions": {
-                    "markerRadius": 5,
-                    "dataLabelOffsetY": 8
                 }
-            }
+            },
+            "points": [
+                "単一系列の折れ線グラフ",
+                "グラデーション付きエリア表示",
+                "データラベル表示対応"
+            ],
+            "notes": "月間売上の推移を折れ線グラフで表示しています。"
         },
-        "imagePosition": "right",
-        "points": [
-            "3系列のデータを比較",
-            "凡例で系列を識別",
-            "グラデーションカラー対応"
-        ]
-    },
-    {
-        "_comment": "=== IMAGE TEXT WITH CHART: ドーナツグラフ ===",
-        "type": "imageText",
-        "title": "ドーナツグラフ",
-        "image": {
-            "chartType": "donut",
-            "data": {
-                "title": "市場シェア",
-                "subtitle": "2024年度",
-                "source": "業界レポート",
-                "centerLabel": "シェア",
-                "colors": [
-                    {
-                        "id": "A",
+        {
+            "_comment": "=== IMAGE TEXT WITH CHART: 複数系列折れ線 ===",
+            "type": "imageText",
+            "title": "複数系列折れ線グラフ",
+            "image": {
+                "chartType": "multi-line",
+                "data": {
+                    "title": "部門別売上比較",
+                    "subtitle": "（四半期推移）",
+                    "source": "社内データ",
+                    "yAxisUnitLabel": "（億円）",
+                    "xAxisLabels": [
+                        "Q1",
+                        "Q2",
+                        "Q3",
+                        "Q4"
+                    ],
+                    "series": [
+                        {
+                            "id": "A",
+                            "label": "営業1部",
+                            "values": [
+                                10,
+                                12,
+                                15,
+                                18
+                            ]
+                        },
+                        {
+                            "id": "B",
+                            "label": "営業2部",
+                            "values": [
+                                8,
+                                10,
+                                11,
+                                14
+                            ]
+                        },
+                        {
+                            "id": "C",
+                            "label": "営業3部",
+                            "values": [
+                                5,
+                                7,
+                                9,
+                                12
+                            ]
+                        }
+                    ],
+                    "colors": [
+                        {
+                            "id": "A",
+                            "start": "#e68a9c",
+                            "end": "#d96d8f"
+                        },
+                        {
+                            "id": "B",
+                            "start": "#b469b8",
+                            "end": "#a656ad"
+                        },
+                        {
+                            "id": "C",
+                            "start": "#7c6ce8",
+                            "end": "#6b5ce0"
+                        }
+                    ],
+                    "layout": {
+                        "width": 650,
+                        "height": 510,
+                        "marginTop": 140,
+                        "marginBottom": 80,
+                        "marginLeft": 75,
+                        "marginRight": 35,
+                        "horizontalPadding": 20
+                    },
+                    "yAxis": {
+                        "min": 0,
+                        "max": 20,
+                        "tickCount": 5
+                    },
+                    "lineOptions": {
+                        "markerRadius": 5,
+                        "dataLabelOffsetY": 8
+                    }
+                }
+            },
+            "imagePosition": "right",
+            "points": [
+                "3系列のデータを比較",
+                "凡例で系列を識別",
+                "グラデーションカラー対応"
+            ]
+        },
+        {
+            "_comment": "=== IMAGE TEXT WITH CHART: ドーナツグラフ ===",
+            "type": "imageText",
+            "title": "ドーナツグラフ",
+            "image": {
+                "chartType": "donut",
+                "data": {
+                    "title": "市場シェア",
+                    "subtitle": "2024年度",
+                    "source": "業界レポート",
+                    "centerLabel": "シェア",
+                    "colors": [
+                        {
+                            "id": "A",
+                            "start": "#e68a9c",
+                            "end": "#d96d8f"
+                        },
+                        {
+                            "id": "B",
+                            "start": "#b469b8",
+                            "end": "#a656ad"
+                        },
+                        {
+                            "id": "C",
+                            "start": "#9f63d0",
+                            "end": "#8c4fc8"
+                        },
+                        {
+                            "id": "D",
+                            "start": "#7c6ce8",
+                            "end": "#6b5ce0"
+                        },
+                        {
+                            "id": "E",
+                            "start": "#616ad8",
+                            "end": "#5059d1"
+                        }
+                    ],
+                    "items": [
+                        {
+                            "label": "A社",
+                            "value": 35,
+                            "id": "A"
+                        },
+                        {
+                            "label": "B社",
+                            "value": 25,
+                            "id": "B"
+                        },
+                        {
+                            "label": "C社",
+                            "value": 20,
+                            "id": "C"
+                        },
+                        {
+                            "label": "D社",
+                            "value": 12,
+                            "id": "D"
+                        },
+                        {
+                            "label": "その他",
+                            "value": 8,
+                            "id": "E"
+                        }
+                    ]
+                }
+            },
+            "points": [
+                "円グラフの変形版",
+                "中央に合計値を表示",
+                "最大5項目を推奨"
+            ]
+        },
+        {
+            "_comment": "=== IMAGE TEXT WITH CHART: 棒グラフ（単一系列） ===",
+            "type": "imageText",
+            "title": "棒グラフ（単一系列）",
+            "image": {
+                "chartType": "bar",
+                "data": {
+                    "title": "部門別スコア",
+                    "subtitle": "満足度調査結果",
+                    "source": "社内調査",
+                    "items": [
+                        {
+                            "label": "営業部",
+                            "value": 85
+                        },
+                        {
+                            "label": "開発部",
+                            "value": 78
+                        },
+                        {
+                            "label": "...",
+                            "value": 0
+                        },
+                        {
+                            "label": "総務部",
+                            "value": 45
+                        }
+                    ],
+                    "color": {
                         "start": "#e68a9c",
-                        "end": "#d96d8f"
+                        "end": "#9f63d0"
                     },
-                    {
-                        "id": "B",
-                        "start": "#b469b8",
-                        "end": "#a656ad"
+                    "layout": {
+                        "width": 600,
+                        "height": 450,
+                        "marginTop": 100,
+                        "marginBottom": 65,
+                        "marginLeft": 70,
+                        "marginRight": 40
                     },
-                    {
-                        "id": "C",
-                        "start": "#9f63d0",
-                        "end": "#8c4fc8"
+                    "barOptions": {
+                        "barToSlotRatio": 0.6
                     },
-                    {
-                        "id": "D",
-                        "start": "#7c6ce8",
-                        "end": "#6b5ce0"
-                    },
-                    {
-                        "id": "E",
-                        "start": "#616ad8",
-                        "end": "#5059d1"
+                    "yAxis": {
+                        "max": 100,
+                        "min": 0,
+                        "tickCount": 4,
+                        "unit": "%"
                     }
-                ],
-                "items": [
-                    {
-                        "label": "A社",
-                        "value": 35,
-                        "id": "A"
-                    },
-                    {
-                        "label": "B社",
-                        "value": 25,
-                        "id": "B"
-                    },
-                    {
-                        "label": "C社",
-                        "value": 20,
-                        "id": "C"
-                    },
-                    {
-                        "label": "D社",
-                        "value": 12,
-                        "id": "D"
-                    },
-                    {
-                        "label": "その他",
-                        "value": 8,
-                        "id": "E"
-                    }
-                ]
-            }
-        },
-        "points": [
-            "円グラフの変形版",
-            "中央に合計値を表示",
-            "最大5項目を推奨"
-        ]
-    },
-    {
-        "_comment": "=== IMAGE TEXT WITH CHART: 棒グラフ（単一系列） ===",
-        "type": "imageText",
-        "title": "棒グラフ（単一系列）",
-        "image": {
-            "chartType": "bar",
-            "data": {
-                "title": "部門別スコア",
-                "subtitle": "満足度調査結果",
-                "source": "社内調査",
-                "items": [
-                    {
-                        "label": "営業部",
-                        "value": 85
-                    },
-                    {
-                        "label": "開発部",
-                        "value": 78
-                    },
-                    {
-                        "label": "...",
-                        "value": 0
-                    },
-                    {
-                        "label": "総務部",
-                        "value": 45
-                    }
-                ],
-                "color": {
-                    "start": "#e68a9c",
-                    "end": "#9f63d0"
-                },
-                "layout": {
-                    "width": 600,
-                    "height": 450,
-                    "marginTop": 100,
-                    "marginBottom": 65,
-                    "marginLeft": 70,
-                    "marginRight": 40
-                },
-                "barOptions": {
-                    "barToSlotRatio": 0.6
-                },
-                "yAxis": {
-                    "max": 100,
-                    "min": 0,
-                    "tickCount": 4,
-                    "unit": "%"
                 }
-            }
+            },
+            "imagePosition": "left",
+            "points": [
+                "シンプルな縦棒グラフ",
+                "省略表現にも対応",
+                "Y軸に単位表示可能"
+            ]
         },
-        "imagePosition": "left",
-        "points": [
-            "シンプルな縦棒グラフ",
-            "省略表現にも対応",
-            "Y軸に単位表示可能"
-        ]
-    },
-    {
-        "_comment": "=== IMAGE TEXT WITH CHART: 積み上げ棒グラフ ===",
-        "type": "imageText",
-        "title": "積み上げ棒グラフ",
-        "image": {
-            "chartType": "stacked-bar",
-            "data": {
-                "title": "カテゴリ別売上構成",
-                "subtitle": "（月別推移）",
-                "source": "社内データ",
-                "yAxisUnitLabel": "（万円）",
-                "colors": [
-                    {
-                        "id": "A",
-                        "start": "#e68a9c",
-                        "end": "#d96d8f"
+        {
+            "_comment": "=== IMAGE TEXT WITH CHART: 積み上げ棒グラフ ===",
+            "type": "imageText",
+            "title": "積み上げ棒グラフ",
+            "image": {
+                "chartType": "stacked-bar",
+                "data": {
+                    "title": "カテゴリ別売上構成",
+                    "subtitle": "（月別推移）",
+                    "source": "社内データ",
+                    "yAxisUnitLabel": "（万円）",
+                    "colors": [
+                        {
+                            "id": "A",
+                            "start": "#e68a9c",
+                            "end": "#d96d8f"
+                        },
+                        {
+                            "id": "B",
+                            "start": "#b469b8",
+                            "end": "#a656ad"
+                        },
+                        {
+                            "id": "C",
+                            "start": "#9f63d0",
+                            "end": "#8c4fc8"
+                        }
+                    ],
+                    "legendLabels": [
+                        "製品A",
+                        "製品B",
+                        "製品C"
+                    ],
+                    "barData": [
+                        {
+                            "label": "4月",
+                            "values": [
+                                60,
+                                40,
+                                30
+                            ]
+                        },
+                        {
+                            "label": "5月",
+                            "values": [
+                                70,
+                                45,
+                                35
+                            ]
+                        },
+                        {
+                            "label": "6月",
+                            "values": [
+                                80,
+                                50,
+                                40
+                            ]
+                        },
+                        {
+                            "label": "7月",
+                            "values": [
+                                75,
+                                55,
+                                45
+                            ]
+                        }
+                    ],
+                    "layout": {
+                        "width": 600,
+                        "height": 550,
+                        "marginTop": 170,
+                        "marginBottom": 50,
+                        "marginLeft": 75,
+                        "marginRight": 50
                     },
-                    {
-                        "id": "B",
-                        "start": "#b469b8",
-                        "end": "#a656ad"
+                    "barOptions": {
+                        "width": 50,
+                        "cornerRadius": 4,
+                        "totalLabelOffset": 10
                     },
-                    {
-                        "id": "C",
-                        "start": "#9f63d0",
-                        "end": "#8c4fc8"
+                    "yAxis": {
+                        "max": 200,
+                        "tickCount": 4
                     }
-                ],
-                "legendLabels": [
-                    "製品A",
-                    "製品B",
-                    "製品C"
-                ],
-                "barData": [
-                    {
-                        "label": "4月",
-                        "values": [
-                            60,
-                            40,
-                            30
-                        ]
-                    },
-                    {
-                        "label": "5月",
-                        "values": [
-                            70,
-                            45,
-                            35
-                        ]
-                    },
-                    {
-                        "label": "6月",
-                        "values": [
-                            80,
-                            50,
-                            40
-                        ]
-                    },
-                    {
-                        "label": "7月",
-                        "values": [
-                            75,
-                            55,
-                            45
-                        ]
-                    }
-                ],
-                "layout": {
-                    "width": 600,
-                    "height": 550,
-                    "marginTop": 170,
-                    "marginBottom": 50,
-                    "marginLeft": 75,
-                    "marginRight": 50
-                },
-                "barOptions": {
-                    "width": 50,
-                    "cornerRadius": 4,
-                    "totalLabelOffset": 10
-                },
-                "yAxis": {
-                    "max": 200,
-                    "tickCount": 4
                 }
-            }
+            },
+            "points": [
+                "絶対値の積み上げ表示",
+                "合計値を棒の上に表示",
+                "最大5系列を推奨"
+            ]
         },
-        "points": [
-            "絶対値の積み上げ表示",
-            "合計値を棒の上に表示",
-            "最大5系列を推奨"
-        ]
-    },
-    {
-        "_comment": "=== IMAGE TEXT WITH CHART: 100%積み上げ棒グラフ ===",
-        "type": "imageText",
-        "title": "100%積み上げ棒グラフ",
-        "image": {
-            "chartType": "100-stacked-bar",
-            "data": {
-                "title": "年代別利用端末",
-                "subtitle": "（構成比）",
-                "source": "利用者調査",
-                "colors": [
-                    {
-                        "id": "A",
-                        "start": "#e68a9c",
-                        "end": "#d96d8f"
+        {
+            "_comment": "=== IMAGE TEXT WITH CHART: 100%積み上げ棒グラフ ===",
+            "type": "imageText",
+            "title": "100%積み上げ棒グラフ",
+            "image": {
+                "chartType": "100-stacked-bar",
+                "data": {
+                    "title": "年代別利用端末",
+                    "subtitle": "（構成比）",
+                    "source": "利用者調査",
+                    "colors": [
+                        {
+                            "id": "A",
+                            "start": "#e68a9c",
+                            "end": "#d96d8f"
+                        },
+                        {
+                            "id": "B",
+                            "start": "#b469b8",
+                            "end": "#a656ad"
+                        },
+                        {
+                            "id": "C",
+                            "start": "#7c6ce8",
+                            "end": "#6b5ce0"
+                        }
+                    ],
+                    "legendLabels": [
+                        "スマートフォン",
+                        "タブレット",
+                        "PC"
+                    ],
+                    "barData": [
+                        {
+                            "label": "10代",
+                            "values": [
+                                70,
+                                10,
+                                20
+                            ]
+                        },
+                        {
+                            "label": "20代",
+                            "values": [
+                                60,
+                                15,
+                                25
+                            ]
+                        },
+                        {
+                            "label": "30代",
+                            "values": [
+                                50,
+                                20,
+                                30
+                            ]
+                        },
+                        {
+                            "label": "40代",
+                            "values": [
+                                40,
+                                25,
+                                35
+                            ]
+                        },
+                        {
+                            "label": "50代",
+                            "values": [
+                                30,
+                                20,
+                                50
+                            ]
+                        }
+                    ],
+                    "layout": {
+                        "width": 600,
+                        "height": 510,
+                        "marginTop": 150,
+                        "marginBottom": 80,
+                        "marginLeft": 70,
+                        "marginRight": 25
                     },
-                    {
-                        "id": "B",
-                        "start": "#b469b8",
-                        "end": "#a656ad"
+                    "barOptions": {
+                        "width": 50,
+                        "cornerRadius": 4
                     },
-                    {
-                        "id": "C",
-                        "start": "#7c6ce8",
-                        "end": "#6b5ce0"
+                    "yAxis": {
+                        "tickCount": 4
                     }
-                ],
-                "legendLabels": [
-                    "スマートフォン",
-                    "タブレット",
-                    "PC"
-                ],
-                "barData": [
-                    {
-                        "label": "10代",
-                        "values": [
-                            70,
-                            10,
-                            20
-                        ]
-                    },
-                    {
-                        "label": "20代",
-                        "values": [
-                            60,
-                            15,
-                            25
-                        ]
-                    },
-                    {
-                        "label": "30代",
-                        "values": [
-                            50,
-                            20,
-                            30
-                        ]
-                    },
-                    {
-                        "label": "40代",
-                        "values": [
-                            40,
-                            25,
-                            35
-                        ]
-                    },
-                    {
-                        "label": "50代",
-                        "values": [
-                            30,
-                            20,
-                            50
-                        ]
-                    }
-                ],
-                "layout": {
-                    "width": 600,
-                    "height": 510,
-                    "marginTop": 150,
-                    "marginBottom": 80,
-                    "marginLeft": 70,
-                    "marginRight": 25
-                },
-                "barOptions": {
-                    "width": 50,
-                    "cornerRadius": 4
-                },
-                "yAxis": {
-                    "tickCount": 4
                 }
-            }
+            },
+            "imagePosition": "right",
+            "points": [
+                "構成比を100%で正規化",
+                "比率の比較に最適",
+                "自動でパーセント計算"
+            ]
         },
-        "imagePosition": "right",
-        "points": [
-            "構成比を100%で正規化",
-            "比率の比較に最適",
-            "自動でパーセント計算"
-        ]
-    },
-    {
-        "_comment": "=== IMAGE TEXT WITH CHART: 複合グラフ ===",
-        "type": "imageText",
-        "title": "複合グラフ（棒+折れ線）",
-        "image": {
-            "chartType": "combo",
-            "data": {
-                "title": "売上と利益率の推移",
-                "subtitle": "（月別データ）",
-                "source": "財務データ",
-                "legendBarLabel": "売上高",
-                "legendLineLabel": "利益率",
-                "yAxisLeftLabel": "（万円）",
-                "yAxisRightLabel": "（%）",
-                "colors": {
-                    "bar": {
-                        "start": "#e68a9c",
-                        "end": "#b469b8"
+        {
+            "_comment": "=== IMAGE TEXT WITH CHART: 複合グラフ ===",
+            "type": "imageText",
+            "title": "複合グラフ（棒+折れ線）",
+            "image": {
+                "chartType": "combo",
+                "data": {
+                    "title": "売上と利益率の推移",
+                    "subtitle": "（月別データ）",
+                    "source": "財務データ",
+                    "legendBarLabel": "売上高",
+                    "legendLineLabel": "利益率",
+                    "yAxisLeftLabel": "（万円）",
+                    "yAxisRightLabel": "（%）",
+                    "colors": {
+                        "bar": {
+                            "start": "#e68a9c",
+                            "end": "#b469b8"
+                        },
+                        "line": "#6b5ce0"
                     },
-                    "line": "#6b5ce0"
-                },
-                "items": [
-                    {
-                        "label": "4月",
-                        "barValue": 1200,
-                        "lineValue": 12
+                    "items": [
+                        {
+                            "label": "4月",
+                            "barValue": 1200,
+                            "lineValue": 12
+                        },
+                        {
+                            "label": "5月",
+                            "barValue": 1350,
+                            "lineValue": 14
+                        },
+                        {
+                            "label": "6月",
+                            "barValue": 1500,
+                            "lineValue": 15
+                        },
+                        {
+                            "label": "7月",
+                            "barValue": 1420,
+                            "lineValue": 13
+                        },
+                        {
+                            "label": "8月",
+                            "barValue": 1600,
+                            "lineValue": 16
+                        }
+                    ],
+                    "layout": {
+                        "width": 600,
+                        "height": 510,
+                        "marginTop": 180,
+                        "marginBottom": 50,
+                        "marginLeft": 70,
+                        "marginRight": 70
                     },
-                    {
-                        "label": "5月",
-                        "barValue": 1350,
-                        "lineValue": 14
+                    "barOptions": {
+                        "barToSlotRatio": 0.55,
+                        "labelPosition": "auto"
                     },
-                    {
-                        "label": "6月",
-                        "barValue": 1500,
-                        "lineValue": 15
+                    "lineOptions": {
+                        "markerRadius": 5
                     },
-                    {
-                        "label": "7月",
-                        "barValue": 1420,
-                        "lineValue": 13
+                    "yAxisLeft": {
+                        "max": 2000,
+                        "min": 0,
+                        "tickCount": 4
                     },
-                    {
-                        "label": "8月",
-                        "barValue": 1600,
-                        "lineValue": 16
+                    "yAxisRight": {
+                        "max": 20,
+                        "min": 10,
+                        "tickCount": 4,
+                        "unit": "%"
                     }
-                ],
-                "layout": {
-                    "width": 600,
-                    "height": 510,
-                    "marginTop": 180,
-                    "marginBottom": 50,
-                    "marginLeft": 70,
-                    "marginRight": 70
-                },
-                "barOptions": {
-                    "barToSlotRatio": 0.55,
-                    "labelPosition": "auto"
-                },
-                "lineOptions": {
-                    "markerRadius": 5
-                },
-                "yAxisLeft": {
-                    "max": 2000,
-                    "min": 0,
-                    "tickCount": 4
-                },
-                "yAxisRight": {
-                    "max": 20,
-                    "min": 10,
-                    "tickCount": 4,
-                    "unit": "%"
                 }
-            }
+            },
+            "points": [
+                "2つの異なる指標を同時表示",
+                "左右に独立したY軸",
+                "棒と折れ線の組み合わせ"
+            ],
+            "notes": "売上高を棒グラフ、利益率を折れ線グラフで同時に表示しています。"
         },
-        "points": [
-            "2つの異なる指標を同時表示",
-            "左右に独立したY軸",
-            "棒と折れ線の組み合わせ"
-        ],
-        "notes": "売上高を棒グラフ、利益率を折れ線グラフで同時に表示しています。"
-    },
-    {
-        "_comment": "=== CLOSING SLIDE ===",
-        "type": "closing",
-        "notes": "ご清聴ありがとうございました。ご質問があればお気軽にどうぞ。"
-    }
-]
+        {
+            "_comment": "=== CLOSING SLIDE ===",
+            "type": "closing",
+            "notes": "ご清聴ありがとうございました。ご質問があればお気軽にどうぞ。"
+        }
+    ]
+}

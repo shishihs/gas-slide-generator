@@ -2,7 +2,6 @@
 import { ISlideGenerator } from '../../../domain/services/ISlideGenerator';
 import { LayoutManager } from '../../../common/utils/LayoutManager';
 import { SlideTheme } from '../../../common/config/SlideTheme';
-import { DEFAULT_THEME } from '../../../common/config/DefaultTheme';
 import {
     insertImageFromUrlOrFileId,
     setStyledText,
@@ -94,7 +93,7 @@ export class GasSectionSlideGenerator implements ISlideGenerator {
                 bold: true,
                 align: SlidesApp.ParagraphAlignment.CENTER,
                 fontType: 'large'
-            });
+            }, theme);
         }
 
         addFooter(slide, layout, pageNum, settings, this.creditImageBlob);

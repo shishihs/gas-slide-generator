@@ -1,11 +1,11 @@
 import { IDiagramRenderer } from './IDiagramRenderer';
 import { LayoutManager } from '../../../../common/utils/LayoutManager';
-import { DEFAULT_THEME } from '../../../../common/config/DefaultTheme';
 import { setStyledText } from '../../../../common/utils/SlideUtils';
 import { generateTimelineCardColors } from '../../../../common/utils/ColorUtils';
 
 export class TimelineDiagramRenderer implements IDiagramRenderer {
     render(slide: GoogleAppsScript.Slides.Slide, data: any, area: any, settings: any, layout: LayoutManager): void {
+        const theme = layout.getTheme();
         const milestones = data.milestones || data.items || [];
         if (!milestones.length) return;
 
@@ -16,7 +16,7 @@ export class TimelineDiagramRenderer implements IDiagramRenderer {
 
         // Draw Line (Minimalist thin dark line)
         const line = slide.insertLine(SlidesApp.LineCategory.STRAIGHT, leftX, baseY, rightX, baseY);
-        line.getLineFill().setSolidFill(DEFAULT_THEME.colors.neutralGray); // Darker than faintGray for contrast
+        line.getLineFill().setSolidFill(theme.colors.neutralGray); // Darker than faintGray for contrast
         line.setWeight(1); // Thin line
 
         const dotR = layout.pxToPt(8); // Slightly smaller precise dot
@@ -35,13 +35,13 @@ export class TimelineDiagramRenderer implements IDiagramRenderer {
             // 1. Dot on Axis (Anchor)
             const dot = slide.insertShape(SlidesApp.ShapeType.ELLIPSE, x - dotR / 2, baseY - dotR / 2, dotR, dotR);
             dot.getFill().setSolidFill('#FFFFFF'); // White center
-            dot.getBorder().getLineFill().setSolidFill(settings.primaryColor || DEFAULT_THEME.colors.primary); // Use settings color if available
+            dot.getBorder().getLineFill().setSolidFill(settings.primaryColor || theme.colors.primary); // Use settings color if available
             dot.getBorder().setWeight(2);
 
             // 2. Vertical Connector (Shorter and clearer)
             // Draws from axis up to the bottom of the date box
             const connector = slide.insertLine(SlidesApp.LineCategory.STRAIGHT, x, baseY - connectorH, x, baseY - dotR / 2);
-            connector.getLineFill().setSolidFill(settings.primaryColor || DEFAULT_THEME.colors.primary);
+            connector.getLineFill().setSolidFill(settings.primaryColor || theme.colors.primary);
             connector.setWeight(1.5); // Increased weight for better visibility
 
             // Calculate positions for Date and Label (both above the axis)
@@ -55,9 +55,9 @@ export class TimelineDiagramRenderer implements IDiagramRenderer {
             setStyledText(dateShape, String(m.date || ''), {
                 size: 12,
                 bold: true,
-                color: settings.primaryColor || DEFAULT_THEME.colors.primary,
+                color: settings.primaryColor || theme.colors.primary,
                 align: SlidesApp.ParagraphAlignment.CENTER
-            });
+            }, theme);
             try { dateShape.setContentAlignment(SlidesApp.ContentAlignment.BOTTOM); } catch (e) { }
 
             // 4. Label Text (Immediately above Date)
@@ -72,9 +72,9 @@ export class TimelineDiagramRenderer implements IDiagramRenderer {
 
             setStyledText(labelShape, labelText, {
                 size: bodyFontSize,
-                color: DEFAULT_THEME.colors.textPrimary, // Stark Black/Gray
+                color: theme.colors.textPrimary, // Stark Black/Gray
                 align: SlidesApp.ParagraphAlignment.CENTER
-            });
+            }, theme);
             try {
                 dateShape.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
                 labelShape.setContentAlignment(SlidesApp.ContentAlignment.BOTTOM);

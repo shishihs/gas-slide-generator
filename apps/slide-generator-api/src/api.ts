@@ -32,12 +32,27 @@ export function generateSlides(data: any): SlideGenerationResponse {
     try {
         Logger.log('Library Call: generateSlides with data: ' + JSON.stringify(data));
 
+        // Flexibly handle input: Root object with 'slides' or direct array
+        let slides = data.slides;
+        let theme = data.theme;
+
+        if (Array.isArray(data)) {
+            slides = data;
+        }
+
+        if (!Array.isArray(slides)) {
+            throw new Error("Invalid input: 'slides' must be an array.");
+        }
+
         const request: CreatePresentationRequest = {
             title: data.title || '無題のプレゼンテーション',
             templateId: data.templateId, // Optional ID for template
             destinationId: data.destinationId, // Optional ID for existing destination
-            settings: data.settings,
-            slides: data.slides.map((s: any) => ({
+            settings: {
+                ...(data.settings || {}),
+                theme: theme || (data.settings && data.settings.theme)
+            },
+            slides: slides.map((s: any) => ({
                 ...s, // Spread all valid properties from source
                 title: s.title,
                 subtitle: s.subtitle || s.subhead, // Handle alias if inconsistent

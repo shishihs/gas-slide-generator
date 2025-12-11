@@ -7,7 +7,7 @@ import { GasTitleSlideGenerator } from '../infrastructure/gas/generators/GasTitl
 import { GasSectionSlideGenerator } from '../infrastructure/gas/generators/GasSectionSlideGenerator';
 import { GasContentSlideGenerator } from '../infrastructure/gas/generators/GasContentSlideGenerator';
 import { LayoutManager } from '../common/utils/LayoutManager';
-import { DEFAULT_THEME } from '../common/config/DefaultTheme';
+import { DEFAULT_THEME, AVAILABLE_THEMES } from '../common/config/DefaultTheme';
 
 // --- MOCK GLOBALS ---
 (global as any).SlidesApp = {
@@ -39,7 +39,13 @@ import { DEFAULT_THEME } from '../common/config/DefaultTheme';
 // Load Data
 const jsonPath = path.resolve(__dirname, '../test-data/comprehensive-test.json');
 const rawData = fs.readFileSync(jsonPath, 'utf8');
-const slideDataList = JSON.parse(rawData);
+let slideDataList = JSON.parse(rawData);
+let themeName = 'Green';
+
+if (!Array.isArray(slideDataList) && slideDataList.slides) {
+    themeName = slideDataList.theme || themeName;
+    slideDataList = slideDataList.slides;
+}
 
 // Generators
 const titleGenerator = new GasTitleSlideGenerator(null);
@@ -47,10 +53,13 @@ const sectionGenerator = new GasSectionSlideGenerator(null);
 const contentGenerator = new GasContentSlideGenerator(null);
 const diagramGenerator = new GasDiagramSlideGenerator(null);
 
-const layout = new LayoutManager(960, 540, DEFAULT_THEME);
+const selectedTheme = AVAILABLE_THEMES[themeName] || DEFAULT_THEME;
+console.log(`Using Theme: ${themeName}`);
+
+const layout = new LayoutManager(960, 540, selectedTheme);
 const settings = {
-    primaryColor: '#4285F4',
-    secondaryColor: '#EA4335',
+    primaryColor: selectedTheme.colors.primary,
+    secondaryColor: selectedTheme.colors.deepPrimary,
     fonts: { body: 'Arial' }
 };
 

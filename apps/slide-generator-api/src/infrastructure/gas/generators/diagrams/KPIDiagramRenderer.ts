@@ -1,10 +1,10 @@
 import { IDiagramRenderer } from './IDiagramRenderer';
 import { LayoutManager } from '../../../../common/utils/LayoutManager';
-import { DEFAULT_THEME } from '../../../../common/config/DefaultTheme';
 import { setStyledText } from '../../../../common/utils/SlideUtils';
 
 export class KPIDiagramRenderer implements IDiagramRenderer {
     render(slide: GoogleAppsScript.Slides.Slide, data: any, area: any, settings: any, layout: LayoutManager): void {
+        const theme = layout.getTheme();
         const items = data.items || [];
         if (!items.length) return;
 
@@ -26,7 +26,7 @@ export class KPIDiagramRenderer implements IDiagramRenderer {
                 const lineY = y + (cardH - lineH) / 2;
                 const lineX = x - gap / 2;
                 const line = slide.insertLine(SlidesApp.LineCategory.STRAIGHT, lineX, lineY, lineX, lineY + lineH);
-                line.getLineFill().setSolidFill(DEFAULT_THEME.colors.ghostGray);
+                line.getLineFill().setSolidFill(theme.colors.ghostGray);
                 line.setWeight(1);
             }
 
@@ -39,10 +39,10 @@ export class KPIDiagramRenderer implements IDiagramRenderer {
             const labelBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x, y + layout.pxToPt(5), cardW, labelH);
             setStyledText(labelBox, (item.label || 'METRIC').toUpperCase(), {
                 size: 11, // Slightly smaller
-                color: DEFAULT_THEME.colors.neutralGray,
+                color: theme.colors.neutralGray,
                 align: SlidesApp.ParagraphAlignment.CENTER,
                 bold: true
-            });
+            }, theme);
             try { labelBox.setContentAlignment(SlidesApp.ContentAlignment.BOTTOM); } catch (e) { }
 
             // Value (Dominant element) - Immediately below label
@@ -61,7 +61,7 @@ export class KPIDiagramRenderer implements IDiagramRenderer {
                 color: settings.primaryColor,
                 align: SlidesApp.ParagraphAlignment.CENTER,
                 fontType: 'lato'
-            });
+            }, theme);
             try { valueBox.setContentAlignment(SlidesApp.ContentAlignment.TOP); } catch (e) { }
 
             // Change/Status (Bottom)
@@ -69,7 +69,7 @@ export class KPIDiagramRenderer implements IDiagramRenderer {
                 const statusH = layout.pxToPt(30);
                 const statusBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x, y + labelH + valueH, cardW, statusH);
 
-                let color = DEFAULT_THEME.colors.neutralGray;
+                let color = theme.colors.neutralGray;
                 let prefix = '';
                 if (item.status === 'good') { color = '#2E7D32'; prefix = '↑ '; } // Darker green for pro look
                 if (item.status === 'bad') { color = '#C62828'; prefix = '↓ '; }  // Darker red
@@ -79,7 +79,7 @@ export class KPIDiagramRenderer implements IDiagramRenderer {
                     bold: true,
                     color: color,
                     align: SlidesApp.ParagraphAlignment.CENTER
-                });
+                }, theme);
             }
         });
     }

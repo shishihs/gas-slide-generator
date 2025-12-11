@@ -1,11 +1,11 @@
 import { IDiagramRenderer } from './IDiagramRenderer';
 import { LayoutManager } from '../../../../common/utils/LayoutManager';
-import { DEFAULT_THEME } from '../../../../common/config/DefaultTheme';
 import { setStyledText } from '../../../../common/utils/SlideUtils';
 import { generateCompareColors } from '../../../../common/utils/ColorUtils';
 
 export class ComparisonDiagramRenderer implements IDiagramRenderer {
     render(slide: GoogleAppsScript.Slides.Slide, data: any, area: any, settings: any, layout: LayoutManager): void {
+        const theme = layout.getTheme();
         const leftTitle = data.leftTitle || 'プランA';
         const rightTitle = data.rightTitle || 'プランB';
         const leftItems = data.leftItems || [];
@@ -35,9 +35,9 @@ export class ComparisonDiagramRenderer implements IDiagramRenderer {
             setStyledText(titleBox, title, {
                 size: 28, // Even Larger
                 bold: true,
-                color: DEFAULT_THEME.colors.textPrimary,
+                color: theme.colors.textPrimary,
                 align: SlidesApp.ParagraphAlignment.START
-            });
+            }, theme);
 
             // 3. Items list
             // Bring closer to title
@@ -47,7 +47,7 @@ export class ComparisonDiagramRenderer implements IDiagramRenderer {
                 // Minimal Dot - Align with text top approx
                 const bulletSize = layout.pxToPt(6);
                 const bullet = slide.insertShape(SlidesApp.ShapeType.ELLIPSE, x, currentY + layout.pxToPt(7), bulletSize, bulletSize);
-                bullet.getFill().setSolidFill(DEFAULT_THEME.colors.neutralGray);
+                bullet.getFill().setSolidFill(theme.colors.neutralGray);
                 bullet.getBorder().setTransparent();
 
                 // Text - Closer to bullet
@@ -60,9 +60,9 @@ export class ComparisonDiagramRenderer implements IDiagramRenderer {
                 const textBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, textX, currentY, textW, itemH);
                 setStyledText(textBox, itemText, {
                     size: 16,
-                    color: DEFAULT_THEME.colors.textPrimary,
+                    color: theme.colors.textPrimary,
                     align: SlidesApp.ParagraphAlignment.START
-                });
+                }, theme);
                 try { textBox.setContentAlignment(SlidesApp.ContentAlignment.TOP); } catch (e) { }
 
                 currentY += layout.pxToPt(25) + itemSpacing;
@@ -77,7 +77,7 @@ export class ComparisonDiagramRenderer implements IDiagramRenderer {
         const sepY = area.top + layout.pxToPt(20);
         const sepH = area.height - layout.pxToPt(40);
         const sepLine = slide.insertLine(SlidesApp.LineCategory.STRAIGHT, centerX, sepY, centerX, sepY + sepH);
-        sepLine.getLineFill().setSolidFill(DEFAULT_THEME.colors.ghostGray);
+        sepLine.getLineFill().setSolidFill(theme.colors.ghostGray);
         sepLine.setWeight(1);
     }
 }

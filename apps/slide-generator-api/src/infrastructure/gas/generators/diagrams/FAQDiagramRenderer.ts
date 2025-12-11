@@ -1,10 +1,10 @@
 import { IDiagramRenderer } from './IDiagramRenderer';
 import { LayoutManager } from '../../../../common/utils/LayoutManager';
-import { DEFAULT_THEME } from '../../../../common/config/DefaultTheme';
 import { setStyledText } from '../../../../common/utils/SlideUtils';
 
 export class FAQDiagramRenderer implements IDiagramRenderer {
     render(slide: GoogleAppsScript.Slides.Slide, data: any, area: any, settings: any, layout: LayoutManager): void {
+        const theme = layout.getTheme();
         const items = data.items || data.points || [];
         // Support points as strings ("Q:...", "A:...") or objects
         const parsedItems: any[] = [];
@@ -32,23 +32,23 @@ export class FAQDiagramRenderer implements IDiagramRenderer {
 
             // Q Indicator (Small bold accent)
             const qInd = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, area.left, y, layout.pxToPt(30), layout.pxToPt(30));
-            setStyledText(qInd, 'Q.', { size: 16, bold: true, color: settings.primaryColor });
+            setStyledText(qInd, 'Q.', { size: 16, bold: true, color: settings.primaryColor }, theme);
 
             // Q Content - Closer to Q.
             const qBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, area.left + layout.pxToPt(30), y, area.width - layout.pxToPt(30), layout.pxToPt(40));
-            setStyledText(qBox, qStr, { size: 14, bold: true, color: DEFAULT_THEME.colors.textPrimary });
+            setStyledText(qBox, qStr, { size: 14, bold: true, color: theme.colors.textPrimary }, theme);
 
             // A Indicator (Gray)
             // Positioned below Q - Closer
             const aY = y + layout.pxToPt(30);
             const aInd = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, area.left, aY, layout.pxToPt(30), layout.pxToPt(30));
-            setStyledText(aInd, 'A.', { size: 16, bold: true, color: DEFAULT_THEME.colors.neutralGray });
+            setStyledText(aInd, 'A.', { size: 16, bold: true, color: theme.colors.neutralGray }, theme);
 
             // A Content - Closer to A.
             const aBoxHasHeight = itemH - layout.pxToPt(40);
             if (aBoxHasHeight > 10) {
                 const aBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, area.left + layout.pxToPt(30), aY, area.width - layout.pxToPt(30), aBoxHasHeight);
-                setStyledText(aBox, aStr, { size: 12, color: DEFAULT_THEME.colors.textPrimary });
+                setStyledText(aBox, aStr, { size: 12, color: theme.colors.textPrimary }, theme);
                 try { aBox.setContentAlignment(SlidesApp.ContentAlignment.TOP); } catch (e) { }
             }
 
@@ -56,7 +56,7 @@ export class FAQDiagramRenderer implements IDiagramRenderer {
             if (i < parsedItems.length - 1) {
                 const lineY = y + itemH + gap / 2;
                 const line = slide.insertLine(SlidesApp.LineCategory.STRAIGHT, area.left, lineY, area.left + area.width, lineY);
-                line.getLineFill().setSolidFill(DEFAULT_THEME.colors.ghostGray);
+                line.getLineFill().setSolidFill(theme.colors.ghostGray);
                 line.setWeight(0.5);
             }
         });

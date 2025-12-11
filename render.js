@@ -193,7 +193,12 @@ function parseMarkdown(text) {
 // Init
 window.onload = () => {
     if (typeof mockData !== 'undefined') {
-        renderSlides(mockData);
+        // Handle New Object Format or Legacy Array
+        let slides = mockData;
+        if (!Array.isArray(mockData)) {
+            slides = mockData.slides || [];
+        }
+        renderSlides(slides);
     } else {
         console.error('No mockData found');
     }

@@ -1,10 +1,10 @@
 import { IDiagramRenderer } from './IDiagramRenderer';
 import { LayoutManager } from '../../../../common/utils/LayoutManager';
-import { DEFAULT_THEME } from '../../../../common/config/DefaultTheme';
 import { setStyledText } from '../../../../common/utils/SlideUtils';
 
 export class StepUpDiagramRenderer implements IDiagramRenderer {
     render(slide: GoogleAppsScript.Slides.Slide, data: any, area: any, settings: any, layout: LayoutManager): void {
+        const theme = layout.getTheme();
         const items = data.items || [];
         if (!items.length) return;
         const count = items.length;
@@ -51,12 +51,12 @@ export class StepUpDiagramRenderer implements IDiagramRenderer {
                 bold: true,
                 color: settings.primaryColor,
                 align: SlidesApp.ParagraphAlignment.START
-            });
+            }, theme);
             try { numBox.setContentAlignment(SlidesApp.ContentAlignment.BOTTOM); } catch (e) { }
 
             // Vertical dotted line to ground (Anchor)
             const dropLine = slide.insertLine(SlidesApp.LineCategory.STRAIGHT, x, y + layout.pxToPt(2), x, area.top + area.height);
-            dropLine.getLineFill().setSolidFill(DEFAULT_THEME.colors.ghostGray);
+            dropLine.getLineFill().setSolidFill(theme.colors.ghostGray);
             dropLine.setDashStyle(SlidesApp.DashStyle.DOT);
             dropLine.setWeight(1);
 
@@ -77,8 +77,8 @@ export class StepUpDiagramRenderer implements IDiagramRenderer {
             setStyledText(textBox, `${title.toUpperCase()}`, {
                 size: 14,
                 bold: true,
-                color: DEFAULT_THEME.colors.textPrimary
-            });
+                color: theme.colors.textPrimary
+            }, theme);
             try { textBox.setContentAlignment(SlidesApp.ContentAlignment.TOP); } catch (e) { }
 
             // Desc
@@ -86,8 +86,8 @@ export class StepUpDiagramRenderer implements IDiagramRenderer {
                 const descBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x, titleContentY + titleHeight, stepWidth + gap / 2, textH - titleHeight);
                 setStyledText(descBox, desc, {
                     size: 12,
-                    color: DEFAULT_THEME.colors.textSmallFont
-                });
+                    color: theme.colors.textSmallFont
+                }, theme);
                 try { descBox.setContentAlignment(SlidesApp.ContentAlignment.TOP); } catch (e) { }
             }
         });

@@ -1,11 +1,11 @@
 import { IDiagramRenderer } from './IDiagramRenderer';
 import { LayoutManager } from '../../../../common/utils/LayoutManager';
-import { DEFAULT_THEME } from '../../../../common/config/DefaultTheme';
 import { setStyledText } from '../../../../common/utils/SlideUtils';
 import { generatePyramidColors } from '../../../../common/utils/ColorUtils';
 
 export class PyramidDiagramRenderer implements IDiagramRenderer {
     render(slide: GoogleAppsScript.Slides.Slide, data: any, area: any, settings: any, layout: LayoutManager): void {
+        const theme = layout.getTheme();
 
         const levels = data.levels || data.items || [];
         if (!levels.length) return;
@@ -39,7 +39,7 @@ export class PyramidDiagramRenderer implements IDiagramRenderer {
                 bold: true,
                 color: settings.primaryColor,
                 align: SlidesApp.ParagraphAlignment.END // Right align number towards content
-            });
+            }, theme);
             try { numBox.setContentAlignment(SlidesApp.ContentAlignment.TOP); } catch (e) { }
 
             // 2. Separator line (vertical accent)
@@ -47,7 +47,7 @@ export class PyramidDiagramRenderer implements IDiagramRenderer {
             const lineX = startX + numW + layout.pxToPt(10);
             // Height: connect visually but leave breathing room
             const line = slide.insertLine(SlidesApp.LineCategory.STRAIGHT, lineX, y + layout.pxToPt(5), lineX, y + levelHeight - layout.pxToPt(5));
-            line.getLineFill().setSolidFill(DEFAULT_THEME.colors.ghostGray);
+            line.getLineFill().setSolidFill(theme.colors.ghostGray);
             line.setWeight(1);
 
             // 3. Content
@@ -63,18 +63,18 @@ export class PyramidDiagramRenderer implements IDiagramRenderer {
             setStyledText(titleBox, levelTitle.toUpperCase(), {
                 size: 14,
                 bold: true,
-                color: DEFAULT_THEME.colors.textPrimary,
+                color: theme.colors.textPrimary,
                 align: SlidesApp.ParagraphAlignment.START
-            });
+            }, theme);
 
             // Description - Closer to title
             if (levelDesc) {
                 const descBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, contentX, y + titleH, textW, levelHeight - titleH);
                 setStyledText(descBox, levelDesc, {
                     size: 12,
-                    color: DEFAULT_THEME.colors.neutralGray,
+                    color: theme.colors.neutralGray,
                     align: SlidesApp.ParagraphAlignment.START
-                });
+                }, theme);
                 try { descBox.setContentAlignment(SlidesApp.ContentAlignment.TOP); } catch (e) { }
             }
         });

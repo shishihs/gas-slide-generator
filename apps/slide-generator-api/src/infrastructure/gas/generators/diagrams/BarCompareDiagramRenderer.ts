@@ -1,11 +1,11 @@
 import { IDiagramRenderer } from './IDiagramRenderer';
 import { LayoutManager } from '../../../../common/utils/LayoutManager';
-import { DEFAULT_THEME } from '../../../../common/config/DefaultTheme';
 import { setStyledText } from '../../../../common/utils/SlideUtils';
 import { generateCompareColors } from '../../../../common/utils/ColorUtils';
 
 export class BarCompareDiagramRenderer implements IDiagramRenderer {
     render(slide: GoogleAppsScript.Slides.Slide, data: any, area: any, settings: any, layout: LayoutManager): void {
+        const theme = layout.getTheme();
         const leftTitle = data.leftTitle || '導入前';
         const rightTitle = data.rightTitle || '導入後';
         const stats = data.stats || [];
@@ -48,8 +48,8 @@ export class BarCompareDiagramRenderer implements IDiagramRenderer {
                 size: 14,
                 bold: true,
                 align: SlidesApp.ParagraphAlignment.START,
-                color: DEFAULT_THEME.colors.textPrimary
-            });
+                color: theme.colors.textPrimary
+            }, theme);
             try { labelShape.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
 
             // Bar Area
@@ -65,11 +65,11 @@ export class BarCompareDiagramRenderer implements IDiagramRenderer {
             const leftBarW = (leftNum / maxValue) * maxBarWidth;
             if (leftBarW > 0) {
                 const b = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, barLeft, barY, leftBarW, barHeight);
-                b.getFill().setSolidFill(DEFAULT_THEME.colors.neutralGray);
+                b.getFill().setSolidFill(theme.colors.neutralGray);
                 b.getBorder().setTransparent();
                 // Value Text inside or end? End looks cleaner.
                 const v = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, barLeft + leftBarW + layout.pxToPt(5), barY - layout.pxToPt(2), layout.pxToPt(60), barHeight + layout.pxToPt(5));
-                setStyledText(v, leftValue, { size: 10, color: DEFAULT_THEME.colors.neutralGray });
+                setStyledText(v, leftValue, { size: 10, color: theme.colors.neutralGray }, theme);
             }
 
             // Right (After) - Color, Slightly Thicker/Same
@@ -80,7 +80,7 @@ export class BarCompareDiagramRenderer implements IDiagramRenderer {
                 b.getFill().setSolidFill(settings.primaryColor);
                 b.getBorder().setTransparent();
                 const v = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, barLeft + rightBarW + layout.pxToPt(5), barY + barHeight + barGap - layout.pxToPt(2), layout.pxToPt(60), barHeight + layout.pxToPt(5));
-                setStyledText(v, rightValue, { size: 10, bold: true, color: settings.primaryColor });
+                setStyledText(v, rightValue, { size: 10, bold: true, color: settings.primaryColor }, theme);
             }
 
             // Trend Arrow on far right (Text only, no ball)
@@ -95,7 +95,7 @@ export class BarCompareDiagramRenderer implements IDiagramRenderer {
                     bold: true,
                     color: color,
                     align: SlidesApp.ParagraphAlignment.CENTER
-                });
+                }, theme);
                 try { trendShape.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
             }
 
@@ -103,7 +103,7 @@ export class BarCompareDiagramRenderer implements IDiagramRenderer {
             if (index < stats.length - 1) {
                 const lineY = currentY + rowHeight;
                 const line = slide.insertLine(SlidesApp.LineCategory.STRAIGHT, area.left, lineY, area.left + area.width, lineY);
-                line.getLineFill().setSolidFill(DEFAULT_THEME.colors.ghostGray);
+                line.getLineFill().setSolidFill(theme.colors.ghostGray);
                 line.setWeight(0.5); // Very thin
             }
 

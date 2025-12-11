@@ -65,7 +65,7 @@ export function setBulletsWithInlineStyles(shape: GoogleAppsScript.Slides.Shape,
     }, theme);
     try {
         tr.getParagraphs().forEach(p => {
-            p.getRange().getParagraphStyle().setLineSpacing(100).setSpaceBelow(6);
+            p.getRange().getParagraphStyle().setLineSpacing(130).setSpaceBelow(12);
         });
     } catch (e) { }
     applyStyleRanges(tr, ranges);

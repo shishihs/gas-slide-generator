@@ -67,50 +67,44 @@ var global = this;
     },
     fonts: {
       // Noto Sans JP is good, but let's assume we can use different weights via styles
-      family: "Noto Sans JP",
+      family: "Meiryo UI",
       sizes: {
         title: 48,
-        // Larger title
         date: 14,
         sectionTitle: 52,
-        // Very large section title
         contentTitle: 28,
-        // Clear hierarchy
-        subhead: 18,
-        body: 16,
-        // Readable body text
-        footer: 10,
+        subhead: 20,
+        // Increased visibility
+        body: 18,
+        // "18pt minimum" rule
+        footer: 11,
         chip: 12,
-        laneTitle: 14,
-        small: 11,
+        laneTitle: 16,
+        small: 12,
         processStep: 16,
         axis: 12,
         ghostNum: 250
-        // Massive background number
       }
     },
     colors: {
-      primary: "#4A6C42",
-      // Deep Olive - Sophisticated, trustworthy, organic
-      deepPrimary: "#2E3A45",
-      // Slate Charcoal - For strong contrast
-      textPrimary: "#212121",
-      // Almost black
-      textSmallFont: "#424242",
+      primary: "#0F4C81",
+      // Trustworthy Blue - Professional, intellectual, reliable
+      deepPrimary: "#0A3B66",
+      // Darker Navy
+      textPrimary: "#333333",
+      // Soft Black - better readability than pure black
+      textSmallFont: "#555555",
       backgroundWhite: "#FFFFFF",
       cardBg: "#FFFFFF",
-      // Clean white cards
-      backgroundGray: "#F8F9FA",
-      // Very subtle gray
-      faintGray: "#F8F9FA",
+      backgroundGray: "#F4F5F7",
+      // Cooler gray
+      faintGray: "#F4F5F7",
       ghostGray: "#E0E0E0",
-      // For subtle background elements
       tableHeaderBg: "#E0E0E0",
-      // Neutral header
       laneBorder: "#EEEEEE",
-      cardBorder: "#E0E0E0",
+      cardBorder: "#DDDDDD",
       neutralGray: "#9E9E9E",
-      processArrow: "#4A6C42"
+      processArrow: "#0F4C81"
     },
     diagram: {
       laneGapPx: 30,
@@ -627,7 +621,7 @@ var global = this;
     }, theme);
     try {
       tr.getParagraphs().forEach((p) => {
-        p.getRange().getParagraphStyle().setLineSpacing(100).setSpaceBelow(6);
+        p.getRange().getParagraphStyle().setLineSpacing(130).setSpaceBelow(12);
       });
     } catch (e) {
     }
@@ -2346,12 +2340,15 @@ ${desc}`, {
         generatedGroup = newElements[0];
       }
       if (generatedGroup) {
-        const currentWidth = generatedGroup.getWidth();
-        const currentHeight = generatedGroup.getHeight();
-        const centerX = workArea.left + (workArea.width - currentWidth) / 2;
-        const centerY = workArea.top + (workArea.height - currentHeight) / 2;
-        generatedGroup.setLeft(centerX);
-        generatedGroup.setTop(centerY);
+        const groupWidth = generatedGroup.getWidth();
+        const groupHeight = generatedGroup.getHeight();
+        const workAreaCenterX = workArea.left + workArea.width / 2;
+        const workAreaCenterY = workArea.top + workArea.height / 2;
+        const newLeft = workAreaCenterX - groupWidth / 2;
+        const newTop = workAreaCenterY - groupHeight / 2;
+        generatedGroup.setLeft(newLeft);
+        generatedGroup.setTop(newTop);
+        Logger.log(`Centered Group: left=${newLeft}, top=${newTop} (Area Center: ${workAreaCenterX}, ${workAreaCenterY})`);
       }
       addFooter(slide, layout, pageNum, settings, this.creditImageBlob);
     }

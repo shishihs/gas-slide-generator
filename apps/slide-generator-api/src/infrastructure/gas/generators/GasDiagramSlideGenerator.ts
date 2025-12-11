@@ -125,14 +125,22 @@ export class GasDiagramSlideGenerator implements ISlideGenerator {
 
         // Center the generated content within the work area
         if (generatedGroup) {
-            const currentWidth = generatedGroup.getWidth();
-            const currentHeight = generatedGroup.getHeight();
+            // Force Update of the group dimensions after creation
+            const groupWidth = generatedGroup.getWidth();
+            const groupHeight = generatedGroup.getHeight();
 
-            const centerX = workArea.left + (workArea.width - currentWidth) / 2;
-            const centerY = workArea.top + (workArea.height - currentHeight) / 2;
+            // Calculate center of the Work Area
+            const workAreaCenterX = workArea.left + (workArea.width / 2);
+            const workAreaCenterY = workArea.top + (workArea.height / 2);
 
-            generatedGroup.setLeft(centerX);
-            generatedGroup.setTop(centerY);
+            // Calculate new Top/Left for the Group to align centers
+            const newLeft = workAreaCenterX - (groupWidth / 2);
+            const newTop = workAreaCenterY - (groupHeight / 2);
+
+            generatedGroup.setLeft(newLeft);
+            generatedGroup.setTop(newTop);
+
+            Logger.log(`Centered Group: left=${newLeft}, top=${newTop} (Area Center: ${workAreaCenterX}, ${workAreaCenterY})`);
         }
 
         addFooter(slide, layout, pageNum, settings, this.creditImageBlob);

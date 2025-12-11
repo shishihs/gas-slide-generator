@@ -1087,6 +1087,128 @@ var global = this;
     }
   });
 
+  // src/infrastructure/gas/generators/diagrams/CardsDiagramRenderer.ts
+  var CardsDiagramRenderer;
+  var init_CardsDiagramRenderer = __esm({
+    "src/infrastructure/gas/generators/diagrams/CardsDiagramRenderer.ts"() {
+      init_DefaultTheme();
+      init_SlideUtils();
+      CardsDiagramRenderer = class {
+        render(slide, data, area, settings, layout) {
+          const items = data.items || [];
+          if (!items.length) return;
+          const type = (data.type || "").toLowerCase();
+          const hasHeader = type.includes("headercards");
+          const cols = data.columns || Math.min(items.length, 3);
+          const rows = Math.ceil(items.length / cols);
+          const gap = layout.pxToPt(30);
+          const cardW = (area.width - gap * (cols - 1)) / cols;
+          const cardH = (area.height - gap * (rows - 1)) / rows;
+          items.forEach((item, i) => {
+            const r = Math.floor(i / cols);
+            const c = i % cols;
+            const x = area.left + c * (cardW + gap);
+            const y = area.top + r * (cardH + gap);
+            let title = "";
+            let desc = "";
+            if (typeof item === "string") {
+              const lines = item.split("\n");
+              title = lines[0] || "";
+              desc = lines.slice(1).join("\n") || "";
+            } else {
+              title = item.title || item.label || "";
+              desc = item.desc || item.description || item.text || "";
+            }
+            if (hasHeader) {
+              const barH = layout.pxToPt(4);
+              const bar = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, x, y, cardW, barH);
+              bar.getFill().setSolidFill(settings.primaryColor);
+              bar.getBorder().setTransparent();
+              const numStr = String(i + 1).padStart(2, "0");
+              const numBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x, y + layout.pxToPt(10), cardW, layout.pxToPt(20));
+              setStyledText(numBox, numStr, {
+                size: 14,
+                bold: true,
+                color: DEFAULT_THEME.colors.neutralGray,
+                // Subtle gray
+                align: SlidesApp.ParagraphAlignment.END
+              });
+              const titleTop = y + layout.pxToPt(10);
+              const titleH = layout.pxToPt(40);
+              const titleBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x, titleTop, cardW, titleH);
+              setStyledText(titleBox, title, {
+                size: 18,
+                bold: true,
+                color: DEFAULT_THEME.colors.textPrimary,
+                align: SlidesApp.ParagraphAlignment.START
+              });
+              try {
+                titleBox.setContentAlignment(SlidesApp.ContentAlignment.TOP);
+              } catch (e) {
+              }
+              const descTop = titleTop + titleH + layout.pxToPt(5);
+              const descH = cardH - (descTop - y);
+              if (descH > 20) {
+                const descBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x, descTop, cardW, descH);
+                setStyledText(descBox, desc, {
+                  size: 13,
+                  color: typeof DEFAULT_THEME.colors.textSmallFont === "string" ? DEFAULT_THEME.colors.textSmallFont : "#424242",
+                  align: SlidesApp.ParagraphAlignment.START
+                });
+                try {
+                  descBox.setContentAlignment(SlidesApp.ContentAlignment.TOP);
+                } catch (e) {
+                }
+              }
+            } else {
+              const dotSize = layout.pxToPt(6);
+              const dot = slide.insertShape(SlidesApp.ShapeType.ELLIPSE, x, y + layout.pxToPt(9), dotSize, dotSize);
+              dot.getFill().setSolidFill(settings.primaryColor);
+              dot.getBorder().setTransparent();
+              const contentX = x + dotSize + layout.pxToPt(12);
+              const contentW = cardW - (dotSize + layout.pxToPt(12));
+              const titleH = layout.pxToPt(30);
+              const titleBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, contentX, y, contentW, titleH);
+              setStyledText(titleBox, title, {
+                size: 16,
+                bold: true,
+                color: DEFAULT_THEME.colors.textPrimary,
+                align: SlidesApp.ParagraphAlignment.START
+              });
+              const descTop = y + titleH;
+              const descH = cardH - titleH;
+              if (descH > 20) {
+                const descBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, contentX, descTop, contentW, descH);
+                setStyledText(descBox, desc, {
+                  size: 13,
+                  color: typeof DEFAULT_THEME.colors.textSmallFont === "string" ? DEFAULT_THEME.colors.textSmallFont : "#424242",
+                  align: SlidesApp.ParagraphAlignment.START
+                });
+              }
+            }
+          });
+        }
+      };
+    }
+  });
+
+  // src/infrastructure/gas/generators/diagrams/DiagramRendererFactory.ts
+  var DiagramRendererFactory;
+  var init_DiagramRendererFactory = __esm({
+    "src/infrastructure/gas/generators/diagrams/DiagramRendererFactory.ts"() {
+      init_CardsDiagramRenderer();
+      DiagramRendererFactory = class {
+        static getRenderer(type) {
+          const normalizedType = type.toLowerCase();
+          if (normalizedType.includes("cards") || normalizedType.includes("headercards")) {
+            return new CardsDiagramRenderer();
+          }
+          return null;
+        }
+      };
+    }
+  });
+
   // src/infrastructure/gas/generators/GasDiagramSlideGenerator.ts
   var GasDiagramSlideGenerator;
   var init_GasDiagramSlideGenerator = __esm({
@@ -1094,6 +1216,7 @@ var global = this;
       init_DefaultTheme();
       init_SlideUtils();
       init_ColorUtils();
+      init_DiagramRendererFactory();
       GasDiagramSlideGenerator = class {
         constructor(creditImageBlob) {
           this.creditImageBlob = creditImageBlob;
@@ -1145,7 +1268,10 @@ var global = this;
           }
           const elementsBefore = slide.getPageElements().map((e) => e.getObjectId());
           try {
-            if (type.includes("timeline")) {
+            const renderer = DiagramRendererFactory.getRenderer(type);
+            if (renderer) {
+              renderer.render(slide, data, workArea, settings, layout);
+            } else if (type.includes("timeline")) {
               this.drawTimeline(slide, data, workArea, settings, layout);
             } else if (type.includes("process")) {
               this.drawProcess(slide, data, workArea, settings, layout);
@@ -1167,8 +1293,6 @@ var global = this;
               this.drawFlowChart(slide, data, workArea, settings, layout);
             } else if (type.includes("diagram")) {
               this.drawLanes(slide, data, workArea, settings, layout);
-            } else if (type.includes("cards") || type.includes("headercards")) {
-              this.drawCards(slide, data, workArea, settings, layout);
             } else if (type.includes("kpi")) {
               this.drawKPI(slide, data, workArea, settings, layout);
             } else if (type.includes("table")) {
@@ -1904,100 +2028,6 @@ ${desc}`, {
               const line = slide.insertLine(SlidesApp.LineCategory.STRAIGHT, ax, ay, bx, by);
               line.setEndArrow(SlidesApp.ArrowStyle.FILL_ARROW);
               line.getLineFill().setSolidFill(DEFAULT_THEME.colors.neutralGray);
-            }
-          });
-        }
-        drawCards(slide, data, area, settings, layout) {
-          const items = data.items || [];
-          if (!items.length) return;
-          const type = (data.type || "").toLowerCase();
-          const hasHeader = type.includes("headercards");
-          const cols = data.columns || Math.min(items.length, 3);
-          const rows = Math.ceil(items.length / cols);
-          const gap = layout.pxToPt(30);
-          const cardW = (area.width - gap * (cols - 1)) / cols;
-          const cardH = (area.height - gap * (rows - 1)) / rows;
-          items.forEach((item, i) => {
-            const r = Math.floor(i / cols);
-            const c = i % cols;
-            const x = area.left + c * (cardW + gap);
-            const y = area.top + r * (cardH + gap);
-            let title = "";
-            let desc = "";
-            if (typeof item === "string") {
-              const lines = item.split("\n");
-              title = lines[0] || "";
-              desc = lines.slice(1).join("\n") || "";
-            } else {
-              title = item.title || item.label || "";
-              desc = item.desc || item.description || item.text || "";
-            }
-            if (hasHeader) {
-              const barH = layout.pxToPt(4);
-              const bar = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, x, y, cardW, barH);
-              bar.getFill().setSolidFill(settings.primaryColor);
-              bar.getBorder().setTransparent();
-              const numStr = String(i + 1).padStart(2, "0");
-              const numBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x, y + layout.pxToPt(10), cardW, layout.pxToPt(20));
-              setStyledText(numBox, numStr, {
-                size: 14,
-                bold: true,
-                color: DEFAULT_THEME.colors.neutralGray,
-                // Subtle gray
-                align: SlidesApp.ParagraphAlignment.END
-              });
-              const titleTop = y + layout.pxToPt(10);
-              const titleH = layout.pxToPt(40);
-              const titleBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x, titleTop, cardW, titleH);
-              setStyledText(titleBox, title, {
-                size: 18,
-                bold: true,
-                color: DEFAULT_THEME.colors.textPrimary,
-                align: SlidesApp.ParagraphAlignment.START
-              });
-              try {
-                titleBox.setContentAlignment(SlidesApp.ContentAlignment.TOP);
-              } catch (e) {
-              }
-              const descTop = titleTop + titleH + layout.pxToPt(5);
-              const descH = cardH - (descTop - y);
-              if (descH > 20) {
-                const descBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x, descTop, cardW, descH);
-                setStyledText(descBox, desc, {
-                  size: 13,
-                  color: typeof DEFAULT_THEME.colors.textSmallFont === "string" ? DEFAULT_THEME.colors.textSmallFont : "#424242",
-                  align: SlidesApp.ParagraphAlignment.START
-                });
-                try {
-                  descBox.setContentAlignment(SlidesApp.ContentAlignment.TOP);
-                } catch (e) {
-                }
-              }
-            } else {
-              const dotSize = layout.pxToPt(6);
-              const dot = slide.insertShape(SlidesApp.ShapeType.ELLIPSE, x, y + layout.pxToPt(9), dotSize, dotSize);
-              dot.getFill().setSolidFill(settings.primaryColor);
-              dot.getBorder().setTransparent();
-              const contentX = x + dotSize + layout.pxToPt(12);
-              const contentW = cardW - (dotSize + layout.pxToPt(12));
-              const titleH = layout.pxToPt(30);
-              const titleBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, contentX, y, contentW, titleH);
-              setStyledText(titleBox, title, {
-                size: 16,
-                bold: true,
-                color: DEFAULT_THEME.colors.textPrimary,
-                align: SlidesApp.ParagraphAlignment.START
-              });
-              const descTop = y + titleH;
-              const descH = cardH - titleH;
-              if (descH > 20) {
-                const descBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, contentX, descTop, contentW, descH);
-                setStyledText(descBox, desc, {
-                  size: 13,
-                  color: typeof DEFAULT_THEME.colors.textSmallFont === "string" ? DEFAULT_THEME.colors.textSmallFont : "#424242",
-                  align: SlidesApp.ParagraphAlignment.START
-                });
-              }
             }
           });
         }

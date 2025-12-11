@@ -67,7 +67,7 @@ var global = this;
     },
     fonts: {
       // Noto Sans JP is good, but let's assume we can use different weights via styles
-      family: "Meiryo UI",
+      family: "Noto Sans JP",
       sizes: {
         title: 48,
         date: 14,
@@ -387,7 +387,9 @@ var global = this;
       if (titlePlaceholder) {
         if (data.title) {
           try {
-            titlePlaceholder.asShape().getText().setText(data.title);
+            const textRange = titlePlaceholder.asShape().getText();
+            textRange.setText(data.title);
+            textRange.getTextStyle().setBold(true);
           } catch (e) {
             Logger.log(`Warning: Title placeholder found but text could not be set. ${e}`);
           }
@@ -966,7 +968,9 @@ var global = this;
       const titlePlaceholder = slide.getPlaceholder(SlidesApp.PlaceholderType.TITLE) || slide.getPlaceholder(SlidesApp.PlaceholderType.CENTERED_TITLE);
       if (titlePlaceholder) {
         try {
-          titlePlaceholder.asShape().getText().setText(data.title || "");
+          const textRange = titlePlaceholder.asShape().getText();
+          textRange.setText(data.title || "");
+          textRange.getTextStyle().setBold(true);
         } catch (e) {
           Logger.log(`Warning: Section Title placeholder found but text could not be set. ${e}`);
         }
@@ -993,7 +997,9 @@ var global = this;
       if (titlePlaceholder) {
         if (data.title) {
           try {
-            titlePlaceholder.asShape().getText().setText(data.title);
+            const textRange = titlePlaceholder.asShape().getText();
+            textRange.setText(data.title);
+            textRange.getTextStyle().setBold(true);
           } catch (e) {
             Logger.log(`Warning: Content Title placeholder found but text could not be set. ${e}`);
           }
@@ -2267,7 +2273,9 @@ ${desc}`, {
       const titlePlaceholder = slide.getPlaceholder(SlidesApp.PlaceholderType.TITLE) || slide.getPlaceholder(SlidesApp.PlaceholderType.CENTERED_TITLE);
       if (titlePlaceholder) {
         try {
-          titlePlaceholder.asShape().getText().setText(data.title || "");
+          const textRange = titlePlaceholder.asShape().getText();
+          textRange.setText(data.title || "");
+          textRange.getTextStyle().setBold(true);
         } catch (e) {
           Logger.log(`Warning: Title placeholder found but text could not be set. ${e}`);
         }

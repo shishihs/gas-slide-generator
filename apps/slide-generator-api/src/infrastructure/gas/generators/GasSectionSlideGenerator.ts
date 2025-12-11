@@ -76,7 +76,9 @@ export class GasSectionSlideGenerator implements ISlideGenerator {
         const titlePlaceholder = slide.getPlaceholder(SlidesApp.PlaceholderType.TITLE) || slide.getPlaceholder(SlidesApp.PlaceholderType.CENTERED_TITLE);
         if (titlePlaceholder) {
             try {
-                titlePlaceholder.asShape().getText().setText(data.title || '');
+                const textRange = titlePlaceholder.asShape().getText();
+                textRange.setText(data.title || '');
+                textRange.getTextStyle().setBold(true);
             } catch (e) {
                 Logger.log(`Warning: Section Title placeholder found but text could not be set. ${e}`);
             }

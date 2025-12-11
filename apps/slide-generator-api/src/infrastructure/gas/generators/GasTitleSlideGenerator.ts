@@ -20,7 +20,9 @@ export class GasTitleSlideGenerator implements ISlideGenerator {
         if (titlePlaceholder) {
             if (data.title) {
                 try {
-                    titlePlaceholder.asShape().getText().setText(data.title);
+                    const textRange = titlePlaceholder.asShape().getText();
+                    textRange.setText(data.title);
+                    textRange.getTextStyle().setBold(true);
                 } catch (e) {
                     Logger.log(`Warning: Title placeholder found but text could not be set. ${e}`);
                 }

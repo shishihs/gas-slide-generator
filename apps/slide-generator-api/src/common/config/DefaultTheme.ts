@@ -201,7 +201,7 @@ export const DEFAULT_THEME: SlideTheme = {
     },
     fonts: {
         // Noto Sans JP is good, but let's assume we can use different weights via styles
-        family: "Meiryo UI",
+        family: "Noto Sans JP",
         sizes: {
             title: 48,
             date: 14,

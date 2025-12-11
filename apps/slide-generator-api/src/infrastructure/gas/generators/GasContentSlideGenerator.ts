@@ -29,7 +29,9 @@ export class GasContentSlideGenerator implements ISlideGenerator {
             if (data.title) {
                 // Using simple setText to respect template style
                 try {
-                    titlePlaceholder.asShape().getText().setText(data.title);
+                    const textRange = titlePlaceholder.asShape().getText();
+                    textRange.setText(data.title);
+                    textRange.getTextStyle().setBold(true);
                 } catch (e) {
                     Logger.log(`Warning: Content Title placeholder found but text could not be set. ${e}`);
                 }

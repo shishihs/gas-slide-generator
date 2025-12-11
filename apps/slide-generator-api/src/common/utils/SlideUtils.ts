@@ -184,8 +184,9 @@ function applyStyleRanges(textRange: GoogleAppsScript.Slides.TextRange, ranges: 
 
 
 export function insertImageFromUrlOrFileId(urlOrFileId: string): GoogleAppsScript.Base.BlobSource | null {
-    if (!urlOrFileId) return null;
+    if (!urlOrFileId || typeof urlOrFileId !== 'string') return null;
     function extractFileIdFromUrl(url: string) {
+        if (!url || typeof url !== 'string') return null;
         const patterns = [
             /\/file\/d\/([a-zA-Z0-9_-]+)/,
             /id=([a-zA-Z0-9_-]+).*file/,

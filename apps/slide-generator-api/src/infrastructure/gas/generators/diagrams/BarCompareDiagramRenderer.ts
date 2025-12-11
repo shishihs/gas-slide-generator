@@ -42,55 +42,66 @@ export class BarCompareDiagramRenderer implements IDiagramRenderer {
             const leftNum = parseFloat(String(leftValue).replace(/[^0-9.]/g, '')) || 0;
             const rightNum = parseFloat(String(rightValue).replace(/[^0-9.]/g, '')) || 0;
 
-            // Label
+            // Label (Left Column)
             const labelShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, area.left, currentY, labelColW, rowHeight);
-            setStyledText(labelShape, label, { size: DEFAULT_THEME.fonts.sizes.body, bold: true, align: SlidesApp.ParagraphAlignment.START });
+            setStyledText(labelShape, label, {
+                size: 14,
+                bold: true,
+                align: SlidesApp.ParagraphAlignment.START,
+                color: DEFAULT_THEME.colors.textPrimary
+            });
             try { labelShape.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
 
-            // Bar area
-            const barLeft = area.left + labelColW;
-            const barTop = currentY + (rowHeight - (barHeight * 2 + barGap)) / 2;
+            // Bar Area
+            const barLeft = area.left + labelColW + layout.pxToPt(20);
+            const maxBarWidth = area.width - (labelColW + layout.pxToPt(80)); // Leave room on right for diff
 
-            // Left bar (Before)
-            const leftBarWidth = (leftNum / maxValue) * barAreaW;
-            if (leftBarWidth > 0) {
-                const leftBar = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, barLeft, barTop, leftBarWidth, barHeight);
-                leftBar.getFill().setSolidFill(compareColors.left);
-                leftBar.getBorder().setTransparent();
+            const barY = currentY + (rowHeight - (barHeight * 2 + barGap * 2)) / 2;
+
+            // Minimal Bars
+            // Left (Before) - Gray, Thin
+            const leftBarW = (leftNum / maxValue) * maxBarWidth;
+            if (leftBarW > 0) {
+                const b = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, barLeft, barY, leftBarW, barHeight);
+                b.getFill().setSolidFill(DEFAULT_THEME.colors.neutralGray);
+                b.getBorder().setTransparent();
+                // Value Text inside or end? End looks cleaner.
+                const v = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, barLeft + leftBarW + layout.pxToPt(5), barY - layout.pxToPt(2), layout.pxToPt(60), barHeight + layout.pxToPt(5));
+                setStyledText(v, leftValue, { size: 10, color: DEFAULT_THEME.colors.neutralGray });
             }
-            // Left label
-            const leftLabel = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, barLeft + leftBarWidth + layout.pxToPt(5), barTop, layout.pxToPt(60), barHeight);
-            setStyledText(leftLabel, leftValue, { size: 10, color: compareColors.left });
 
-            // Right bar (After)
-            const rightBarWidth = (rightNum / maxValue) * barAreaW;
-            if (rightBarWidth > 0) {
-                const rightBar = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, barLeft, barTop + barHeight + barGap, rightBarWidth, barHeight);
-                rightBar.getFill().setSolidFill(compareColors.right);
-                rightBar.getBorder().setTransparent();
+            // Right (After) - Color, Slightly Thicker/Same
+            const rightBarW = (rightNum / maxValue) * maxBarWidth;
+            if (rightBarW > 0) {
+                const b = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, barLeft, barY + barHeight + barGap, rightBarW, barHeight);
+                b.getFill().setSolidFill(settings.primaryColor);
+                b.getBorder().setTransparent();
+                const v = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, barLeft + rightBarW + layout.pxToPt(5), barY + barHeight + barGap - layout.pxToPt(2), layout.pxToPt(60), barHeight + layout.pxToPt(5));
+                setStyledText(v, rightValue, { size: 10, bold: true, color: settings.primaryColor });
             }
-            // Right label
-            const rightLabel = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, barLeft + rightBarWidth + layout.pxToPt(5), barTop + barHeight + barGap, layout.pxToPt(60), barHeight);
-            setStyledText(rightLabel, rightValue, { size: 10, color: compareColors.right });
 
-            // Trend indicator (optional)
+            // Trend Arrow on far right (Text only, no ball)
             if (trend) {
-                const trendX = area.left + area.width - trendColW;
-                const trendShape = slide.insertShape(SlidesApp.ShapeType.ELLIPSE, trendX, currentY + rowHeight / 2 - layout.pxToPt(12), layout.pxToPt(24), layout.pxToPt(24));
+                const trendX = area.left + area.width - layout.pxToPt(40);
                 const isUp = trend.toLowerCase() === 'up';
-                const trendColor = isUp ? '#28a745' : '#dc3545';
-                trendShape.getFill().setSolidFill(trendColor);
-                trendShape.getBorder().setTransparent();
-                setStyledText(trendShape, isUp ? '↑' : '↓', { size: 12, color: '#FFFFFF', bold: true, align: SlidesApp.ParagraphAlignment.CENTER });
+                const trendShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, trendX, currentY, layout.pxToPt(40), rowHeight);
+                const color = isUp ? '#2E7D32' : '#C62828';
+                const sym = isUp ? '↑' : '↓';
+                setStyledText(trendShape, sym, {
+                    size: 20,
+                    bold: true,
+                    color: color,
+                    align: SlidesApp.ParagraphAlignment.CENTER
+                });
                 try { trendShape.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
             }
 
-            // Separator line
+            // Separator line (clean divider)
             if (index < stats.length - 1) {
                 const lineY = currentY + rowHeight;
                 const line = slide.insertLine(SlidesApp.LineCategory.STRAIGHT, area.left, lineY, area.left + area.width, lineY);
-                line.getLineFill().setSolidFill(DEFAULT_THEME.colors.faintGray);
-                line.setWeight(1);
+                line.getLineFill().setSolidFill(DEFAULT_THEME.colors.ghostGray);
+                line.setWeight(0.5); // Very thin
             }
 
             currentY += rowHeight;

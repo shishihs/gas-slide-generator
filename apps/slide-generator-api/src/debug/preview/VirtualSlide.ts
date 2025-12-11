@@ -3,8 +3,30 @@ export class VirtualSlide {
     public elements: any[] = [];
     public width = 960;
     public height = 540;
+    public background = { color: '#ffffff' };
 
     constructor() { }
+
+    getBackground() {
+        return {
+            setSolidFill: (hex: string) => this.background.color = hex
+        };
+    }
+
+    insertImage(blob: any) {
+        // Mock image insertion - treating it like a rect for now
+        const shape = new VirtualShape('IMAGE', 0, 0, 100, 100);
+        this.elements.push(shape);
+        return {
+            getWidth: () => shape.width,
+            getHeight: () => shape.height,
+            setWidth: (w: number) => { shape.width = w; return this; },
+            setHeight: (h: number) => { shape.height = h; return this; },
+            setLeft: (l: number) => { shape.left = l; return this; },
+            setTop: (t: number) => { shape.top = t; return this; },
+            remove: () => { this.elements = this.elements.filter(e => e !== shape); }
+        };
+    }
 
     insertLine(type: any, x1: number, y1: number, x2: number, y2: number) {
         const line = new VirtualLine(x1, y1, x2, y2);
@@ -16,6 +38,12 @@ export class VirtualSlide {
         const shape = new VirtualShape(type, left, top, width, height);
         this.elements.push(shape);
         return shape;
+    }
+
+    insertTable(rows: number, cols: number) {
+        const table = new VirtualTable(rows, cols);
+        this.elements.push(table);
+        return table;
     }
 
     getPlaceholder(type: any) {
@@ -162,6 +190,10 @@ export class VirtualShape extends VirtualElement {
     constructor(type: string, left: number, top: number, width: number, height: number) {
         super(left, top, width, height);
         this.type = String(type);
+        if (this.type === 'TEXT_BOX') {
+            this.fillColor = 'TRANSPARENT';
+            this.borderColor = 'TRANSPARENT';
+        }
     }
 
     getFill() {
@@ -211,4 +243,82 @@ export class VirtualShape extends VirtualElement {
 
     getPlaceholderType() { return this.placeholderType; }
     asShape() { return this; }
+}
+
+export class VirtualTable extends VirtualElement {
+    rows: number;
+    cols: number;
+    cells: VirtualCell[][];
+
+    constructor(rows: number, cols: number) {
+        super(0, 0, 100, 100);
+        this.rows = rows;
+        this.cols = cols;
+        this.cells = [];
+        for (let r = 0; r < rows; r++) {
+            const rowArr = [];
+            for (let c = 0; c < cols; c++) {
+                rowArr.push(new VirtualCell());
+            }
+            this.cells.push(rowArr);
+        }
+    }
+
+    getCell(r: number, c: number) {
+        return this.cells[r][c];
+    }
+}
+
+export class VirtualCell {
+    text = '';
+    fillColor = 'TRANSPARENT';
+    borders = {
+        top: new VirtualBorder(),
+        bottom: new VirtualBorder(),
+        left: new VirtualBorder(),
+        right: new VirtualBorder()
+    };
+    textStyle: any = { size: 10, color: '#000000', bold: false, align: 'LEFT', family: 'Arial' };
+    contentAlignment = 'TOP';
+
+    getText() {
+        return {
+            setText: (t: string) => this.text = t,
+            getTextStyle: () => this.getTextStyleMock()
+        };
+    }
+
+    private getTextStyleMock() {
+        const mock = {
+            setFontSize: (s: number) => { this.textStyle.size = s; return mock; },
+            setForegroundColor: (c: string) => { this.textStyle.color = c; return mock; },
+            setBold: (b: boolean) => { this.textStyle.bold = b; return mock; },
+            setFontFamily: (f: string) => { this.textStyle.family = f; return mock; },
+        };
+        return mock;
+    }
+
+    getFill() {
+        return {
+            setSolidFill: (hex: string) => this.fillColor = hex,
+            setTransparent: () => this.fillColor = 'TRANSPARENT'
+        };
+    }
+
+    getBorderTop() { return this.borders.top; }
+    getBorderBottom() { return this.borders.bottom; }
+    getBorderLeft() { return this.borders.left; }
+    getBorderRight() { return this.borders.right; }
+
+    setContentAlignment(a: any) { this.contentAlignment = String(a); }
+}
+
+export class VirtualBorder {
+    color = '#000000';
+    weight = 1;
+    isVisible = true;
+
+    setSolidFill(hex: string) { this.color = hex; this.isVisible = true; }
+    setTransparent() { this.isVisible = false; }
+    setWeight(w: number) { this.weight = w; }
 }

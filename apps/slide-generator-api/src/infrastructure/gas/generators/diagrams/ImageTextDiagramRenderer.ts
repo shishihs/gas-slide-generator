@@ -24,7 +24,7 @@ export class ImageTextDiagramRenderer implements IDiagramRenderer {
                 let img;
                 if (blob) {
                     img = slide.insertImage(blob);
-                } else if (imageUrl.startsWith('http')) {
+                } else if (typeof imageUrl === 'string' && imageUrl.startsWith('http')) {
                     // Fallback to URL direct insert
                     img = slide.insertImage(imageUrl);
                 }

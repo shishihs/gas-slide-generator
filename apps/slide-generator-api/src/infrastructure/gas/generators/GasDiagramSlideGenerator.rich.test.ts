@@ -2,6 +2,7 @@ import { vi, describe, it, expect, beforeEach, Mock } from 'vitest';
 import { GasDiagramSlideGenerator } from './GasDiagramSlideGenerator';
 import { DiagramRendererFactory } from './diagrams/DiagramRendererFactory';
 import { LayoutManager } from '../../../common/utils/LayoutManager';
+import { setupGasGlobals } from '../../../test/gas-mocks';
 
 // Mock Dependencies
 vi.mock('../../../common/utils/SlideUtils', () => ({
@@ -31,14 +32,8 @@ describe('GasDiagramSlideGenerator', () => {
     beforeEach(() => {
         vi.clearAllMocks();
 
-        // Mock global GAS objects
-        (global as any).SlidesApp = {
-            ShapeType: { RECTANGLE: 'RECTANGLE' } as any,
-            PlaceholderType: { TITLE: 'TITLE', CENTERED_TITLE: 'CENTERED_TITLE', BODY: 'BODY', OBJECT: 'OBJECT', PICTURE: 'PICTURE' } as any,
-            ParagraphAlignment: { START: 'START' } as any,
-            ContentAlignment: { MIDDLE: 'MIDDLE' } as any
-        } as any;
-        (global as any).Logger = { log: vi.fn() } as any;
+        // Setup Type-Safe Global Mocks
+        setupGasGlobals();
 
         // Setup Factory Mock
         mockRenderer = { render: vi.fn() };

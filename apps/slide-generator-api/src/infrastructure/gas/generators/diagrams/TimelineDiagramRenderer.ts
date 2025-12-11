@@ -14,79 +14,70 @@ export class TimelineDiagramRenderer implements IDiagramRenderer {
         const leftX = area.left + inner,
             rightX = area.left + area.width - inner;
 
-        // Draw Line
+        // Draw Line (Minimalist thin dark line)
         const line = slide.insertLine(SlidesApp.LineCategory.STRAIGHT, leftX, baseY, rightX, baseY);
-        line.getLineFill().setSolidFill(DEFAULT_THEME.colors.faintGray);
-        line.setWeight(2);
+        line.getLineFill().setSolidFill(DEFAULT_THEME.colors.neutralGray); // Darker than faintGray for contrast
+        line.setWeight(1); // Thin line
 
-        const dotR = layout.pxToPt(10);
+        const dotR = layout.pxToPt(8); // Slightly smaller precise dot
         const gap = (milestones.length > 1) ? (rightX - leftX) / (milestones.length - 1) : 0;
-        const cardW_pt = layout.pxToPt(180);
-        const vOffset = layout.pxToPt(40);
-        const headerHeight = layout.pxToPt(28);
-        const bodyHeight = layout.pxToPt(80);
+        const cardW_pt = layout.pxToPt(160); // Narrower text area
 
-        // Colors
-        const timelineColors = generateTimelineCardColors(settings.primaryColor, milestones.length);
+        // New vertical spacing parameters
+        const connectorH = layout.pxToPt(20); // Height of the vertical connector from axis to text
+        const dateHeight = layout.pxToPt(20);
+        const labelHeight = layout.pxToPt(50); // Adjusted for label text
+        const dateToLabelGap = layout.pxToPt(5); // Gap between date and label
 
         milestones.forEach((m: any, i: number) => {
             const x = leftX + gap * i;
-            const isAbove = i % 2 === 0;
-            const dateText = String(m.date || '');
-            const labelText = String(m.label || m.state || '');
 
-            const cardH_pt = headerHeight + bodyHeight;
-            const cardLeft = x - (cardW_pt / 2);
-            const cardTop = isAbove ? (baseY - vOffset - cardH_pt) : (baseY + vOffset);
-
-            // Header
-            const headerShape = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, cardLeft, cardTop, cardW_pt, headerHeight);
-            headerShape.getFill().setSolidFill(timelineColors[i]);
-            headerShape.getBorder().getLineFill().setSolidFill(timelineColors[i]);
-
-            // Body
-            const bodyShape = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, cardLeft, cardTop + headerHeight, cardW_pt, bodyHeight);
-            bodyShape.getFill().setSolidFill(DEFAULT_THEME.colors.backgroundGray);
-            bodyShape.getBorder().getLineFill().setSolidFill(DEFAULT_THEME.colors.cardBorder);
-
-            // Connector
-            const connectorY_start = isAbove ? (cardTop + cardH_pt) : baseY;
-            const connectorY_end = isAbove ? baseY : cardTop;
-            const connector = slide.insertLine(SlidesApp.LineCategory.STRAIGHT, x, connectorY_start, x, connectorY_end);
-            connector.getLineFill().setSolidFill(DEFAULT_THEME.colors.neutralGray);
-            connector.setWeight(1);
-
-            // Dot
+            // 1. Dot on Axis (Anchor)
             const dot = slide.insertShape(SlidesApp.ShapeType.ELLIPSE, x - dotR / 2, baseY - dotR / 2, dotR, dotR);
-            dot.getFill().setSolidFill(timelineColors[i]);
-            dot.getBorder().setTransparent();
+            dot.getFill().setSolidFill('#FFFFFF'); // White center
+            dot.getBorder().getLineFill().setSolidFill(settings.primaryColor || DEFAULT_THEME.colors.primary); // Use settings color if available
+            dot.getBorder().setWeight(2);
 
-            // Header Text
-            const headerTextShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, cardLeft, cardTop, cardW_pt, headerHeight);
-            setStyledText(headerTextShape, dateText, {
-                size: DEFAULT_THEME.fonts.sizes.body,
+            // 2. Vertical Connector (Shorter and clearer)
+            // Draws from axis up to the bottom of the date box
+            const connector = slide.insertLine(SlidesApp.LineCategory.STRAIGHT, x, baseY - connectorH, x, baseY - dotR / 2);
+            connector.getLineFill().setSolidFill(settings.primaryColor || DEFAULT_THEME.colors.primary);
+            connector.setWeight(1.5); // Increased weight for better visibility
+
+            // Calculate positions for Date and Label (both above the axis)
+            const dateTop = baseY - connectorH - dateHeight;
+            const labelTop = dateTop - labelHeight - dateToLabelGap;
+
+            // 3. Date Text (Closest to axis anchor)
+            const dateShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x - cardW_pt / 2, dateTop, cardW_pt, dateHeight);
+            dateShape.getFill().setTransparent();
+            dateShape.getBorder().setTransparent();
+            setStyledText(dateShape, String(m.date || ''), {
+                size: 12,
                 bold: true,
-                color: DEFAULT_THEME.colors.backgroundGray,
+                color: settings.primaryColor || DEFAULT_THEME.colors.primary,
                 align: SlidesApp.ParagraphAlignment.CENTER
             });
-            try {
-                headerTextShape.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
-            } catch (e) { }
+            try { dateShape.setContentAlignment(SlidesApp.ContentAlignment.BOTTOM); } catch (e) { }
 
-            // Body Text
-            let bodyFontSize = DEFAULT_THEME.fonts.sizes.body;
-            const textLength = labelText.length;
-            if (textLength > 40) bodyFontSize = 10;
-            else if (textLength > 30) bodyFontSize = 11;
-            else if (textLength > 20) bodyFontSize = 12;
+            // 4. Label Text (Immediately above Date)
+            const labelText = String(m.label || m.state || '');
+            const labelShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x - cardW_pt / 2, labelTop, cardW_pt, labelHeight);
+            labelShape.getFill().setTransparent();
+            labelShape.getBorder().setTransparent();
 
-            const bodyTextShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, cardLeft, cardTop + headerHeight, cardW_pt, bodyHeight);
-            setStyledText(bodyTextShape, labelText, {
+            // Adjust body font size based on length
+            let bodyFontSize = 12;
+            if (labelText.length > 50) bodyFontSize = 10;
+
+            setStyledText(labelShape, labelText, {
                 size: bodyFontSize,
+                color: DEFAULT_THEME.colors.textPrimary, // Stark Black/Gray
                 align: SlidesApp.ParagraphAlignment.CENTER
             });
             try {
-                bodyTextShape.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
+                dateShape.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
+                labelShape.setContentAlignment(SlidesApp.ContentAlignment.BOTTOM);
             } catch (e) { }
         });
     }

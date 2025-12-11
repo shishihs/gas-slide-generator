@@ -38,26 +38,25 @@ export class CardsDiagramRenderer implements IDiagramRenderer {
 
             if (hasHeader) {
                 // Editorial Style: Top Bar Header
-                // Instead of a full colored box, use a sleek top accent line
                 const barH = layout.pxToPt(4);
                 const bar = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, x, y, cardW, barH);
                 bar.getFill().setSolidFill(settings.primaryColor);
                 bar.getBorder().setTransparent();
 
-                // Numbering (01, 02...) for structure
-                // Placed subtly at top right or just above title
+                // Numbering (01, 02...)
                 const numStr = String(i + 1).padStart(2, '0');
-                const numBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x, y + layout.pxToPt(10), cardW, layout.pxToPt(20));
+                // Place closer to header
+                const numBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x, y + layout.pxToPt(6), cardW, layout.pxToPt(20));
                 setStyledText(numBox, numStr, {
                     size: 14,
                     bold: true,
-                    color: DEFAULT_THEME.colors.neutralGray, // Subtle gray
+                    color: DEFAULT_THEME.colors.neutralGray,
                     align: SlidesApp.ParagraphAlignment.END
                 });
 
-                // Title - Large and bold
-                const titleTop = y + layout.pxToPt(10);
-                const titleH = layout.pxToPt(40);
+                // Title - Large and bold, closer to top
+                const titleTop = y + layout.pxToPt(6); // Aligned with num
+                const titleH = layout.pxToPt(30);
                 const titleBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x, titleTop, cardW, titleH);
                 setStyledText(titleBox, title, {
                     size: 18,
@@ -67,10 +66,9 @@ export class CardsDiagramRenderer implements IDiagramRenderer {
                 });
                 try { titleBox.setContentAlignment(SlidesApp.ContentAlignment.TOP); } catch (e) { }
 
-                // Body - Use smaller font, lighter color
-                const descTop = titleTop + titleH + layout.pxToPt(5);
+                // Body - Closer to title
+                const descTop = titleTop + titleH; // No extra gap
                 const descH = cardH - (descTop - y);
-                // Ensure descH is positive
                 if (descH > 20) {
                     const descBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x, descTop, cardW, descH);
                     setStyledText(descBox, desc, {
@@ -83,15 +81,15 @@ export class CardsDiagramRenderer implements IDiagramRenderer {
 
             } else {
                 // Minimal Card (No header bar)
-                // Use a small dot accent
                 const dotSize = layout.pxToPt(6);
-                const dot = slide.insertShape(SlidesApp.ShapeType.ELLIPSE, x, y + layout.pxToPt(11), dotSize, dotSize);
+                // Align dot with top of title text approx
+                const dot = slide.insertShape(SlidesApp.ShapeType.ELLIPSE, x, y + layout.pxToPt(8), dotSize, dotSize);
                 dot.getFill().setSolidFill(settings.primaryColor);
                 dot.getBorder().setTransparent();
 
-                // Title next to dot
-                const contentX = x + dotSize + layout.pxToPt(15);
-                const contentW = cardW - (dotSize + layout.pxToPt(15));
+                // Title closer to dot
+                const contentX = x + dotSize + layout.pxToPt(10);
+                const contentW = cardW - (dotSize + layout.pxToPt(10));
 
                 const titleH = layout.pxToPt(30);
                 const titleBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, contentX, y, contentW, titleH);
@@ -103,9 +101,9 @@ export class CardsDiagramRenderer implements IDiagramRenderer {
                 });
                 try { titleBox.setContentAlignment(SlidesApp.ContentAlignment.TOP); } catch (e) { }
 
-                // Body below
-                const descTop = y + titleH;
-                const descH = cardH - titleH;
+                // Body closer to Title
+                const descTop = y + titleH - layout.pxToPt(5); // Slight overlap to tighten visual gap
+                const descH = cardH - (descTop - y);
                 if (descH > 20) {
                     const descBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, contentX, descTop, contentW, descH);
                     setStyledText(descBox, desc, {

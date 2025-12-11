@@ -1,9 +1,18 @@
 import { vi, describe, it, expect } from 'vitest';
 import { PresentationApplicationService } from '../src/application/PresentationApplicationService';
 import { GasSlideRepository } from '../src/infrastructure/gas/GasSlideRepository';
+import { setupGasGlobals } from '../src/test/gas-mocks';
 
-const mockSlidesApp = {
-    create: vi.fn().mockImplementation((title) => ({
+let slidesApp: any;
+let driveApp: any;
+
+beforeEach(() => {
+    const mocks = setupGasGlobals();
+    slidesApp = mocks.slidesApp;
+    driveApp = mocks.driveApp;
+
+    // Override specific behavior for integration test
+    slidesApp.create.mockImplementation((title) => ({
         getUrl: vi.fn().mockReturnValue('https://mock-slide.com'),
         getPageWidth: vi.fn().mockReturnValue(960),
         getPageHeight: vi.fn().mockReturnValue(540),
@@ -73,8 +82,9 @@ const mockSlidesApp = {
                 })
             })
         }))
-    })),
-    openById: vi.fn().mockImplementation(() => ({
+    }));
+
+    slidesApp.openById.mockImplementation(() => ({
         getUrl: vi.fn().mockReturnValue('https://template-copy.com'),
         getPageWidth: vi.fn().mockReturnValue(960),
         getPageHeight: vi.fn().mockReturnValue(540),
@@ -144,57 +154,15 @@ const mockSlidesApp = {
                 })
             })
         }))
-    })),
-    PredefinedLayout: {
-        TITLE_AND_BODY: 'TITLE_AND_BODY',
-        TITLE: 'TITLE',
-        SECTION_HEADER: 'SECTION_HEADER',
-        BLANK: 'BLANK'
-    },
-    PlaceholderType: {
-        TITLE: 'TITLE',
-        CENTERED_TITLE: 'CENTERED_TITLE',
-        SUBTITLE: 'SUBTITLE',
-        BODY: 'BODY'
-    },
-    ShapeType: {
-        TEXT_BOX: 'TEXT_BOX',
-        RECTANGLE: 'RECTANGLE',
-        ELLIPSE: 'ELLIPSE'
-    },
-    ArrowStyle: {
-        FILL_ARROW: 'FILL_ARROW'
-    },
-    LineCategory: {
-        STRAIGHT: 'STRAIGHT'
-    },
-    ParagraphAlignment: {
-        START: 'START',
-        CENTER: 'CENTER',
-        END: 'END',
-        JUSTIFIED: 'JUSTIFIED'
-    },
-    ContentAlignment: {
-        TOP: 'TOP',
-        MIDDLE: 'MIDDLE',
-        BOTTOM: 'BOTTOM'
-    }
-};
+    }));
 
-(global as any).SlidesApp = mockSlidesApp;
-
-(global as any).Logger = {
-    log: vi.fn()
-};
-
-(global as any).DriveApp = {
-    getFileById: vi.fn().mockReturnValue({
+    driveApp.getFileById.mockReturnValue({
         makeCopy: vi.fn().mockReturnValue({
             getId: vi.fn().mockReturnValue('new-copy-id')
         }),
         getBlob: vi.fn()
-    })
-};
+    });
+});
 
 describe('Integration: Application Service + Infrastructure', () => {
     it('should create blank presentation if no templateId provided', () => {

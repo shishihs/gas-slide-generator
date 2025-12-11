@@ -8,25 +8,60 @@ export class QuoteDiagramRenderer implements IDiagramRenderer {
         const text = data.text || (data.points && data.points[0]) || '';
         const author = data.author || (data.points && data.points[1]) || '';
 
-        // Background Cushion
-        const bg = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, area.left, area.top, area.width, area.height);
-        bg.getFill().setSolidFill(DEFAULT_THEME.colors.faintGray);
-        bg.getBorder().setTransparent();
 
-        // Big Quote Marks
-        const quoteMark = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, area.left, area.top - layout.pxToPt(20), layout.pxToPt(100), layout.pxToPt(100));
-        setStyledText(quoteMark, '“', { size: 120, color: DEFAULT_THEME.colors.ghostGray, font: 'Georgia' });
+        // Minimal layout: No background box
+        // Use a MASSIVE quote mark transparently in the background for impact
 
-        const contentW = area.width * 0.8;
+        // Big Quote Mark (Ghost element behind)
+        const quoteSize = layout.pxToPt(200);
+        const quoteMark = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, area.left + layout.pxToPt(20), area.top - layout.pxToPt(40), quoteSize, quoteSize);
+        setStyledText(quoteMark, '“', {
+            size: 200,
+            color: '#F0F0F0', // Very faint
+            fontType: 'georgia', // Serif
+            bold: true
+        });
+        quoteMark.sendToBack(); // Ensure it's behind
+
+        const contentW = area.width * 0.9;
         const contentX = area.left + (area.width - contentW) / 2;
+        const textTop = area.top + layout.pxToPt(60);
 
-        const quoteBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, contentX, area.top, contentW, area.height - layout.pxToPt(60));
-        setStyledText(quoteBox, text, { size: 28, bold: true, color: settings.primaryColor, align: SlidesApp.ParagraphAlignment.CENTER, font: 'Serif' }); // Usage of Serif if available, else standard
-        try { quoteBox.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
+        // Quote Text
+        // Use a nice Serif if possible, otherwise clean Sans
+        // Quote Text
+        // Use a nice Serif if possible, otherwise clean Sans
+        const quoteBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, contentX, textTop, contentW, layout.pxToPt(160)); // Reduce reserved height
+        setStyledText(quoteBox, text, {
+            size: 32,
+            bold: false,
+            color: DEFAULT_THEME.colors.textPrimary,
+            align: SlidesApp.ParagraphAlignment.CENTER,
+            fontType: 'georgia'
+        });
+        try { quoteBox.setContentAlignment(SlidesApp.ContentAlignment.BOTTOM); } catch (e) { }
+
+        // Author separating line (small, minimal)
+        const lineW = layout.pxToPt(40); // Shorter line
+        const lineX = area.left + (area.width - lineW) / 2;
+        // Position line closer to text bottom. Since we don't know exact text height, we guess or use relative.
+        // Let's assume text takes ~120pt max.
+        const lineY = textTop + layout.pxToPt(165);
+
+        const line = slide.insertLine(SlidesApp.LineCategory.STRAIGHT, lineX, lineY, lineX + lineW, lineY);
+        line.getLineFill().setSolidFill(settings.primaryColor);
+        line.setWeight(2);
 
         if (author) {
-            const authorBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, contentX, area.top + area.height - layout.pxToPt(60), contentW, layout.pxToPt(40));
-            setStyledText(authorBox, `— ${author}`, { size: 16, align: SlidesApp.ParagraphAlignment.END, color: DEFAULT_THEME.colors.neutralGray });
+            // Author closer to line
+            const authorBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, contentX, lineY + layout.pxToPt(5), contentW, layout.pxToPt(30));
+            setStyledText(authorBox, author, {
+                size: 14,
+                align: SlidesApp.ParagraphAlignment.CENTER,
+                color: DEFAULT_THEME.colors.neutralGray,
+                bold: true // Small but bold
+            });
+            try { authorBox.setContentAlignment(SlidesApp.ContentAlignment.TOP); } catch (e) { }
         }
     }
 }

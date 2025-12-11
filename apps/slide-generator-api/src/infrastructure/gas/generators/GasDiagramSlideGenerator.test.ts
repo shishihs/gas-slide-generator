@@ -1,6 +1,6 @@
-
 import { vi, describe, it, expect, beforeEach, Mock } from 'vitest';
 import { GasDiagramSlideGenerator } from './GasDiagramSlideGenerator';
+import { setupGasGlobals } from '../../../test/gas-mocks';
 
 // Mock Dependencies
 vi.mock('../../../common/utils/SlideUtils', () => ({
@@ -96,45 +96,7 @@ const mockLayout = {
 describe('GasDiagramSlideGenerator', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-
-        // Mock Global SlidesApp
-        (global as any).SlidesApp = {
-            ShapeType: {
-                RECTANGLE: 'RECTANGLE',
-                ELLIPSE: 'ELLIPSE',
-                TEXT_BOX: 'TEXT_BOX',
-                CHEVRON: 'CHEVRON',
-                ROUND_RECTANGLE: 'ROUND_RECTANGLE',
-                DONUT: 'DONUT',
-                TRAPEZOID: 'TRAPEZOID',
-                DOWN_ARROW: 'DOWN_ARROW',
-                BENT_ARROW: 'BENT_ARROW'
-            },
-            LineCategory: {
-                STRAIGHT: 'STRAIGHT'
-            },
-            ArrowStyle: {
-                FILL_ARROW: 'FILL_ARROW'
-            },
-            PlaceholderType: {
-                TITLE: 'TITLE',
-                CENTERED_TITLE: 'CENTERED_TITLE',
-                BODY: 'BODY'
-            },
-            ParagraphAlignment: {
-                CENTER: 'CENTER',
-                START: 'START',
-                LEFT: 'LEFT'
-            },
-            ContentAlignment: {
-                MIDDLE: 'MIDDLE'
-            }
-        };
-
-        // Mock Logger
-        (global as any).Logger = {
-            log: vi.fn()
-        };
+        setupGasGlobals();
     });
 
     it('drawTimeline should correctly set border color using getLineFill() and use ColorUtils', () => {

@@ -1,7 +1,11 @@
-
+import * as fs from 'fs';
+import * as path from 'path';
 import { VirtualSlide } from './preview/VirtualSlide';
 import { PreviewRenderer } from './preview/PreviewRenderer';
 import { GasDiagramSlideGenerator } from '../infrastructure/gas/generators/GasDiagramSlideGenerator';
+import { GasTitleSlideGenerator } from '../infrastructure/gas/generators/GasTitleSlideGenerator';
+import { GasSectionSlideGenerator } from '../infrastructure/gas/generators/GasSectionSlideGenerator';
+import { GasContentSlideGenerator } from '../infrastructure/gas/generators/GasContentSlideGenerator';
 import { LayoutManager } from '../common/utils/LayoutManager';
 import { DEFAULT_THEME } from '../common/config/DefaultTheme';
 
@@ -11,7 +15,8 @@ import { DEFAULT_THEME } from '../common/config/DefaultTheme';
         RECTANGLE: 'RECTANGLE',
         ELLIPSE: 'ELLIPSE',
         TEXT_BOX: 'TEXT_BOX',
-        ROUND_RECTANGLE: 'ROUND_RECTANGLE'
+        ROUND_RECTANGLE: 'ROUND_RECTANGLE',
+        LINE: 'LINE'
     },
     LineCategory: { STRAIGHT: 'STRAIGHT' },
     PlaceholderType: {
@@ -22,8 +27,8 @@ import { DEFAULT_THEME } from '../common/config/DefaultTheme';
         OBJECT: 'OBJECT',
         PICTURE: 'PICTURE'
     },
-    ParagraphAlignment: { CENTER: 'CENTER', LEFT: 'LEFT', START: 'START' },
-    ContentAlignment: { MIDDLE: 'MIDDLE' }
+    ParagraphAlignment: { CENTER: 'CENTER', LEFT: 'LEFT', START: 'START', END: 'END', JUSTIFIED: 'JUSTIFIED' },
+    ContentAlignment: { MIDDLE: 'MIDDLE', TOP: 'TOP', BOTTOM: 'BOTTOM' }
 };
 
 (global as any).Logger = {
@@ -31,34 +36,54 @@ import { DEFAULT_THEME } from '../common/config/DefaultTheme';
 };
 // --------------------
 
-// Setup
-const slide = new VirtualSlide();
-// GasDiagramSlideGenerator expects a slide object that implements the GAS interface. 
-// VirtualSlide implements the subset identifying methods used.
+// Load Data
+const jsonPath = path.resolve(__dirname, '../test-data/comprehensive-test.json');
+const rawData = fs.readFileSync(jsonPath, 'utf8');
+const slideDataList = JSON.parse(rawData);
 
-const generator = new GasDiagramSlideGenerator(null);
+// Generators
+const titleGenerator = new GasTitleSlideGenerator(null);
+const sectionGenerator = new GasSectionSlideGenerator(null);
+const contentGenerator = new GasContentSlideGenerator(null);
+const diagramGenerator = new GasDiagramSlideGenerator(null);
+
 const layout = new LayoutManager(960, 540, DEFAULT_THEME);
-
-// Input Data
-const data = {
-    type: 'timeline',
-    title: 'Project Timeline 2025',
-    milestones: [
-        { date: 'Q1', label: 'Research Phase' },
-        { date: 'Q2', label: 'Prototyping' },
-        { date: 'Q3', label: 'Development' },
-        { date: 'Q4', label: 'Launch' }
-    ]
-};
-
 const settings = {
     primaryColor: '#4285F4',
     secondaryColor: '#EA4335',
     fonts: { body: 'Arial' }
 };
 
-console.log('Generating slide...');
-generator.generate(slide as any, data, layout, 1, settings);
+const generatedSlides: VirtualSlide[] = [];
 
-console.log('Rendering preview...');
-PreviewRenderer.render(slide, 'preview.html');
+console.log(`Found ${slideDataList.length} slides in mock data.`);
+
+slideDataList.forEach((data: any, index: number) => {
+    // Skip comments or invalid entries if any
+    if (!data.type) return;
+
+    console.log(`Processing Slide ${index + 1}: ${data.type}`);
+    const slide = new VirtualSlide();
+
+    // Routing Logic (Simulating GasSlideRepository)
+    const type = (data.type || '').toLowerCase();
+
+    try {
+        if (type === 'title') {
+            titleGenerator.generate(slide as any, data, layout, index + 1, settings);
+        } else if (type === 'section') {
+            sectionGenerator.generate(slide as any, data, layout, index + 1, settings);
+        } else if (['content', 'agenda', 'unknown'].includes(type)) {
+            contentGenerator.generate(slide as any, data, layout, index + 1, settings);
+        } else {
+            // Assume parsing or diagram type
+            diagramGenerator.generate(slide as any, data, layout, index + 1, settings);
+        }
+        generatedSlides.push(slide);
+    } catch (e) {
+        console.error(`Failed to generate slide ${index + 1} (${type}):`, e);
+    }
+});
+
+console.log(`Rendering preview for ${generatedSlides.length} slides...`);
+PreviewRenderer.render(generatedSlides, 'preview.html');

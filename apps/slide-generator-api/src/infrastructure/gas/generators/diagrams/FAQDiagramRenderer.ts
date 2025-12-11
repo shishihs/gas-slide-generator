@@ -19,31 +19,46 @@ export class FAQDiagramRenderer implements IDiagramRenderer {
         }
         if (!parsedItems.length) return;
 
-        const gap = layout.pxToPt(20);
+        const gap = layout.pxToPt(30);
+        // Estimate height per item based on available space
         const itemH = (area.height - (gap * (parsedItems.length - 1))) / parsedItems.length;
 
         parsedItems.forEach((item, i) => {
             const y = area.top + i * (itemH + gap);
-            const iconSize = layout.pxToPt(40);
 
-            // Q Circle
-            const qCircle = slide.insertShape(SlidesApp.ShapeType.ELLIPSE, area.left, y + (itemH - iconSize) / 2, iconSize, iconSize);
-            qCircle.getFill().setSolidFill(settings.primaryColor);
-            qCircle.getBorder().setTransparent();
-            setStyledText(qCircle, 'Q', { size: 18, bold: true, color: '#FFFFFF', align: SlidesApp.ParagraphAlignment.CENTER });
-            try { qCircle.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
+            // Clean Q text
+            const qStr = (item.q || '').replace(/^[QA][:. ]+/, '');
+            const aStr = (item.a || '').replace(/^[QA][:. ]+/, '');
 
-            // Content Box
-            const boxLeft = area.left + iconSize + layout.pxToPt(15);
-            const boxW = area.width - (iconSize + layout.pxToPt(15));
-            const box = slide.insertShape(SlidesApp.ShapeType.ROUND_RECTANGLE, boxLeft, y, boxW, itemH);
-            box.getFill().setSolidFill('#FFFFFF');
-            box.getBorder().getLineFill().setSolidFill(DEFAULT_THEME.colors.cardBorder);
+            // Q Indicator (Small bold accent)
+            const qInd = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, area.left, y, layout.pxToPt(30), layout.pxToPt(30));
+            setStyledText(qInd, 'Q.', { size: 16, bold: true, color: settings.primaryColor });
 
-            const qText = (item.q || '').replace(/^[QA][:. ]+/, '');
-            const aText = (item.a || '').replace(/^[QA][:. ]+/, '');
+            // Q Content
+            const qBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, area.left + layout.pxToPt(40), y, area.width - layout.pxToPt(40), layout.pxToPt(40));
+            setStyledText(qBox, qStr, { size: 14, bold: true, color: DEFAULT_THEME.colors.textPrimary });
 
-            setStyledText(box, `Q. ${qText}\n\nA. ${aText}`, { size: 12, color: DEFAULT_THEME.colors.textPrimary });
+            // A Indicator (Gray)
+            // Positioned below Q
+            const aY = y + layout.pxToPt(40); // Approx offset
+            const aInd = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, area.left, aY, layout.pxToPt(30), layout.pxToPt(30));
+            setStyledText(aInd, 'A.', { size: 16, bold: true, color: DEFAULT_THEME.colors.neutralGray });
+
+            // A Content
+            const aBoxHasHeight = itemH - layout.pxToPt(50);
+            if (aBoxHasHeight > 10) {
+                const aBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, area.left + layout.pxToPt(40), aY, area.width - layout.pxToPt(40), aBoxHasHeight);
+                setStyledText(aBox, aStr, { size: 12, color: DEFAULT_THEME.colors.textPrimary });
+                try { aBox.setContentAlignment(SlidesApp.ContentAlignment.TOP); } catch (e) { }
+            }
+
+            // Separator Line
+            if (i < parsedItems.length - 1) {
+                const lineY = y + itemH + gap / 2;
+                const line = slide.insertLine(SlidesApp.LineCategory.STRAIGHT, area.left, lineY, area.left + area.width, lineY);
+                line.getLineFill().setSolidFill(DEFAULT_THEME.colors.ghostGray);
+                line.setWeight(0.5);
+            }
         });
     }
 }

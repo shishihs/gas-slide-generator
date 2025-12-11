@@ -6,83 +6,77 @@ import { generatePyramidColors } from '../../../../common/utils/ColorUtils';
 
 export class PyramidDiagramRenderer implements IDiagramRenderer {
     render(slide: GoogleAppsScript.Slides.Slide, data: any, area: any, settings: any, layout: LayoutManager): void {
+
         const levels = data.levels || data.items || [];
         if (!levels.length) return;
+        const levelsToDraw = levels.slice(0, 5); // Allow up to 5
 
-        // Limit to 4 for visual consistency as per reference, or relax? Reference says slice(0, 4)
-        const levelsToDraw = levels.slice(0, 4);
+        const levelHeight = layout.pxToPt(60);
+        // Vertical gap
+        const levelGap = layout.pxToPt(20);
 
-        const levelHeight = layout.pxToPt(70);
-        const levelGap = layout.pxToPt(2);
         const totalHeight = (levelHeight * levelsToDraw.length) + (levelGap * (levelsToDraw.length - 1));
         const startY = area.top + (area.height - totalHeight) / 2;
-        const pyramidWidth = layout.pxToPt(480);
-        const textColumnWidth = layout.pxToPt(400);
-        const gap = layout.pxToPt(30);
-        const pyramidLeft = area.left;
-        const textColumnLeft = pyramidLeft + pyramidWidth + gap;
 
-        const pyramidColors = generatePyramidColors(settings.primaryColor, levelsToDraw.length);
-        const baseWidth = pyramidWidth;
-        const widthIncrement = baseWidth / levelsToDraw.length;
-        const centerX = pyramidLeft + pyramidWidth / 2;
+        // Use a centered list approach for the "Pyramid" feel, where width decreases or increases
+        // But for editorial, a clean stack with numbering is better than a literal triangle.
+        // Let's do a "Stepped List" where the number indicates hierarchy.
+
+        const contentW = layout.pxToPt(500);
+        const centerX = area.left + area.width / 2;
+        const startX = centerX - contentW / 2;
 
         levelsToDraw.forEach((level: any, index: number) => {
-            const levelWidth = baseWidth - (widthIncrement * (levelsToDraw.length - 1 - index));
-            const levelX = centerX - levelWidth / 2;
-            const levelY = startY + index * (levelHeight + levelGap);
+            const y = startY + index * (levelHeight + levelGap);
+            const isLast = index === levelsToDraw.length - 1;
 
-            // Shape
-            const levelBox = slide.insertShape(SlidesApp.ShapeType.ROUND_RECTANGLE, levelX, levelY, levelWidth, levelHeight);
-            levelBox.getFill().setSolidFill(pyramidColors[index]);
-            levelBox.getBorder().setTransparent();
-
-            // Inner Text (Title)
-            const titleShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, levelX, levelY, levelWidth, levelHeight);
-            titleShape.getFill().setTransparent();
-            titleShape.getBorder().setTransparent();
-            const levelTitle = level.title || `レベル${index + 1}`;
-            setStyledText(titleShape, levelTitle, {
-                size: DEFAULT_THEME.fonts.sizes.body,
+            // 1. Number / Hierarchy Indicator (01, 02...)
+            const numStr = String(index + 1).padStart(2, '0');
+            const numW = layout.pxToPt(50);
+            const numBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, startX, y, numW, levelHeight);
+            setStyledText(numBox, numStr, {
+                size: 32,
                 bold: true,
-                color: DEFAULT_THEME.colors.backgroundGray,
-                align: SlidesApp.ParagraphAlignment.CENTER
+                color: settings.primaryColor,
+                align: SlidesApp.ParagraphAlignment.END // Right align number towards content
             });
-            try { titleShape.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
+            try { numBox.setContentAlignment(SlidesApp.ContentAlignment.TOP); } catch (e) { }
 
-            // Connecting Line
-            const connectionStartX = levelX + levelWidth;
-            const connectionEndX = textColumnLeft;
-            const connectionY = levelY + levelHeight / 2;
-            if (connectionEndX > connectionStartX) {
-                const connectionLine = slide.insertLine(
-                    SlidesApp.LineCategory.STRAIGHT,
-                    connectionStartX, connectionY, connectionEndX, connectionY
-                );
-                connectionLine.getLineFill().setSolidFill('#D0D7DE');
-                connectionLine.setWeight(1.5);
-            }
+            // 2. Separator line (vertical accent)
+            // Move closer to number
+            const lineX = startX + numW + layout.pxToPt(10);
+            // Height: connect visually but leave breathing room
+            const line = slide.insertLine(SlidesApp.LineCategory.STRAIGHT, lineX, y + layout.pxToPt(5), lineX, y + levelHeight - layout.pxToPt(5));
+            line.getLineFill().setSolidFill(DEFAULT_THEME.colors.ghostGray);
+            line.setWeight(1);
 
-            // Description Text
-            const textShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, textColumnLeft, levelY, textColumnWidth, levelHeight);
-            textShape.getFill().setTransparent();
-            textShape.getBorder().setTransparent();
+            // 3. Content
+            // Closer to line
+            const contentX = lineX + layout.pxToPt(15);
+            const textW = contentW - (contentX - startX);
+            const levelTitle = level.title || `Level ${index + 1}`;
             const levelDesc = level.description || '';
-            let formattedText;
-            if (levelDesc.includes('•') || levelDesc.includes('・')) {
-                formattedText = levelDesc;
-            } else if (levelDesc.includes('\n')) {
-                formattedText = levelDesc.split('\n').filter((l: string) => l.trim()).slice(0, 2).map((l: string) => `• ${l.trim()}`).join('\n');
-            } else {
-                formattedText = levelDesc;
-            }
-            setStyledText(textShape, formattedText, {
-                size: DEFAULT_THEME.fonts.sizes.body - 1,
-                align: SlidesApp.ParagraphAlignment.START, // Fixed from LEFT
+
+            // Title
+            const titleH = layout.pxToPt(25);
+            const titleBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, contentX, y, textW, titleH);
+            setStyledText(titleBox, levelTitle.toUpperCase(), {
+                size: 14,
+                bold: true,
                 color: DEFAULT_THEME.colors.textPrimary,
-                bold: true
+                align: SlidesApp.ParagraphAlignment.START
             });
-            try { textShape.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
+
+            // Description - Closer to title
+            if (levelDesc) {
+                const descBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, contentX, y + titleH, textW, levelHeight - titleH);
+                setStyledText(descBox, levelDesc, {
+                    size: 12,
+                    color: DEFAULT_THEME.colors.neutralGray,
+                    align: SlidesApp.ParagraphAlignment.START
+                });
+                try { descBox.setContentAlignment(SlidesApp.ContentAlignment.TOP); } catch (e) { }
+            }
         });
     }
 }

@@ -11,15 +11,14 @@ interface SlideGenerationResponse {
     url?: string;
     error?: string;
     success: boolean;
+    message?: string;
+    received?: any;
 }
 
 /**
  * Web App Entry Point: POST
  */
-// Explicitly expose functions to global scope for GAS
-(global as any).doPost = doPost;
-(global as any).doGet = doGet;
-(global as any).generateSlides = generateSlides;
+// Explicitly expose functions removed here, handled in main.ts
 
 /**
  * Library Entry Point: generateSlides
@@ -29,7 +28,7 @@ interface SlideGenerationResponse {
  * @param {any} data - The JSON payload (Presentation Data)
  * @returns {SlideGenerationResponse}
  */
-function generateSlides(data: any): SlideGenerationResponse {
+export function generateSlides(data: any): SlideGenerationResponse {
     try {
         Logger.log('Library Call: generateSlides with data: ' + JSON.stringify(data));
 
@@ -68,11 +67,11 @@ function generateSlides(data: any): SlideGenerationResponse {
     }
 }
 
-function doGet(e: GoogleAppsScript.Events.DoGet) {
+export function doGet(e: GoogleAppsScript.Events.DoGet) {
     return ContentService.createTextOutput("Slide Generator API is running. Authorization successful.");
 }
 
-function doPost(e: GoogleAppsScript.Events.DoPost) {
+export function doPost(e: GoogleAppsScript.Events.DoPost) {
     try {
         const postData = JSON.parse(e.postData.contents);
 
@@ -103,9 +102,7 @@ function doPost(e: GoogleAppsScript.Events.DoPost) {
     }
 }
 
-(global as any).doPost = doPost;
-
-function createJsonResponse(data: SlideGenerationResponse) {
+export function createJsonResponse(data: SlideGenerationResponse) {
     return ContentService.createTextOutput(JSON.stringify(data))
         .setMimeType(ContentService.MimeType.JSON);
 }

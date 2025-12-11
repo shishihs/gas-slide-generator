@@ -10,59 +10,83 @@ export class StepUpDiagramRenderer implements IDiagramRenderer {
         const count = items.length;
 
         const gap = layout.pxToPt(20);
-        const stepWidth = (area.width - gap * (count - 1)) / count;
+        // Reduced max steps to fit clean diagonal
+        const validCount = Math.min(count, 5);
+        const stepWidth = (area.width - gap * (validCount - 1)) / validCount;
+        const stepHeight = area.height / validCount;
 
-        // Simple stair layout
-        const maxStepHeight = area.height;
-        const minStepHeight = area.height * 0.4;
-        const heightIncrement = (maxStepHeight - minStepHeight) / Math.max(1, count - 1);
+        items.slice(0, validCount).forEach((item: any, i: number) => {
+            // Diagonal positioning
+            // For a 'Step Up', bottom-left to top-right? Or simple ascending bars.
+            // Let's do ascending from left to right.
 
-        items.forEach((item: any, i: number) => {
-            const stepH = minStepHeight + (i * heightIncrement);
             const x = area.left + (i * (stepWidth + gap));
-            const y = area.top + (area.height - stepH);
+            // y goes UP as i increases (or down if we want top-left start? No, steps go up)
+            // But visuals usually go L->R.
+            // We'll stack them such that the last one is highest visually?
+            // Actually, "Step Up" usually means progress.
+            // Let's keep them distributed L->R, but shift Y up?
+            // Or just equal height bars but minimal.
 
-            // Background box (Subtle Gray)
-            const shape = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, x, y, stepWidth, stepH);
-            shape.getFill().setSolidFill(DEFAULT_THEME.colors.backgroundGray);
-            shape.getBorder().setTransparent();
+            // Let's do Equal height spacing but Y shifts.
+            const totalRise = area.height * 0.6;
+            const yStep = totalRise / (validCount - 1 || 1);
+            // i=0 is lowest (bottom), i=last is highest (top)
+            const y = (area.top + area.height - layout.pxToPt(100)) - (i * yStep);
 
-            // Accent Top Bar
-            const topBar = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, x, y, stepWidth, layout.pxToPt(4));
-            topBar.getFill().setSolidFill(settings.primaryColor);
-            topBar.getBorder().setTransparent();
+            // Minimal "Step" Shape: Just a horizontal heavy line and vertical connector?
+            // Line (The "Step")
+            const lineW = stepWidth;
+            const line = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, x, y, lineW, layout.pxToPt(4));
+            line.getFill().setSolidFill(settings.primaryColor);
+            line.getBorder().setTransparent();
 
-            // Number (Large watermark-like)
-            const numBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x, y + layout.pxToPt(10), stepWidth, layout.pxToPt(60));
-            setStyledText(numBox, String(i + 1).padStart(2, '0'), {
-                size: 42,
+            // Number (Sitting directly on top of the line, bottom-left aligned)
+            const numStr = String(i + 1).padEnd(2, '0');
+            // Shift Y down so it sits tight on the line
+            const numBoxH = layout.pxToPt(40);
+            const numBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x, y - numBoxH + layout.pxToPt(5), lineW, numBoxH);
+            setStyledText(numBox, numStr, {
+                size: 32,
                 bold: true,
-                color: DEFAULT_THEME.colors.neutralGray,
-                align: SlidesApp.ParagraphAlignment.END
+                color: settings.primaryColor,
+                align: SlidesApp.ParagraphAlignment.START
             });
+            try { numBox.setContentAlignment(SlidesApp.ContentAlignment.BOTTOM); } catch (e) { }
 
-            // Title & Content
+            // Vertical dotted line to ground (Anchor)
+            const dropLine = slide.insertLine(SlidesApp.LineCategory.STRAIGHT, x, y + layout.pxToPt(2), x, area.top + area.height);
+            dropLine.getLineFill().setSolidFill(DEFAULT_THEME.colors.ghostGray);
+            dropLine.setDashStyle(SlidesApp.DashStyle.DOT);
+            dropLine.setWeight(1);
+
+            // Title & Desc below line (Hanging)
+            // Bring closer to line
+            const titleContentY = y + layout.pxToPt(10);
+
+            // Allow text to go down
+            const textH = area.top + area.height - titleContentY;
+
+            // Title
+            const titleHeight = layout.pxToPt(25);
+            const textBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x, titleContentY, stepWidth + gap / 2, titleHeight);
+
             const title = item.title || item.label || '';
             const desc = item.desc || item.description || item.text || '';
 
-            const contentY = y + layout.pxToPt(70);
-
-            const titleBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x + layout.pxToPt(10), contentY, stepWidth - layout.pxToPt(20), layout.pxToPt(40));
-            setStyledText(titleBox, title, {
-                size: 18,
+            setStyledText(textBox, `${title.toUpperCase()}`, {
+                size: 14,
                 bold: true,
-                color: DEFAULT_THEME.colors.textPrimary,
-                align: SlidesApp.ParagraphAlignment.START
+                color: DEFAULT_THEME.colors.textPrimary
             });
+            try { textBox.setContentAlignment(SlidesApp.ContentAlignment.TOP); } catch (e) { }
 
-            const descBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x + layout.pxToPt(10), contentY + layout.pxToPt(45), stepWidth - layout.pxToPt(20), stepH - layout.pxToPt(120));
-            // Ensure height is reasonable
-            const descH = stepH - layout.pxToPt(120);
-            if (descH > 20) {
+            // Desc
+            if (desc) {
+                const descBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x, titleContentY + titleHeight, stepWidth + gap / 2, textH - titleHeight);
                 setStyledText(descBox, desc, {
-                    size: 14,
-                    color: DEFAULT_THEME.colors.textSmallFont,
-                    align: SlidesApp.ParagraphAlignment.START
+                    size: 12,
+                    color: DEFAULT_THEME.colors.textSmallFont
                 });
                 try { descBox.setContentAlignment(SlidesApp.ContentAlignment.TOP); } catch (e) { }
             }

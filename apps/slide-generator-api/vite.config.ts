@@ -4,7 +4,7 @@ import path from 'path';
 export default defineConfig({
     build: {
         lib: {
-            entry: path.resolve(__dirname, 'src/api.ts'),
+            entry: path.resolve(__dirname, 'src/main.ts'),
             name: 'SlideGeneratorApi',
             fileName: () => 'api.gs',
             formats: ['iife'],
@@ -20,11 +20,7 @@ export default defineConfig({
             output: {
                 extend: true,
                 banner: 'var global = this;',
-                footer: `
-function generateSlides(data){ return global.generateSlides(data); }
-function doPost(e){ return global.doPost(e); }
-function doGet(e){ return global.doGet(e); }
-`
+                // Footer removed: Globals are now explicitly exposed in src/main.ts
             }
         },
         minify: false, // 読みやすさ重視

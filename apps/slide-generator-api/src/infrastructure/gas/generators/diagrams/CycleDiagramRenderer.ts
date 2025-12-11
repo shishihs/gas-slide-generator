@@ -8,86 +8,105 @@ export class CycleDiagramRenderer implements IDiagramRenderer {
         const items = data.items || [];
         if (!items.length) return;
 
-        const textLengths = items.map((item: any) => {
-            const labelLength = (item.label || '').length;
-            const subLabelLength = (item.subLabel || '').length;
-            return labelLength + subLabelLength;
-        });
-        const maxLength = Math.max(...textLengths);
-        const avgLength = textLengths.reduce((sum: number, len: number) => sum + len, 0) / textLengths.length;
-
         const centerX = area.left + area.width / 2;
         const centerY = area.top + area.height / 2;
-        const radiusX = area.width / 3.2;
-        const radiusY = area.height / 2.6;
+        const radius = Math.min(area.width, area.height) * 0.35;
 
-        const maxCardW = Math.min(layout.pxToPt(220), radiusX * 0.8);
-        const maxCardH = Math.min(layout.pxToPt(100), radiusY * 0.6);
+        // 1. Central Thin Circle (The Path)
+        // Instead of bent arrows, we use a clean circle representing the cycle.
+        const circleParams = {
+            left: centerX - radius,
+            top: centerY - radius,
+            width: radius * 2,
+            height: radius * 2
+        };
+        const mainCircle = slide.insertShape(SlidesApp.ShapeType.ELLIPSE, circleParams.left, circleParams.top, circleParams.width, circleParams.height);
+        mainCircle.getFill().setTransparent();
+        mainCircle.getBorder().getLineFill().setSolidFill(DEFAULT_THEME.colors.ghostGray); // Very subtle
+        mainCircle.getBorder().setWeight(1);
+        mainCircle.getBorder().setDashStyle(SlidesApp.DashStyle.DOT); // Dotted for "flow"
 
-        let cardW, cardH, fontSize;
-        if (maxLength > 25 || avgLength > 18) {
-            cardW = Math.min(layout.pxToPt(230), maxCardW); cardH = Math.min(layout.pxToPt(105), maxCardH); fontSize = 13;
-        } else if (maxLength > 15 || avgLength > 10) {
-            cardW = Math.min(layout.pxToPt(215), maxCardW); cardH = Math.min(layout.pxToPt(95), maxCardH); fontSize = 14;
-        } else {
-            cardW = layout.pxToPt(200); cardH = layout.pxToPt(90); fontSize = 16;
-        }
-
+        // Center Text
         if (data.centerText) {
-            const centerTextBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, centerX - layout.pxToPt(100), centerY - layout.pxToPt(50), layout.pxToPt(200), layout.pxToPt(100));
-            setStyledText(centerTextBox, data.centerText, { size: 20, bold: true, align: SlidesApp.ParagraphAlignment.CENTER, color: DEFAULT_THEME.colors.textPrimary });
+            const centerW = radius * 1.2;
+            const centerTextBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, centerX - centerW / 2, centerY - layout.pxToPt(20), centerW, layout.pxToPt(40));
+            setStyledText(centerTextBox, data.centerText, {
+                size: 18,
+                bold: true,
+                align: SlidesApp.ParagraphAlignment.CENTER,
+                color: DEFAULT_THEME.colors.primary
+            });
             try { centerTextBox.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
         }
 
-        const positions = [
-            { x: centerX + radiusX, y: centerY },
-            { x: centerX, y: centerY + radiusY },
-            { x: centerX - radiusX, y: centerY },
-            { x: centerX, y: centerY - radiusY }
-        ];
+        const count = items.length;
+        const angleStep = (2 * Math.PI) / count;
+        // Start from top (-PI/2)
+        const startAngle = -Math.PI / 2;
 
-        // Ensure we only draw as many items as we have (up to 4)
-        const itemsToDraw = items.slice(0, 4);
+        items.forEach((item: any, i: number) => {
+            const angle = startAngle + (i * angleStep);
 
-        itemsToDraw.forEach((item: any, i: number) => {
-            const pos = positions[i];
-            const cardX = pos.x - cardW / 2;
-            const cardY = pos.y - cardH / 2;
+            // Item Position (on the circle)
+            const itemX = centerX + Math.cos(angle) * radius;
+            const itemY = centerY + Math.sin(angle) * radius;
 
-            const card = slide.insertShape(SlidesApp.ShapeType.ROUND_RECTANGLE, cardX, cardY, cardW, cardH);
-            card.getFill().setSolidFill(settings.primaryColor);
-            card.getBorder().setTransparent();
+            // Dot at anchor point (Slightly larger for impact)
+            const dotR = layout.pxToPt(10);
+            const dot = slide.insertShape(SlidesApp.ShapeType.ELLIPSE, itemX - dotR / 2, itemY - dotR / 2, dotR, dotR);
+            dot.getFill().setSolidFill(DEFAULT_THEME.colors.backgroundWhite);
+            dot.getBorder().getLineFill().setSolidFill(DEFAULT_THEME.colors.primary);
+            dot.getBorder().setWeight(2);
 
-            const subLabelText = item.subLabel || `${i + 1}番目`;
-            const labelText = item.label || '';
-            setStyledText(card, `${subLabelText}\n${labelText}`, { size: fontSize, bold: true, color: DEFAULT_THEME.colors.backgroundGray, align: SlidesApp.ParagraphAlignment.CENTER });
+            // Text Positioning
+            const isRight = itemX > centerX;
 
-            try {
-                card.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
-                const textRange = card.getText();
-                const subLabelEnd = subLabelText.length;
-                if (textRange.asString().length > subLabelEnd) {
-                    textRange.getRange(0, subLabelEnd).getTextStyle().setFontSize(Math.max(10, fontSize - 2));
-                }
-            } catch (e) { }
-        });
+            const textW = layout.pxToPt(140);
+            const textH = layout.pxToPt(60);
+            // Reduced margin to keep text visually connected to anchor
+            const margin = layout.pxToPt(10);
 
-        // Bent Arrows
-        const arrowRadiusX = radiusX * 0.75;
-        const arrowRadiusY = radiusY * 0.80;
-        const arrowSize = layout.pxToPt(80);
-        const arrowPositions = [
-            { left: centerX + arrowRadiusX, top: centerY - arrowRadiusY, rotation: 90 },
-            { left: centerX + arrowRadiusX, top: centerY + arrowRadiusY, rotation: 180 },
-            { left: centerX - arrowRadiusX, top: centerY + arrowRadiusY, rotation: 270 },
-            { left: centerX - arrowRadiusX, top: centerY - arrowRadiusY, rotation: 0 }
-        ];
+            let textLeft = isRight ? (itemX + margin) : (itemX - textW - margin);
+            // Adjust for exact center alignment cases (Top/Bottom items)
+            if (Math.abs(itemX - centerX) < 5) { textLeft = itemX - textW / 2; }
 
-        arrowPositions.slice(0, itemsToDraw.length).forEach(pos => {
-            const arrow = slide.insertShape(SlidesApp.ShapeType.BENT_ARROW, pos.left - arrowSize / 2, pos.top - arrowSize / 2, arrowSize, arrowSize);
-            arrow.getFill().setSolidFill(DEFAULT_THEME.colors.ghostGray);
-            arrow.getBorder().setTransparent();
-            arrow.setRotation(pos.rotation);
+            const textTop = itemY - textH / 2;
+
+            const labelStr = item.label || '';
+            const subLabelStr = item.subLabel || `${String(i + 1).padStart(2, '0')}`;
+
+            // Create separate box for Number to style it boldly
+            // Number (Large, Accent) -> Label (Normal)
+
+            // Align logic
+            const align = Math.abs(itemX - centerX) < 5 ? SlidesApp.ParagraphAlignment.CENTER : (isRight ? SlidesApp.ParagraphAlignment.START : SlidesApp.ParagraphAlignment.END);
+
+            // Single box approach for now to keep it simple but utilize line break
+            const textBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, textLeft, textTop, textW, textH);
+
+            // To properly style mixed content (Bold Number + Normal Text) in one box often requires advanced API or multiple calls.
+            // For now, let's stick to the "Editorial" look where the Title is Bold and Number is small/accented or vice versa.
+            // Let's make the Number part of the label but separate line.
+
+            setStyledText(textBox, `${subLabelStr}\n${labelStr}`, {
+                size: 14,
+                bold: true, // Title is bold
+                color: DEFAULT_THEME.colors.textPrimary,
+                align: align
+            });
+            // Ideally we'd color the number differently.
+            // Since we can't easily mixed-style in mock/helper, use formatting:
+            // "01 | Title" ? No, "01\nTitle" is stacked.
+
+            // Let's add a small connector line from dot to text if "Minimal" allows,
+            // to bridge the gap strongly.
+            if (Math.abs(itemX - centerX) > 5) {
+                const lineStart = isRight ? (itemX + dotR / 2) : (itemX - dotR / 2);
+                const lineEnd = isRight ? (textLeft) : (textLeft + textW);
+                const connector = slide.insertLine(SlidesApp.LineCategory.STRAIGHT, lineStart, itemY, lineEnd, itemY);
+                connector.getLineFill().setSolidFill(DEFAULT_THEME.colors.primary);
+                connector.setWeight(1);
+            }
         });
     }
 }

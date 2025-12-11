@@ -94,6 +94,7 @@ function onOpen() {
     DocumentApp.getUi()
         .createMenu('スライド起草くん')
         .addItem('スライド生成', 'showGenerateSlideSidebar')
+        .addItem('デザイン設定', 'showDesignSettingsSidebar')
         .addItem('設定', 'showSettingsSidebar')
         .addSeparator()
         .addItem('ヘルプ', 'showHelpSidebar')
@@ -349,6 +350,15 @@ function showGenerateSlideSidebar() {
 function showSettingsSidebar() {
     const html = HtmlService.createHtmlOutputFromFile('SettingsSidebar')
         .setTitle('設定');
+    DocumentApp.getUi().showSidebar(html);
+}
+
+/**
+ * Show the Design Settings sidebar
+ */
+function showDesignSettingsSidebar() {
+    const html = HtmlService.createHtmlOutputFromFile('DesignSettingsSidebar')
+        .setTitle('デザイン設定');
     DocumentApp.getUi().showSidebar(html);
 }
 

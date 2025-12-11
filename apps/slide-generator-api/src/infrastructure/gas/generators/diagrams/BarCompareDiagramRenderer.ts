@@ -1,15 +1,17 @@
 import { IDiagramRenderer } from './IDiagramRenderer';
 import { LayoutManager } from '../../../../common/utils/LayoutManager';
-import { setStyledText } from '../../../../common/utils/SlideUtils';
+import { BatchTextStyleUtils } from '../../BatchTextStyleUtils';
+import { RequestFactory } from '../../RequestFactory';
 import { generateCompareColors } from '../../../../common/utils/ColorUtils';
 
 export class BarCompareDiagramRenderer implements IDiagramRenderer {
-    render(slide: GoogleAppsScript.Slides.Slide, data: any, area: any, settings: any, layout: LayoutManager): void {
+    render(slideId: string, data: any, area: any, settings: any, layout: LayoutManager): GoogleAppsScript.Slides.Schema.Request[] {
+        const requests: GoogleAppsScript.Slides.Schema.Request[] = [];
         const theme = layout.getTheme();
         const leftTitle = data.leftTitle || '導入前';
         const rightTitle = data.rightTitle || '導入後';
         const stats = data.stats || [];
-        if (!stats.length) return;
+        if (!stats.length) return requests;
 
         const compareColors = generateCompareColors(settings.primaryColor);
 
@@ -20,18 +22,27 @@ export class BarCompareDiagramRenderer implements IDiagramRenderer {
             const rightNum = parseFloat(String(stat.rightValue || '0').replace(/[^0-9.]/g, '')) || 0;
             maxValue = Math.max(maxValue, leftNum, rightNum);
         });
-        if (maxValue === 0) maxValue = 100;  // Fallback
+        if (maxValue === 0) maxValue = 100;
 
         // Layout
         const labelColW = area.width * 0.2;
         const barAreaW = area.width * 0.6;
-        const valueColW = area.width * 0.1;
-        const trendColW = area.width * 0.1;
+        // const valueColW = area.width * 0.1; // Unused in original
+        // const trendColW = area.width * 0.1; // Unused in original
 
         const rowHeight = Math.min(layout.pxToPt(80), area.height / stats.length);
         const barHeight = layout.pxToPt(18);
-        const barGap = layout.pxToPt(4);
         let currentY = area.top;
+
+        // Helper for Line RGB
+        const hexToRgb = (hex: string) => {
+            const h = (hex || '#000000').replace('#', '');
+            return {
+                red: parseInt(h.substring(0, 2), 16) / 255,
+                green: parseInt(h.substring(2, 4), 16) / 255,
+                blue: parseInt(h.substring(4, 6), 16) / 255
+            };
+        };
 
         stats.forEach((stat: any, index: number) => {
             const label = stat.label || '';
@@ -42,72 +53,83 @@ export class BarCompareDiagramRenderer implements IDiagramRenderer {
             const leftNum = parseFloat(String(leftValue).replace(/[^0-9.]/g, '')) || 0;
             const rightNum = parseFloat(String(rightValue).replace(/[^0-9.]/g, '')) || 0;
 
-            // Label (Left Column)
-            const labelShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, area.left, currentY, labelColW, rowHeight);
-            setStyledText(labelShape, label, {
-                size: 14,
-                bold: true,
-                align: SlidesApp.ParagraphAlignment.START,
-                color: theme.colors.textPrimary
-            }, theme);
-            try { labelShape.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
+            const baseId = slideId + '_BAR_R' + index;
 
-            // Bar Area
+            // Label (Left Column)
+            const labelId = baseId + '_LBL';
+            requests.push(RequestFactory.createShape(slideId, labelId, 'TEXT_BOX', area.left, currentY, labelColW, rowHeight));
+            requests.push(...BatchTextStyleUtils.setText(slideId, labelId, label, {
+                size: 14, bold: true, align: 'START', color: theme.colors.textPrimary
+            }, theme));
+            requests.push(RequestFactory.updateShapeProperties(labelId, null, null, null, 'MIDDLE'));
+
             // Bar Area
             const barLeft = area.left + labelColW + layout.pxToPt(20);
-            const maxBarWidth = area.width - (labelColW + layout.pxToPt(80)); // Leave room on right for diff
+            const maxBarWidth = area.width - (labelColW + layout.pxToPt(80));
 
-            const barGap = layout.pxToPt(2); // Tighter gap
+            const barGap = layout.pxToPt(2);
             const barY = currentY + (rowHeight - (barHeight * 2 + barGap * 2)) / 2;
 
-            // Minimal Bars
-            // Left (Before) - Gray, Thin
+            // Left Bar (Gray)
             const leftBarW = (leftNum / maxValue) * maxBarWidth;
             if (leftBarW > 0) {
-                const b = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, barLeft, barY, leftBarW, barHeight);
-                b.getFill().setSolidFill(theme.colors.neutralGray);
-                b.getBorder().setTransparent();
-                // Value Text inside or end? End looks cleaner.
-                const v = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, barLeft + leftBarW + layout.pxToPt(5), barY - layout.pxToPt(2), layout.pxToPt(60), barHeight + layout.pxToPt(5));
-                setStyledText(v, leftValue, { size: 10, color: theme.colors.neutralGray }, theme);
+                const lbId = baseId + '_LB';
+                requests.push(RequestFactory.createShape(slideId, lbId, 'RECTANGLE', barLeft, barY, leftBarW, barHeight));
+                requests.push(RequestFactory.updateShapeProperties(lbId, theme.colors.neutralGray, 'TRANSPARENT'));
+
+                // Value Text (End)
+                const lbvId = baseId + '_LBV';
+                requests.push(RequestFactory.createShape(slideId, lbvId, 'TEXT_BOX', barLeft + leftBarW + layout.pxToPt(5), barY - layout.pxToPt(2), layout.pxToPt(60), barHeight + layout.pxToPt(5)));
+                requests.push(...BatchTextStyleUtils.setText(slideId, lbvId, leftValue, { size: 10, color: theme.colors.neutralGray }, theme));
             }
 
-            // Right (After) - Color, Slightly Thicker/Same
+            // Right Bar (Color)
             const rightBarW = (rightNum / maxValue) * maxBarWidth;
             if (rightBarW > 0) {
-                // Closer to left bar
-                const b = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, barLeft, barY + barHeight + barGap, rightBarW, barHeight);
-                b.getFill().setSolidFill(settings.primaryColor);
-                b.getBorder().setTransparent();
-                const v = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, barLeft + rightBarW + layout.pxToPt(5), barY + barHeight + barGap - layout.pxToPt(2), layout.pxToPt(60), barHeight + layout.pxToPt(5));
-                setStyledText(v, rightValue, { size: 10, bold: true, color: settings.primaryColor }, theme);
+                const rbId = baseId + '_RB';
+                requests.push(RequestFactory.createShape(slideId, rbId, 'RECTANGLE', barLeft, barY + barHeight + barGap, rightBarW, barHeight));
+                requests.push(RequestFactory.updateShapeProperties(rbId, settings.primaryColor, 'TRANSPARENT'));
+
+                const rbvId = baseId + '_RBV';
+                requests.push(RequestFactory.createShape(slideId, rbvId, 'TEXT_BOX', barLeft + rightBarW + layout.pxToPt(5), barY + barHeight + barGap - layout.pxToPt(2), layout.pxToPt(60), barHeight + layout.pxToPt(5)));
+                requests.push(...BatchTextStyleUtils.setText(slideId, rbvId, rightValue, { size: 10, bold: true, color: settings.primaryColor }, theme));
             }
 
-            // Trend Arrow on far right (Text only, no ball)
+            // Trend Arrow
             if (trend) {
                 const trendX = area.left + area.width - layout.pxToPt(40);
-                const isUp = trend.toLowerCase() === 'up';
-                const trendShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, trendX, currentY, layout.pxToPt(40), rowHeight);
+                const isUp = String(trend).toLowerCase() === 'up';
+                const trId = baseId + '_TR';
+                requests.push(RequestFactory.createShape(slideId, trId, 'TEXT_BOX', trendX, currentY, layout.pxToPt(40), rowHeight));
+
                 const color = isUp ? '#2E7D32' : '#C62828';
                 const sym = isUp ? '↑' : '↓';
-                setStyledText(trendShape, sym, {
-                    size: 20,
-                    bold: true,
-                    color: color,
-                    align: SlidesApp.ParagraphAlignment.CENTER
-                }, theme);
-                try { trendShape.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
+                requests.push(...BatchTextStyleUtils.setText(slideId, trId, sym, { size: 20, bold: true, color: color, align: 'CENTER' }, theme));
+                requests.push(RequestFactory.updateShapeProperties(trId, null, null, null, 'MIDDLE'));
             }
 
-            // Separator line (clean divider)
+            // Separator Line
             if (index < stats.length - 1) {
                 const lineY = currentY + rowHeight;
-                const line = slide.insertLine(SlidesApp.LineCategory.STRAIGHT, area.left, lineY, area.left + area.width, lineY);
-                line.getLineFill().setSolidFill(theme.colors.ghostGray);
-                line.setWeight(0.5); // Very thin
+                const lineId = baseId + '_LN';
+                requests.push(RequestFactory.createLine(slideId, lineId, area.left, lineY, area.left + area.width, lineY));
+
+                // Manual updateLineProperties because RequestFactory doesn't have it yet
+                requests.push({
+                    updateLineProperties: {
+                        objectId: lineId,
+                        lineProperties: {
+                            lineFill: { solidFill: { color: { rgbColor: hexToRgb(theme.colors.ghostGray) } } },
+                            weight: { magnitude: 0.5, unit: 'PT' }
+                        },
+                        fields: 'lineFill,weight'
+                    }
+                });
             }
 
             currentY += rowHeight;
         });
+
+        return requests;
     }
 }

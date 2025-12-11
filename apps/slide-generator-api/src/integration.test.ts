@@ -20,9 +20,9 @@ beforeEach(() => {
         getSlides: vi.fn().mockReturnValue([]),
         getMasters: vi.fn().mockReturnValue([]),
         getLayouts: vi.fn().mockReturnValue([
-            { getLayoutName: vi.fn().mockReturnValue('TITLE') },
-            { getLayoutName: vi.fn().mockReturnValue('SECTION_HEADER') },
-            { getLayoutName: vi.fn().mockReturnValue('TITLE_AND_BODY') }
+            { getLayoutName: vi.fn().mockReturnValue('TITLE'), getObjectId: vi.fn().mockReturnValue('layout-title-id') },
+            { getLayoutName: vi.fn().mockReturnValue('SECTION_HEADER'), getObjectId: vi.fn().mockReturnValue('layout-section-id') },
+            { getLayoutName: vi.fn().mockReturnValue('TITLE_AND_BODY'), getObjectId: vi.fn().mockReturnValue('layout-content-id') }
         ]),
         appendSlide: vi.fn().mockImplementation(() => ({
             getObjectId: vi.fn().mockReturnValue('mock-slide-id'),
@@ -94,10 +94,10 @@ beforeEach(() => {
         getSlides: vi.fn().mockReturnValue([{ remove: vi.fn() }, { remove: vi.fn() }]),
         getMasters: vi.fn().mockReturnValue([]),
         getLayouts: vi.fn().mockReturnValue([
-            { getLayoutName: vi.fn().mockReturnValue('TITLE') },
-            { getLayoutName: vi.fn().mockReturnValue('SECTION_HEADER') },
-            { getLayoutName: vi.fn().mockReturnValue('TITLE_AND_BODY') },
-            { getLayoutName: vi.fn().mockReturnValue('BLANK') }
+            { getLayoutName: vi.fn().mockReturnValue('TITLE'), getObjectId: vi.fn().mockReturnValue('layout-title-id') },
+            { getLayoutName: vi.fn().mockReturnValue('SECTION_HEADER'), getObjectId: vi.fn().mockReturnValue('layout-section-id') },
+            { getLayoutName: vi.fn().mockReturnValue('TITLE_AND_BODY'), getObjectId: vi.fn().mockReturnValue('layout-content-id') },
+            { getLayoutName: vi.fn().mockReturnValue('BLANK'), getObjectId: vi.fn().mockReturnValue('layout-blank-id') }
         ]),
         appendSlide: vi.fn().mockImplementation(() => ({
             getObjectId: vi.fn().mockReturnValue('mock-slide-id-2'),
@@ -196,5 +196,30 @@ describe('Integration: Application Service + Infrastructure', () => {
         expect(url).toBe('https://template-copy.com');
         expect((global as any).DriveApp.getFileById).toHaveBeenCalledWith('tmpl-abc');
         expect((global as any).SlidesApp.openById).toHaveBeenCalledWith('new-copy-id');
+    });
+
+    it('should handle diagram slides without error', () => {
+        // Reproduce 'insertShape' error by requesting a diagram
+        const repo = new GasSlideRepository();
+        const service = new PresentationApplicationService(repo);
+
+        // Assume layout map handles mapping or fallback to CONTENT
+        // The error happens inside Generator -> Renderer
+        service.createPresentation({
+            title: 'Diagram Pres',
+            slides: [
+                {
+                    title: 'Triangle Diagram',
+                    // @ts-ignore
+                    layout: 'TIMELINE', // Request something that triggers diagram generator
+                    rawData: { type: 'triangle', items: [{ title: 'A' }, { title: 'B' }] },
+                    content: []
+                }
+            ]
+        });
+
+        // If successful, batchUpdate should be called.
+        // If it fails with 'slide.insertShape is not a function', this test will fail.
+        expect((global as any).Slides.Presentations.batchUpdate).toHaveBeenCalled();
     });
 });

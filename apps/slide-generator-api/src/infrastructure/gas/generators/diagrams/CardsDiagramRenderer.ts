@@ -1,19 +1,20 @@
 import { IDiagramRenderer } from './IDiagramRenderer';
 import { LayoutManager } from '../../../../common/utils/LayoutManager';
-import { setStyledText } from '../../../../common/utils/SlideUtils';
+import { BatchTextStyleUtils } from '../../BatchTextStyleUtils';
+import { RequestFactory } from '../../RequestFactory';
 
 export class CardsDiagramRenderer implements IDiagramRenderer {
-    render(slide: GoogleAppsScript.Slides.Slide, data: any, area: any, settings: any, layout: LayoutManager): void {
+    render(slideId: string, data: any, area: any, settings: any, layout: LayoutManager): GoogleAppsScript.Slides.Schema.Request[] {
+        const requests: GoogleAppsScript.Slides.Schema.Request[] = [];
         const theme = layout.getTheme();
         const items = data.items || [];
-        if (!items.length) return;
+        if (!items.length) return requests;
         const type = (data.type || '').toLowerCase();
         const hasHeader = type.includes('headercards');
 
         const cols = data.columns || Math.min(items.length, 3);
         const rows = Math.ceil(items.length / cols);
 
-        // Editorial spacing: Wider gaps for magazine-like feel
         const gap = layout.pxToPt(30);
         const cardW = (area.width - gap * (cols - 1)) / cols;
         const cardH = (area.height - gap * (rows - 1)) / rows;
@@ -24,7 +25,6 @@ export class CardsDiagramRenderer implements IDiagramRenderer {
             const x = area.left + c * (cardW + gap);
             const y = area.top + r * (cardH + gap);
 
-            // Item content parsing
             let title = '';
             let desc = '';
             if (typeof item === 'string') {
@@ -36,84 +36,81 @@ export class CardsDiagramRenderer implements IDiagramRenderer {
                 desc = item.desc || item.description || item.text || '';
             }
 
+            const baseId = slideId + '_CARD_' + i;
+
             if (hasHeader) {
-                // Editorial Style: Top Bar Header
+                // Header Bar
                 const barH = layout.pxToPt(4);
-                const bar = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, x, y, cardW, barH);
-                bar.getFill().setSolidFill(settings.primaryColor);
-                bar.getBorder().setTransparent();
+                const barId = baseId + '_BAR';
+                requests.push(RequestFactory.createShape(slideId, barId, 'RECTANGLE', x, y, cardW, barH));
+                requests.push(RequestFactory.updateShapeProperties(barId, settings.primaryColor, 'TRANSPARENT'));
 
-                // Numbering (01, 02...)
+                // Numbering
                 const numStr = String(i + 1).padStart(2, '0');
-                // Place closer to header
-                const numBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x, y + layout.pxToPt(6), cardW, layout.pxToPt(20));
-                setStyledText(numBox, numStr, {
-                    size: 14,
-                    bold: true,
-                    color: theme.colors.neutralGray,
-                    align: SlidesApp.ParagraphAlignment.END
-                }, theme);
+                const numId = baseId + '_NUM';
+                requests.push(RequestFactory.createShape(slideId, numId, 'TEXT_BOX', x, y + layout.pxToPt(6), cardW, layout.pxToPt(20)));
+                requests.push(...BatchTextStyleUtils.setText(slideId, numId, numStr, {
+                    size: 14, bold: true, color: theme.colors.neutralGray, align: 'END'
+                }, theme));
 
-                // Title - Large and bold, closer to top
-                const titleTop = y + layout.pxToPt(6); // Aligned with num
+                // Title
+                const titleTop = y + layout.pxToPt(6);
                 const titleH = layout.pxToPt(30);
-                const titleBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x, titleTop, cardW, titleH);
-                setStyledText(titleBox, title, {
-                    size: 18,
-                    bold: true,
-                    color: theme.colors.textPrimary,
-                    align: SlidesApp.ParagraphAlignment.START
-                }, theme);
-                try { titleBox.setContentAlignment(SlidesApp.ContentAlignment.TOP); } catch (e) { }
+                const titleId = baseId + '_TITLE';
+                requests.push(RequestFactory.createShape(slideId, titleId, 'TEXT_BOX', x, titleTop, cardW, titleH));
+                requests.push(RequestFactory.updateShapeProperties(titleId, null, null, null, 'TOP'));
+                requests.push(...BatchTextStyleUtils.setText(slideId, titleId, title, {
+                    size: 18, bold: true, color: theme.colors.textPrimary, align: 'START'
+                }, theme));
 
-                // Body - Closer to title
-                const descTop = titleTop + titleH; // No extra gap
+                // Body
+                const descTop = titleTop + titleH;
                 const descH = cardH - (descTop - y);
                 if (descH > 20) {
-                    const descBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x, descTop, cardW, descH);
-                    setStyledText(descBox, desc, {
+                    const descId = baseId + '_DESC';
+                    requests.push(RequestFactory.createShape(slideId, descId, 'TEXT_BOX', x, descTop, cardW, descH));
+                    requests.push(RequestFactory.updateShapeProperties(descId, null, null, null, 'TOP'));
+                    requests.push(...BatchTextStyleUtils.setText(slideId, descId, desc, {
                         size: 13,
                         color: typeof theme.colors.textSmallFont === 'string' ? theme.colors.textSmallFont : '#424242',
-                        align: SlidesApp.ParagraphAlignment.START
-                    }, theme);
-                    try { descBox.setContentAlignment(SlidesApp.ContentAlignment.TOP); } catch (e) { }
+                        align: 'START'
+                    }, theme));
                 }
 
             } else {
-                // Minimal Card (No header bar)
+                // Minimal
                 const dotSize = layout.pxToPt(6);
-                // Align dot with top of title text approx
-                const dot = slide.insertShape(SlidesApp.ShapeType.ELLIPSE, x, y + layout.pxToPt(8), dotSize, dotSize);
-                dot.getFill().setSolidFill(settings.primaryColor);
-                dot.getBorder().setTransparent();
+                const dotId = baseId + '_DOT';
+                const dotY = y + layout.pxToPt(8);
+                requests.push(RequestFactory.createShape(slideId, dotId, 'ELLIPSE', x, dotY, dotSize, dotSize));
+                requests.push(RequestFactory.updateShapeProperties(dotId, settings.primaryColor, 'TRANSPARENT'));
 
-                // Title closer to dot
                 const contentX = x + dotSize + layout.pxToPt(10);
                 const contentW = cardW - (dotSize + layout.pxToPt(10));
 
                 const titleH = layout.pxToPt(30);
-                const titleBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, contentX, y, contentW, titleH);
-                setStyledText(titleBox, title, {
-                    size: 16,
-                    bold: true,
-                    color: theme.colors.textPrimary,
-                    align: SlidesApp.ParagraphAlignment.START
-                }, theme);
-                try { titleBox.setContentAlignment(SlidesApp.ContentAlignment.TOP); } catch (e) { }
+                const titleId = baseId + '_TITLE';
+                requests.push(RequestFactory.createShape(slideId, titleId, 'TEXT_BOX', contentX, y, contentW, titleH));
+                requests.push(RequestFactory.updateShapeProperties(titleId, null, null, null, 'TOP'));
+                requests.push(...BatchTextStyleUtils.setText(slideId, titleId, title, {
+                    size: 16, bold: true, color: theme.colors.textPrimary, align: 'START'
+                }, theme));
 
-                // Body closer to Title
-                const descTop = y + titleH - layout.pxToPt(5); // Slight overlap to tighten visual gap
+                const descTop = y + titleH - layout.pxToPt(5);
                 const descH = cardH - (descTop - y);
                 if (descH > 20) {
-                    const descBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, contentX, descTop, contentW, descH);
-                    setStyledText(descBox, desc, {
+                    const descId = baseId + '_DESC';
+                    requests.push(RequestFactory.createShape(slideId, descId, 'TEXT_BOX', contentX, descTop, contentW, descH));
+                    requests.push(RequestFactory.updateShapeProperties(descId, null, null, null, 'TOP'));
+                    requests.push(...BatchTextStyleUtils.setText(slideId, descId, desc, {
                         size: 13,
                         color: typeof theme.colors.textSmallFont === 'string' ? theme.colors.textSmallFont : '#424242',
-                        align: SlidesApp.ParagraphAlignment.START
-                    }, theme);
-                    try { descBox.setContentAlignment(SlidesApp.ContentAlignment.TOP); } catch (e) { }
+                        align: 'START'
+                    }, theme));
                 }
             }
         });
+
+        return requests;
     }
 }

@@ -1,67 +1,87 @@
 import { IDiagramRenderer } from './IDiagramRenderer';
 import { LayoutManager } from '../../../../common/utils/LayoutManager';
-import { setStyledText } from '../../../../common/utils/SlideUtils';
+import { BatchTextStyleUtils } from '../../BatchTextStyleUtils';
+import { RequestFactory } from '../../RequestFactory';
 
 export class QuoteDiagramRenderer implements IDiagramRenderer {
-    render(slide: GoogleAppsScript.Slides.Slide, data: any, area: any, settings: any, layout: LayoutManager): void {
+    render(slideId: string, data: any, area: any, settings: any, layout: LayoutManager): GoogleAppsScript.Slides.Schema.Request[] {
+        const requests: GoogleAppsScript.Slides.Schema.Request[] = [];
         const theme = layout.getTheme();
         const text = data.text || (data.points && data.points[0]) || '';
         const author = data.author || (data.points && data.points[1]) || '';
 
-
-        // Minimal layout: No background box
-        // Use a MASSIVE quote mark transparently in the background for impact
-
-        // Big Quote Mark (Ghost element behind)
+        // 1. Big Quote Mark (Background) - Created first to be at back
         const quoteSize = layout.pxToPt(200);
-        const quoteMark = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, area.left + layout.pxToPt(20), area.top - layout.pxToPt(40), quoteSize, quoteSize);
-        setStyledText(quoteMark, '“', {
+        const quoteId = slideId + '_QUOTE_MARK';
+        requests.push(RequestFactory.createShape(slideId, quoteId, 'TEXT_BOX', area.left + layout.pxToPt(20), area.top - layout.pxToPt(40), quoteSize, quoteSize));
+        requests.push(...BatchTextStyleUtils.setText(slideId, quoteId, '“', {
             size: 200,
-            color: '#F0F0F0', // Very faint
-            fontType: 'georgia', // Serif
+            color: '#F0F0F0',
+            fontFamily: 'Georgia',
             bold: true
-        }, theme);
-        quoteMark.sendToBack(); // Ensure it's behind
+        }, theme));
 
         const contentW = area.width * 0.9;
         const contentX = area.left + (area.width - contentW) / 2;
         const textTop = area.top + layout.pxToPt(60);
 
-        // Quote Text
-        // Use a nice Serif if possible, otherwise clean Sans
-        // Quote Text
-        // Use a nice Serif if possible, otherwise clean Sans
-        const quoteBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, contentX, textTop, contentW, layout.pxToPt(160)); // Reduce reserved height
-        setStyledText(quoteBox, text, {
+        // 2. Quote Text
+        const textId = slideId + '_QUOTE_TEXT';
+        requests.push(RequestFactory.createShape(slideId, textId, 'TEXT_BOX', contentX, textTop, contentW, layout.pxToPt(160)));
+        requests.push(...BatchTextStyleUtils.setText(slideId, textId, text, {
             size: 32,
-            bold: false,
+            bold: false, // Explicit false
             color: theme.colors.textPrimary,
-            align: SlidesApp.ParagraphAlignment.CENTER,
-            fontType: 'georgia'
-        }, theme);
-        try { quoteBox.setContentAlignment(SlidesApp.ContentAlignment.BOTTOM); } catch (e) { }
+            align: 'CENTER',
+            fontFamily: 'Georgia'
+        }, theme));
+        requests.push(RequestFactory.updateShapeProperties(textId, null, null, null, 'BOTTOM'));
 
-        // Author separating line (small, minimal)
-        const lineW = layout.pxToPt(40); // Shorter line
+        // 3. Separator Line
+        const lineW = layout.pxToPt(40);
         const lineX = area.left + (area.width - lineW) / 2;
-        // Position line closer to text bottom. Since we don't know exact text height, we guess or use relative.
-        // Let's assume text takes ~120pt max.
         const lineY = textTop + layout.pxToPt(165);
+        const lineId = slideId + '_QUOTE_LINE';
 
-        const line = slide.insertLine(SlidesApp.LineCategory.STRAIGHT, lineX, lineY, lineX + lineW, lineY);
-        line.getLineFill().setSolidFill(settings.primaryColor);
-        line.setWeight(2);
+        requests.push(RequestFactory.createLine(slideId, lineId, lineX, lineY, lineX + lineW, lineY));
+        // We need primary color for line. Assuming primaryColor is Hex.
+        // We'll trust user supplied correct Hex or use fallback.
+        // No easy hexToRgb here unless we inline it or use settings.primaryColor directly if API supported hex (it doesn't for Line).
+        // I'll inline a simple hex parser again or assume gray/black fallback for safety if primaryColor is complex.
+        // Or I can paste the helper. I'll paste the helper. 
+        const hexToRgb = (hex: string) => {
+            const h = (hex || '#000000').replace('#', '');
+            return {
+                red: parseInt(h.substring(0, 2), 16) / 255,
+                green: parseInt(h.substring(2, 4), 16) / 255,
+                blue: parseInt(h.substring(4, 6), 16) / 255
+            };
+        };
 
+        requests.push({
+            updateLineProperties: {
+                objectId: lineId,
+                lineProperties: {
+                    lineFill: { solidFill: { color: { rgbColor: hexToRgb(settings.primaryColor) } } },
+                    weight: { magnitude: 2, unit: 'PT' }
+                },
+                fields: 'lineFill,weight'
+            }
+        });
+
+        // 4. Author
         if (author) {
-            // Author closer to line
-            const authorBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, contentX, lineY + layout.pxToPt(5), contentW, layout.pxToPt(30));
-            setStyledText(authorBox, author, {
+            const authId = slideId + '_QUOTE_AUTH';
+            requests.push(RequestFactory.createShape(slideId, authId, 'TEXT_BOX', contentX, lineY + layout.pxToPt(5), contentW, layout.pxToPt(30)));
+            requests.push(...BatchTextStyleUtils.setText(slideId, authId, author, {
                 size: 14,
-                align: SlidesApp.ParagraphAlignment.CENTER,
+                align: 'CENTER',
                 color: theme.colors.neutralGray,
-                bold: true // Small but bold
-            }, theme);
-            try { authorBox.setContentAlignment(SlidesApp.ContentAlignment.TOP); } catch (e) { }
+                bold: true
+            }, theme));
+            requests.push(RequestFactory.updateShapeProperties(authId, null, null, null, 'TOP'));
         }
+
+        return requests;
     }
 }

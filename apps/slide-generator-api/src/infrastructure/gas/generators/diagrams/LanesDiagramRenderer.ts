@@ -1,9 +1,11 @@
 import { IDiagramRenderer } from './IDiagramRenderer';
 import { LayoutManager } from '../../../../common/utils/LayoutManager';
-import { setStyledText, drawArrowBetweenRects } from '../../../../common/utils/SlideUtils';
+import { BatchTextStyleUtils } from '../../BatchTextStyleUtils';
+import { RequestFactory } from '../../RequestFactory';
 
 export class LanesDiagramRenderer implements IDiagramRenderer {
-    render(slide: GoogleAppsScript.Slides.Slide, data: any, area: any, settings: any, layout: LayoutManager): void {
+    render(slideId: string, data: any, area: any, settings: any, layout: LayoutManager): GoogleAppsScript.Slides.Schema.Request[] {
+        const requests: GoogleAppsScript.Slides.Schema.Request[] = [];
         const theme = layout.getTheme();
         const lanes = data.lanes || [];
         const n = Math.max(1, lanes.length);
@@ -13,23 +15,36 @@ export class LanesDiagramRenderer implements IDiagramRenderer {
         const laneW = (area.width - px(laneGapPx) * (n - 1)) / n;
         const cardBoxes: any[] = [];
 
+        // Helper for colors
+        const hexToRgb = (hex: string) => {
+            const h = (hex || '#000000').replace('#', '');
+            return {
+                red: parseInt(h.substring(0, 2), 16) / 255,
+                green: parseInt(h.substring(2, 4), 16) / 255,
+                blue: parseInt(h.substring(4, 6), 16) / 255
+            };
+        };
+
         for (let j = 0; j < n; j++) {
             const lane = lanes[j] || { title: '', items: [] };
             const left = area.left + j * (laneW + px(laneGapPx));
+            const laneIdPrefix = slideId + `_LANE_${j}`;
 
             // Lane Header
-            const lt = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, left, area.top, laneW, px(laneTitleHeightPx));
-            lt.getFill().setSolidFill(settings.primaryColor);
-            lt.getBorder().getLineFill().setSolidFill(settings.primaryColor);
-            setStyledText(lt, lane.title || '', { size: theme.fonts.sizes.laneTitle, bold: true, color: theme.colors.backgroundGray, align: SlidesApp.ParagraphAlignment.CENTER }, theme);
-            try { lt.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
+            const ltId = laneIdPrefix + '_HEAD';
+            requests.push(RequestFactory.createShape(slideId, ltId, 'RECTANGLE', left, area.top, laneW, px(laneTitleHeightPx)));
+            requests.push(RequestFactory.updateShapeProperties(ltId, settings.primaryColor, settings.primaryColor, 1));
+            requests.push(...BatchTextStyleUtils.setText(slideId, ltId, lane.title || '', {
+                size: theme.fonts.sizes.laneTitle, bold: true, color: theme.colors.backgroundGray, align: 'CENTER'
+            }, theme));
+            requests.push(RequestFactory.updateShapeProperties(ltId, null, null, null, 'MIDDLE'));
 
             // Lane Body
             const laneBodyTop = area.top + px(laneTitleHeightPx);
             const laneBodyHeight = area.height - px(laneTitleHeightPx);
-            const laneBg = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, left, laneBodyTop, laneW, laneBodyHeight);
-            laneBg.getFill().setSolidFill(theme.colors.backgroundGray);
-            laneBg.getBorder().getLineFill().setSolidFill(theme.colors.laneBorder);
+            const lbId = laneIdPrefix + '_BODY';
+            requests.push(RequestFactory.createShape(slideId, lbId, 'RECTANGLE', left, laneBodyTop, laneW, laneBodyHeight));
+            requests.push(RequestFactory.updateShapeProperties(lbId, theme.colors.backgroundGray, theme.colors.laneBorder));
 
             const items = Array.isArray(lane.items) ? lane.items : [];
             const rows = Math.max(1, items.length);
@@ -41,11 +56,14 @@ export class LanesDiagramRenderer implements IDiagramRenderer {
             cardBoxes[j] = [];
             for (let i = 0; i < rows; i++) {
                 const cardTop = firstTop + i * (cardH + px(cardGapPx));
-                const card = slide.insertShape(SlidesApp.ShapeType.ROUND_RECTANGLE, left + px(lanePadPx), cardTop, laneW - px(lanePadPx) * 2, cardH);
-                card.getFill().setSolidFill(theme.colors.backgroundGray);
-                card.getBorder().getLineFill().setSolidFill(theme.colors.cardBorder);
-                setStyledText(card, items[i] || '', { size: theme.fonts.sizes.body }, theme);
-                try { card.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
+                const cardId = laneIdPrefix + `_CARD_${i}`;
+
+                requests.push(RequestFactory.createShape(slideId, cardId, 'ROUND_RECTANGLE', left + px(lanePadPx), cardTop, laneW - px(lanePadPx) * 2, cardH));
+                requests.push(RequestFactory.updateShapeProperties(cardId, theme.colors.backgroundGray, theme.colors.cardBorder));
+                requests.push(...BatchTextStyleUtils.setText(slideId, cardId, items[i] || '', {
+                    size: theme.fonts.sizes.body
+                }, theme));
+                requests.push(RequestFactory.updateShapeProperties(cardId, null, null, null, 'MIDDLE'));
 
                 cardBoxes[j][i] = {
                     left: left + px(lanePadPx),
@@ -56,14 +74,36 @@ export class LanesDiagramRenderer implements IDiagramRenderer {
             }
         }
 
-        // Draw Arrows
+        // Draw Arrows Logic using RequestFactory
         const maxRows = Math.max(0, ...cardBoxes.map(a => a ? a.length : 0));
         for (let j = 0; j < n - 1; j++) {
             for (let i = 0; i < maxRows; i++) {
                 if (cardBoxes[j] && cardBoxes[j][i] && cardBoxes[j + 1] && cardBoxes[j + 1][i]) {
-                    drawArrowBetweenRects(slide, cardBoxes[j][i], cardBoxes[j + 1][i], px(arrowHeightPx), px(arrowGapPx), settings);
+                    const boxA = cardBoxes[j][i];
+                    const boxB = cardBoxes[j + 1][i];
+
+                    const startX = boxA.left + boxA.width;
+                    const startY = boxA.top + boxA.height / 2;
+                    const endX = boxB.left;
+                    const endY = boxB.top + boxB.height / 2;
+
+                    const arrowId = slideId + `_ARR_${j}_${i}`;
+                    requests.push(RequestFactory.createLine(slideId, arrowId, startX, startY, endX, endY));
+                    requests.push({
+                        updateLineProperties: {
+                            objectId: arrowId,
+                            lineProperties: {
+                                lineFill: { solidFill: { color: { rgbColor: hexToRgb(settings.primaryColor) } } },
+                                weight: { magnitude: 2, unit: 'PT' },
+                                endArrow: 'FILL_ARROW'
+                            },
+                            fields: 'lineFill,weight,endArrow'
+                        }
+                    });
                 }
             }
         }
+
+        return requests;
     }
 }

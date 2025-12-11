@@ -95,7 +95,31 @@ const mockLayout = {
         colors: {
             primary: '#4285F4',
             textPrimary: '#000000',
-            neutralGray: '#888888'
+            neutralGray: '#888888',
+            backgroundGray: '#F1F3F4',
+            laneBorder: '#E0E0E0',
+            cardBorder: '#CCCCCC',
+            ghostGray: '#F5F5F5',
+            faintGray: '#F8F9FA',
+            textSmallFont: '#555555'
+        },
+        fonts: {
+            family: 'Roboto',
+            sizes: {
+                title: 32,
+                body: 14,
+                laneTitle: 18
+            }
+        },
+        diagram: {
+            laneGapPx: 10,
+            lanePadPx: 10,
+            laneTitleHeightPx: 40,
+            cardGapPx: 10,
+            cardMinHeightPx: 60,
+            cardMaxHeightPx: 120,
+            arrowHeightPx: 20,
+            arrowGapPx: 5
         }
     })
 };
@@ -140,7 +164,7 @@ describe('GasDiagramSlideGenerator', () => {
         const results = generator.generate('slide-id', data, mockLayout as any, 1, settings);
 
         expect(Array.isArray(results)).toBe(true);
-        const shapeReq = results.find(r => r.createShape && r.createShape.shapeType === 'TEXT_BOX');
+        const shapeReq = results.find(r => r.createShape && r.createShape.shapeType === 'CHEVRON');
         expect(shapeReq).toBeDefined();
     });
 });

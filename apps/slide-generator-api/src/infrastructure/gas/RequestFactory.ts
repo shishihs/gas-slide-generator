@@ -49,7 +49,7 @@ export class RequestFactory {
         return requests;
     }
 
-    static updateTextStyle(objectId: string, style: { bold?: boolean, fontSize?: number, color?: string, fontFamily?: string }, selectionStart?: number, selectionEnd?: number): GoogleAppsScript.Slides.Schema.Request {
+    static updateTextStyle(objectId: string, style: { bold?: boolean, fontSize?: number, color?: string, fontFamily?: string }, selectionStart?: number, selectionEnd?: number, rowIndex?: number, colIndex?: number): GoogleAppsScript.Slides.Schema.Request {
         const fields: string[] = [];
         const textStyle: any = {};
 
@@ -63,10 +63,8 @@ export class RequestFactory {
         }
         if (style.color !== undefined) {
             textStyle.foregroundColor = {
-                opaqueColor: { themeColor: style.color.startsWith('#') ? 'DARK1' : style.color as any } // TODO: Handle Hex vs Theme color properly
+                opaqueColor: { themeColor: style.color.startsWith('#') ? 'DARK1' : style.color as any }
             };
-            // Simple HEX fix for now if possible? API usually wants RGB for hex.
-            // For now assume ThemeColor for simplicity or implement Hex->RGB helper later
             if (style.color.startsWith('#')) {
                 const hex = style.color.replace('#', '');
                 const r = parseInt(hex.substring(0, 2), 16) / 255;
@@ -97,17 +95,15 @@ export class RequestFactory {
             request.updateTextStyle.textRange = {
                 type: 'FIXED_RANGE',
                 startIndex: selectionStart,
-                endIndex: selectionStart + selectionEnd // API uses startIndex + endIndex (exclusive? or count?)
-                // Actually API TextRange is { type, startIndex, endIndex } where endIndex is index, NOT length.
-                // But my calling code passed `length`.
-                // Let's check typical Google API Usage.
-                // updateTextStyle -> textRange -> startIndex (inclusive), endIndex (exclusive).
-                // My caller passed `0, length`. So if start=0, length=5, endIndex=5. Correct.
-                // Wait, caller passed `String(i).length + 1` as start index for second call.
+                endIndex: selectionStart + selectionEnd
             };
-            // Correct logic: usage was (start, length). 
-            // So endIndex = start + length.
-            request.updateTextStyle.textRange.endIndex = selectionStart + selectionEnd;
+        }
+
+        if (rowIndex !== undefined && colIndex !== undefined) {
+            request.updateTextStyle.cellLocation = {
+                rowIndex: rowIndex,
+                columnIndex: colIndex
+            };
         }
 
         return request;
@@ -174,7 +170,7 @@ export class RequestFactory {
         // For now this is a basic approximation.
     }
 
-    static updateShapeProperties(objectId: string, fillHex?: string, borderHex?: string, borderWeightPt?: number): GoogleAppsScript.Slides.Schema.Request {
+    static updateShapeProperties(objectId: string, fillHex?: string, borderHex?: string, borderWeightPt?: number, contentAlignment?: string): GoogleAppsScript.Slides.Schema.Request {
         const fields: string[] = [];
         const shapeProperties: any = {};
 
@@ -216,11 +212,107 @@ export class RequestFactory {
             fields.push('outline');
         }
 
+        if (contentAlignment) {
+            shapeProperties.contentAlignment = contentAlignment;
+            fields.push('contentAlignment');
+        }
+
         return {
             updateShapeProperties: {
                 objectId: objectId,
                 shapeProperties: shapeProperties,
                 fields: fields.join(',')
+            }
+        };
+    }
+
+    static updateParagraphStyle(objectId: string, alignment: string, rowIndex?: number, colIndex?: number): GoogleAppsScript.Slides.Schema.Request {
+        const req: any = {
+            updateParagraphStyle: {
+                objectId: objectId,
+                style: {
+                    alignment: alignment as any
+                },
+                fields: 'alignment'
+            }
+        };
+        if (rowIndex !== undefined && colIndex !== undefined) {
+            req.updateParagraphStyle.cellLocation = {
+                rowIndex: rowIndex,
+                columnIndex: colIndex
+            };
+        }
+        return req;
+    }
+
+    static createTable(pageId: string, objectId: string, rows: number, cols: number, left: number, top: number, width: number, height: number): GoogleAppsScript.Slides.Schema.Request {
+        return {
+            createTable: {
+                objectId: objectId,
+                rows: rows,
+                columns: cols,
+                elementProperties: {
+                    pageObjectId: pageId,
+                    size: {
+                        width: { magnitude: width, unit: 'PT' },
+                        height: { magnitude: height, unit: 'PT' }
+                    },
+                    transform: {
+                        scaleX: 1,
+                        scaleY: 1,
+                        translateX: left,
+                        translateY: top,
+                        unit: 'PT'
+                    }
+                }
+            }
+        };
+    }
+
+    static insertText(objectId: string, text: string, rowIndex?: number, colIndex?: number): GoogleAppsScript.Slides.Schema.Request {
+        const req: any = {
+            insertText: {
+                objectId: objectId,
+                text: text
+            }
+        };
+        if (rowIndex !== undefined && colIndex !== undefined) {
+            req.insertText.cellLocation = {
+                rowIndex: rowIndex,
+                columnIndex: colIndex
+            };
+        }
+        return req;
+    }
+
+    static createImage(pageId: string, objectId: string, url: string, left: number, top: number, width: number, height: number): GoogleAppsScript.Slides.Schema.Request {
+        return {
+            createImage: {
+                objectId: objectId,
+                url: url,
+                elementProperties: {
+                    pageObjectId: pageId,
+                    size: {
+                        width: { magnitude: width, unit: 'PT' },
+                        height: { magnitude: height, unit: 'PT' }
+                    },
+                    transform: {
+                        scaleX: 1,
+                        scaleY: 1,
+                        translateX: left,
+                        translateY: top,
+                        unit: 'PT'
+                    }
+                }
+            }
+        };
+    }
+
+    static groupObjects(pageId: string, groupObjectId: string, childrenObjectIds: string[]): GoogleAppsScript.Slides.Schema.Request {
+        return {
+            groupObjects: {
+                groupObjectId: groupObjectId,
+                childrenObjectIds: childrenObjectIds
             }
         };
     }

@@ -1,38 +1,38 @@
 import { IDiagramRenderer } from './IDiagramRenderer';
 import { LayoutManager } from '../../../../common/utils/LayoutManager';
-import { setStyledText } from '../../../../common/utils/SlideUtils';
+import { BatchTextStyleUtils } from '../../BatchTextStyleUtils';
+import { RequestFactory } from '../../RequestFactory';
 import { generateCompareColors } from '../../../../common/utils/ColorUtils';
 
 export class StatsCompareDiagramRenderer implements IDiagramRenderer {
-    render(slide: GoogleAppsScript.Slides.Slide, data: any, area: any, settings: any, layout: LayoutManager): void {
+    render(slideId: string, data: any, area: any, settings: any, layout: LayoutManager): GoogleAppsScript.Slides.Schema.Request[] {
+        const requests: GoogleAppsScript.Slides.Schema.Request[] = [];
         const theme = layout.getTheme();
         const leftTitle = data.leftTitle || '導入前';
         const rightTitle = data.rightTitle || '導入後';
         const stats = data.stats || [];
-        if (!stats.length) return;
+        if (!stats.length) return requests;
 
         const compareColors = generateCompareColors(settings.primaryColor);
 
         // Header row
         const headerH = layout.pxToPt(45);
-        const labelColW = area.width * 0.35;  // Label column width
-        const valueColW = (area.width - labelColW) / 2;  // Each value column width
+        const labelColW = area.width * 0.35;
+        const valueColW = (area.width - labelColW) / 2;
 
         // Left Title Header
         const leftHeaderX = area.left + labelColW;
-        const leftHeader = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, leftHeaderX, area.top, valueColW, headerH);
-        leftHeader.getFill().setSolidFill(compareColors.left);
-        leftHeader.getBorder().setTransparent();
-        setStyledText(leftHeader, leftTitle, { size: 14, bold: true, color: theme.colors.backgroundGray, align: SlidesApp.ParagraphAlignment.CENTER }, theme);
-        try { leftHeader.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
+        const lhId = slideId + '_STAT_LH';
+        requests.push(RequestFactory.createShape(slideId, lhId, 'RECTANGLE', leftHeaderX, area.top, valueColW, headerH));
+        requests.push(RequestFactory.updateShapeProperties(lhId, compareColors.left, 'TRANSPARENT', 0, 'MIDDLE'));
+        requests.push(...BatchTextStyleUtils.setText(slideId, lhId, leftTitle, { size: 14, bold: true, color: theme.colors.backgroundGray, align: 'CENTER' }, theme));
 
         // Right Title Header
         const rightHeaderX = area.left + labelColW + valueColW;
-        const rightHeader = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, rightHeaderX, area.top, valueColW, headerH);
-        rightHeader.getFill().setSolidFill(compareColors.right);
-        rightHeader.getBorder().setTransparent();
-        setStyledText(rightHeader, rightTitle, { size: 14, bold: true, color: theme.colors.backgroundGray, align: SlidesApp.ParagraphAlignment.CENTER }, theme);
-        try { rightHeader.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
+        const rhId = slideId + '_STAT_RH';
+        requests.push(RequestFactory.createShape(slideId, rhId, 'RECTANGLE', rightHeaderX, area.top, valueColW, headerH));
+        requests.push(RequestFactory.updateShapeProperties(rhId, compareColors.right, 'TRANSPARENT', 0, 'MIDDLE'));
+        requests.push(...BatchTextStyleUtils.setText(slideId, rhId, rightTitle, { size: 14, bold: true, color: theme.colors.backgroundGray, align: 'CENTER' }, theme));
 
         // Data rows
         const availableHeight = area.height - headerH;
@@ -45,43 +45,44 @@ export class StatsCompareDiagramRenderer implements IDiagramRenderer {
             const rightValue = stat.rightValue || '';
             const trend = stat.trend || null;
 
-            // Alternate row background
             const rowBg = index % 2 === 0 ? theme.colors.backgroundGray : '#FFFFFF';
 
+            // Unique IDs per row
+            const baseId = slideId + '_STAT_R' + index;
+
             // Label cell
-            const labelCell = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, area.left, currentY, labelColW, rowHeight);
-            labelCell.getFill().setSolidFill(rowBg);
-            labelCell.getBorder().getLineFill().setSolidFill(theme.colors.faintGray);
-            setStyledText(labelCell, label, { size: theme.fonts.sizes.body, bold: true, align: SlidesApp.ParagraphAlignment.START }, theme);
-            try { labelCell.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
+            const lId = baseId + '_L';
+            requests.push(RequestFactory.createShape(slideId, lId, 'RECTANGLE', area.left, currentY, labelColW, rowHeight));
+            requests.push(RequestFactory.updateShapeProperties(lId, rowBg, theme.colors.faintGray, 1, 'MIDDLE')); // Border width 1? Was 1 in mock? default
+            requests.push(...BatchTextStyleUtils.setText(slideId, lId, label, { size: theme.fonts.sizes.body, bold: true, align: 'START' }, theme));
 
             // Left value cell
-            const leftCell = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, leftHeaderX, currentY, valueColW, rowHeight);
-            leftCell.getFill().setSolidFill(rowBg);
-            leftCell.getBorder().getLineFill().setSolidFill(theme.colors.faintGray);
-            setStyledText(leftCell, leftValue, { size: theme.fonts.sizes.body, align: SlidesApp.ParagraphAlignment.CENTER, color: compareColors.left }, theme);
-            try { leftCell.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
+            const lvId = baseId + '_LV';
+            requests.push(RequestFactory.createShape(slideId, lvId, 'RECTANGLE', leftHeaderX, currentY, valueColW, rowHeight));
+            requests.push(RequestFactory.updateShapeProperties(lvId, rowBg, theme.colors.faintGray, 1, 'MIDDLE'));
+            requests.push(...BatchTextStyleUtils.setText(slideId, lvId, leftValue, { size: theme.fonts.sizes.body, align: 'CENTER', color: compareColors.left }, theme));
 
             // Right value cell
-            const rightCell = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, rightHeaderX, currentY, valueColW - (trend ? layout.pxToPt(40) : 0), rowHeight);
-            rightCell.getFill().setSolidFill(rowBg);
-            rightCell.getBorder().getLineFill().setSolidFill(theme.colors.faintGray);
-            setStyledText(rightCell, rightValue, { size: theme.fonts.sizes.body, align: SlidesApp.ParagraphAlignment.CENTER, color: compareColors.right }, theme);
-            try { rightCell.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
+            const rvId = baseId + '_RV';
+            requests.push(RequestFactory.createShape(slideId, rvId, 'RECTANGLE', rightHeaderX, currentY, valueColW - (trend ? layout.pxToPt(40) : 0), rowHeight));
+            requests.push(RequestFactory.updateShapeProperties(rvId, rowBg, theme.colors.faintGray, 1, 'MIDDLE'));
+            requests.push(...BatchTextStyleUtils.setText(slideId, rvId, rightValue, { size: theme.fonts.sizes.body, align: 'CENTER', color: compareColors.right }, theme));
 
-            // Trend indicator (optional)
+            // Trend
             if (trend) {
                 const trendX = rightHeaderX + valueColW - layout.pxToPt(35);
-                const trendShape = slide.insertShape(SlidesApp.ShapeType.ELLIPSE, trendX, currentY + rowHeight / 4, layout.pxToPt(25), layout.pxToPt(25));
-                const isUp = trend.toLowerCase() === 'up';
-                const trendColor = isUp ? '#28a745' : '#dc3545';  // Green for up, Red for down
-                trendShape.getFill().setSolidFill(trendColor);
-                trendShape.getBorder().setTransparent();
-                setStyledText(trendShape, isUp ? '↑' : '↓', { size: 12, color: '#FFFFFF', bold: true, align: SlidesApp.ParagraphAlignment.CENTER }, theme);
-                try { trendShape.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
+                const tId = baseId + '_TR';
+                const isUp = String(trend).toLowerCase() === 'up';
+                const trendColor = isUp ? '#28a745' : '#dc3545';
+
+                requests.push(RequestFactory.createShape(slideId, tId, 'ELLIPSE', trendX, currentY + rowHeight / 4, layout.pxToPt(25), layout.pxToPt(25)));
+                requests.push(RequestFactory.updateShapeProperties(tId, trendColor, 'TRANSPARENT', 0, 'MIDDLE'));
+                requests.push(...BatchTextStyleUtils.setText(slideId, tId, isUp ? '↑' : '↓', { size: 12, color: '#FFFFFF', bold: true, align: 'CENTER' }, theme));
             }
 
             currentY += rowHeight;
         });
+
+        return requests;
     }
 }

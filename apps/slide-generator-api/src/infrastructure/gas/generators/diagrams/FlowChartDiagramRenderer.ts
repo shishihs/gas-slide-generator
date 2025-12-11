@@ -1,40 +1,61 @@
 import { IDiagramRenderer } from './IDiagramRenderer';
 import { LayoutManager } from '../../../../common/utils/LayoutManager';
-import { setStyledText } from '../../../../common/utils/SlideUtils';
+import { BatchTextStyleUtils } from '../../BatchTextStyleUtils';
+import { RequestFactory } from '../../RequestFactory';
 
 export class FlowChartDiagramRenderer implements IDiagramRenderer {
-    render(slide: GoogleAppsScript.Slides.Slide, data: any, area: any, settings: any, layout: LayoutManager): void {
+    render(slideId: string, data: any, area: any, settings: any, layout: LayoutManager): GoogleAppsScript.Slides.Schema.Request[] {
+        const requests: GoogleAppsScript.Slides.Schema.Request[] = [];
         const theme = layout.getTheme();
         const steps = data.steps || data.items || [];
-        if (!steps.length) return;
+        if (!steps.length) return requests;
 
-        // Similar to Process but maybe boxes with arrows connected
-        // Using a simple left-to-right flow for now
         const count = steps.length;
         const gap = 30;
         const boxWidth = (area.width - (gap * (count - 1))) / count;
         const boxHeight = 80;
         const y = area.top + (area.height - boxHeight) / 2;
 
-        steps.forEach((step: any, i: number) => {
+        for (let i = 0; i < count; i++) {
+            const step = steps[i];
             const x = area.left + i * (boxWidth + gap);
-            const shape = slide.insertShape(SlidesApp.ShapeType.ROUND_RECTANGLE, x, y, boxWidth, boxHeight);
-            shape.getFill().setSolidFill(theme.colors.backgroundGray);
-            shape.getBorder().getLineFill().setSolidFill(settings.primaryColor);
-            shape.getBorder().setWeight(2);
-            setStyledText(shape, typeof step === 'string' ? step : step.label || '', { size: theme.fonts.sizes.body, align: SlidesApp.ParagraphAlignment.CENTER }, theme);
-            try { shape.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
+            const baseId = slideId + `_FLOW_${i}`;
+            const boxId = baseId + '_BOX';
+            const arrowId = baseId + '_ARR';
 
+            // 1. Box
+            requests.push(RequestFactory.createShape(slideId, boxId, 'ROUND_RECTANGLE', x, y, boxWidth, boxHeight));
+            requests.push(RequestFactory.updateShapeProperties(boxId, theme.colors.backgroundGray, settings.primaryColor, 2, 'MIDDLE'));
+
+            const label = typeof step === 'string' ? step : (step.label || '');
+            requests.push(...BatchTextStyleUtils.setText(slideId, boxId, label, {
+                size: theme.fonts.sizes.body,
+                align: 'CENTER',
+                color: theme.colors.textPrimary
+            }, theme));
+
+            // 2. Connector Arrow (if not last)
             if (i < count - 1) {
-                // Arrow
                 const ax = x + boxWidth;
                 const ay = y + boxHeight / 2;
                 const bx = x + boxWidth + gap;
                 const by = ay;
-                const line = slide.insertLine(SlidesApp.LineCategory.STRAIGHT, ax, ay, bx, by);
-                line.setEndArrow(SlidesApp.ArrowStyle.FILL_ARROW);
-                line.getLineFill().setSolidFill(theme.colors.neutralGray);
+
+                requests.push(RequestFactory.createLine(slideId, arrowId, ax, ay, bx, by));
+                requests.push({
+                    updateLineProperties: {
+                        objectId: arrowId,
+                        lineProperties: {
+                            lineFill: { solidFill: { color: { rgbColor: { red: 0.6, green: 0.6, blue: 0.6 } } } }, // Neutral Gray (approx)
+                            weight: { magnitude: 1, unit: 'PT' },
+                            endArrow: 'ARROW'
+                        },
+                        fields: 'lineFill,weight,endArrow'
+                    }
+                });
             }
-        });
+        }
+
+        return requests;
     }
 }

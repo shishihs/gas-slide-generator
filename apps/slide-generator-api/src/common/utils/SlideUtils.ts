@@ -1,5 +1,5 @@
 import { SlideTheme } from '../config/SlideTheme';
-import { DEFAULT_THEME, CONFIG } from '../config/DefaultTheme';
+import { DEFAULT_THEME } from '../config/DefaultTheme';
 import { hexToRgb } from './ColorUtils';
 
 /**

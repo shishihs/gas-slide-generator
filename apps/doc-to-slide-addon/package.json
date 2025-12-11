@@ -4,6 +4,7 @@
   "description": "",
   "main": "Code.js",
   "scripts": {
+    "build": "node scripts/build-help.js",
     "test": "jest"
   },
   "keywords": [],

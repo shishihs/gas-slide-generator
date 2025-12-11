@@ -1456,6 +1456,7 @@ var global = this;
               Logger.log("Warning: Could not remove body placeholder: " + e);
             }
           }
+          const elementsBefore = slide.getPageElements().map((e) => e.getObjectId());
           try {
             if (type.includes("timeline")) {
               this.drawTimeline(slide, data, workArea, settings, layout);
@@ -1498,6 +1499,15 @@ var global = this;
             }
           } catch (e) {
             Logger.log(`ERROR in drawing ${type}: ${e}`);
+          }
+          const newElements = slide.getPageElements().filter((e) => !elementsBefore.includes(e.getObjectId()));
+          if (newElements.length > 1) {
+            try {
+              slide.group(newElements);
+              Logger.log(`Grouped ${newElements.length} elements for ${type}`);
+            } catch (e) {
+              Logger.log(`Warning: Could not group elements: ${e}`);
+            }
           }
           addCucFooter(slide, layout, pageNum, settings, this.creditImageBlob);
         }

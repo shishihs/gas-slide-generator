@@ -108,7 +108,9 @@ const mockSlide = {
     insertTable: jest.fn().mockReturnValue(mockTable),
     getPlaceholder: jest.fn().mockReturnValue(mockPlaceholder),
     getBackground: jest.fn().mockReturnValue({ setSolidFill: jest.fn() }),
-    getPlaceholders: jest.fn().mockReturnValue([])
+    getPlaceholders: jest.fn().mockReturnValue([]),
+    getPageElements: jest.fn().mockReturnValue([]),
+    group: jest.fn().mockReturnValue({ getObjectId: jest.fn().mockReturnValue('group-1') })
 };
 
 const mockLayout = {

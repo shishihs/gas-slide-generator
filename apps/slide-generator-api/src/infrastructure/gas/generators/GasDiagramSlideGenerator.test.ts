@@ -82,7 +82,9 @@ const mockSlide = {
     insertShape: jest.fn().mockReturnValue(mockShape),
     insertLine: jest.fn().mockReturnValue(mockLine),
     getPlaceholder: jest.fn().mockReturnValue(mockPlaceholder), // Return mockPlaceholder to avoid null checks failing if logic changes
-    getBackground: jest.fn().mockReturnValue({ setSolidFill: jest.fn() })
+    getBackground: jest.fn().mockReturnValue({ setSolidFill: jest.fn() }),
+    getPageElements: jest.fn().mockReturnValue([]),
+    group: jest.fn().mockReturnValue({ getObjectId: jest.fn().mockReturnValue('group-1') })
 };
 
 const mockLayout = {

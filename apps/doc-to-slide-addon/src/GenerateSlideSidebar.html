@@ -317,8 +317,8 @@
     <h3>🎨 スライド生成</h3>
     <p>ドキュメントの内容を、見た目の整ったGoogleスライドに自動変換します。</p>
 
-    <!-- Manual JSON Input Section (shown when GCP Project ID is missing) -->
-    <div class="section" id="manualInputSection" style="display: none;">
+    <!-- Manual JSON Input Section (Default View) -->
+    <div class="section" id="manualInputSection">
       <div class="section-title">📝 Manual Mode - JSON を入力</div>
       <p style="margin-bottom: 8px; font-size: 12px; color: var(--text-secondary);">
         Gem で生成した JSON を下のテキストエリアに貼り付けてください。
@@ -332,11 +332,23 @@
       </button>
     </div>
 
+    <!-- Automatic Mode Section (Hidden by default, shown only if configured) -->
+    <div id="automaticModeSection" class="section"
+      style="display:none; border: 1px dashed #4285f4; background-color: #fbfdff;">
+      <div class="section-title" style="color: #1967d2; display:flex; align-items:center; gap:8px;">
+        <span>⚡️ Vertex AI Mode (Auto)</span>
+      </div>
+      <p>GCP プロジェクトが連携されています。AI がドキュメントを直接解析します。</p>
+      <button class="btn-primary" style="background-color: #1967d2;" onclick="startAutomaticGeneration()">
+        🤖 ドキュメントから自動生成
+      </button>
+    </div>
+
     <!-- Retry Action (Only visible on error) -->
     <div class="section" id="retrySection" style="display: none;">
       <div class="section-title">⚠️ エラーが発生しました</div>
       <p style="margin-bottom: 12px;">生成プロセス中にエラーが発生しました。</p>
-      <button class="btn-primary" onclick="startGeneration()">
+      <button class="btn-primary" onclick="startAutomaticGeneration()">
         再試行
       </button>
     </div>
@@ -357,22 +369,21 @@
       <a id="slideLink" href="#" target="_blank" class="link">プレゼンテーションを開く →</a>
 
       <div style="margin-top: 16px; border-top: 1px solid #eee; padding-top: 12px;">
-        <button class="btn-secondary" onclick="startGeneration()">もう一度作成する</button>
+        <button class="btn-secondary" onclick="resetUI()">もう一度作成する</button>
       </div>
     </div>
   </div><!-- End Generate Section -->
 
   <script>
     /**
-     * Start the generation process
-     * Step 1: Convert Doc to JSON
-     * Step 2: Generate Slides from JSON
+     * Start the automatic generation process (Vertex AI)
      */
-    function startGeneration() {
+    function startAutomaticGeneration() {
       // Create cleaner UI state
       document.getElementById('retrySection').style.display = 'none';
       document.getElementById('resultSection').style.display = 'none';
       document.getElementById('manualInputSection').style.display = 'none';
+      document.getElementById('automaticModeSection').style.display = 'none';
 
       showStatus('loading', '<span class="spinner"></span>ステップ 1/2: ドキュメントの内容を分析中...');
 
@@ -380,6 +391,22 @@
         .withSuccessHandler(onJsonSuccess)
         .withFailureHandler(onError)
         .convertDocumentToJson();
+    }
+
+    /**
+     * Reset UI to initial state
+     */
+    function resetUI() {
+      document.getElementById('resultSection').style.display = 'none';
+      document.getElementById('retrySection').style.display = 'none';
+      document.getElementById('status').className = '';
+      document.getElementById('status').innerHTML = '';
+
+      // Manual mode is always main
+      document.getElementById('manualInputSection').style.display = 'block';
+
+      // Re-check auto mode visibility
+      checkGenerativeMode();
     }
 
     /**
@@ -392,9 +419,9 @@
         return;
       }
 
-      // Check if manual mode is required
+      // Check if manual mode is required (shouldn't happen if button was hidden, but just in case)
       if (jsonResult.__manualModeRequired) {
-        showManualInputSection();
+        showManualInputSection(); // Fallback
         return;
       }
 
@@ -410,9 +437,6 @@
      * Show the manual JSON input section
      */
     function showManualInputSection() {
-      document.getElementById('manualInputSection').style.display = 'block';
-      showStatus('info', '💡 Gem で JSON を生成し、上のフィールドに貼り付けてください。');
-
       // Load Gem URL
       google.script.run
         .withSuccessHandler(function (gemUrl) {
@@ -424,6 +448,12 @@
           }
         })
         .getGemUrl();
+    }
+
+    // Call on load to set up the link if needed, though getGemUrl is also called on demand
+    // Better to just call it once on init
+    function initManualMode() {
+      showManualInputSection();
     }
 
     /**
@@ -447,6 +477,7 @@
 
       showStatus('loading', '<span class="spinner"></span>スライドを生成中... (数分かかる場合があります)');
       document.getElementById('manualInputSection').style.display = 'none';
+      document.getElementById('automaticModeSection').style.display = 'none';
 
       google.script.run
         .withSuccessHandler(onSlideSuccess)
@@ -474,6 +505,9 @@
     function onError(error) {
       document.getElementById('retrySection').style.display = 'block';
       showStatus('error', '❌ エラー: ' + error.message);
+
+      // If error, maybe show manual mode again just in case?
+      // For now, keep it simple with retry button.
     }
 
     /**
@@ -485,10 +519,6 @@
       status.innerHTML = message;
     }
 
-
-
-    // Load colors when tab is switched or on load?
-    // Let's load on init
     function loadColors() {
       google.script.run
         .withSuccessHandler(function (colors) {
@@ -499,8 +529,6 @@
             if (colors.deep) {
               document.documentElement.style.setProperty('--primary-hover', colors.deep);
             }
-            // Text color is used for body, but we might not need to set it dynamically here if CSS var usage is limited
-            // But let's set available ones
             if (colors.text) {
               document.documentElement.style.setProperty('--text-primary', colors.text);
             }
@@ -522,12 +550,27 @@
         .getCurrentSettings();
     }
 
+    // Check if Automatic Mode (Vertex AI) applies
+    function checkGenerativeMode() {
+      google.script.run
+        .withSuccessHandler(function (status) {
+          if (status && status.enabled) {
+            document.getElementById('automaticModeSection').style.display = 'block';
+          } else {
+            document.getElementById('automaticModeSection').style.display = 'none';
+          }
+        })
+        .getGenerativeModeStatus();
+    }
 
-    // Auto-start generation on load
+
+    // Initialize UI
     window.onload = function () {
       loadColors();
       checkMockMode();
-      startGeneration();
+      initManualMode();
+      checkGenerativeMode();
+      // startAutomaticGeneration(); // DISABLED AUTO START
     };
   </script>
 </body>

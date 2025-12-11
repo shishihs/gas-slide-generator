@@ -187,43 +187,57 @@
     </div>
 
     <div class="section">
-        <div class="section-title">GCP 設定</div>
+        <div class="section-title"
+            style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;"
+            onclick="toggleGcpSettings()">
+            <span>Mode A: Vertex AI 自動生成 (上級者向け)</span>
+            <span id="gcpToggleIcon"
+                style="color: var(--text-secondary); transform: rotate(0deg); transition: transform 0.2s;">▼</span>
+        </div>
 
-        <div class="form-group">
-            <label for="gcpProjectId">GCP プロジェクト ID</label>
-            <input type="text" id="gcpProjectId" placeholder="your-project-id">
-            <div class="help-text">
-                Vertex AI API が有効化されている GCP プロジェクトの ID
+        <div id="gcpSettingsContent"
+            style="display: none; margin-top: 16px; padding-top: 16px; border-top: 1px dashed var(--border-color);">
+            <div class="info-box" style="margin-bottom: 12px;">
+                ⚠️ <b>要 GCP プロジェクト</b><br>
+                Google Cloud Platform の課金有効化プロジェクトが必要です。
             </div>
-        </div>
 
-        <div class="form-group">
-            <label for="vertexAiLocation">Vertex AI リージョン</label>
-            <select id="vertexAiLocation">
-                <option value="asia-northeast1">asia-northeast1 (東京)</option>
-                <option value="us-central1">us-central1 (アイオワ)</option>
-                <option value="europe-west1">europe-west1 (ベルギー)</option>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label for="vertexAiModel">AI モデル</label>
-            <input type="text" id="vertexAiModel" list="modelOptions" placeholder="モデルを選択または入力">
-            <datalist id="modelOptions">
-                <option value="gemini-2.5-flash">Gemini 2.5 Flash (推奨)</option>
-                <option value="gemini-2.5-pro">Gemini 2.5 Pro (高性能)</option>
-                <option value="gemini-3-pro">Gemini 3 Pro (プレビュー)</option>
-            </datalist>
-            <div class="help-text">
-                モデルを選択するか、カスタムモデル名を入力してください (例: gemini-3.0-flash)
+            <div class="form-group">
+                <label for="gcpProjectId">GCP プロジェクト ID</label>
+                <input type="text" id="gcpProjectId" placeholder="your-project-id">
+                <div class="help-text">
+                    Vertex AI API が有効化されている GCP プロジェクトの ID
+                </div>
             </div>
-        </div>
 
-        <div class="form-group">
-            <label style="display:flex; align-items:center;">
-                <input type="checkbox" id="useMockResponse" style="width:auto; margin-right:8px;">
-                Mock レスポンスを使用する (テスト用)
-            </label>
+            <div class="form-group">
+                <label for="vertexAiLocation">Vertex AI リージョン</label>
+                <select id="vertexAiLocation">
+                    <option value="asia-northeast1">asia-northeast1 (東京)</option>
+                    <option value="us-central1">us-central1 (アイオワ)</option>
+                    <option value="europe-west1">europe-west1 (ベルギー)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="vertexAiModel">AI モデル</label>
+                <input type="text" id="vertexAiModel" list="modelOptions" placeholder="モデルを選択または入力">
+                <datalist id="modelOptions">
+                    <option value="gemini-2.5-flash">Gemini 2.5 Flash (推奨)</option>
+                    <option value="gemini-2.5-pro">Gemini 2.5 Pro (高性能)</option>
+                    <option value="gemini-3-pro">Gemini 3 Pro (プレビュー)</option>
+                </datalist>
+                <div class="help-text">
+                    モデルを選択するか、カスタムモデル名を入力してください (例: gemini-3.0-flash)
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label style="display:flex; align-items:center;">
+                    <input type="checkbox" id="useMockResponse" style="width:auto; margin-right:8px;">
+                    Mock レスポンスを使用する (テスト用)
+                </label>
+            </div>
         </div>
     </div>
     </div>
@@ -421,6 +435,19 @@
                     showStatus('error', '❌ エラー: ' + error.message);
                 })
                 .createTemplateSlide();
+        }
+
+        function toggleGcpSettings() {
+            const content = document.getElementById('gcpSettingsContent');
+            const icon = document.getElementById('gcpToggleIcon');
+
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                content.style.display = 'none';
+                icon.style.transform = 'rotate(0deg)';
+            }
         }
     </script>
 </body>

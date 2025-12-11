@@ -474,6 +474,22 @@ function convertDocumentToJson() {
 }
 
 /**
+ * Check via UI if Vertex AI Generation is available (Hidden Mode Check)
+ */
+function getGenerativeModeStatus() {
+    const userProperties = PropertiesService.getUserProperties();
+    const useMock = userProperties.getProperty('USE_MOCK_RESPONSE') === 'true';
+    const projectId = getGcpProjectId();
+
+    const isConfigured = (projectId && projectId !== 'YOUR_GCP_PROJECT_ID');
+
+    return {
+        enabled: useMock || isConfigured,
+        useMock: useMock
+    };
+}
+
+/**
  * Validate if the object has the minimum required structure for slides
  * @param {any} data 
  * @returns {boolean}

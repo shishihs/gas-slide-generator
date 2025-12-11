@@ -40,16 +40,16 @@ export class DiagramRendererFactory {
         if (normalizedType.includes('triangle')) {
             return new TriangleDiagramRenderer();
         }
-        if (normalizedType.includes('comparison')) {
+        if (normalizedType.includes('compare') || normalizedType.includes('comparison') || normalizedType.includes('kaizen')) {
             // 'stats' -> StatsCompare, 'bar' -> BarCompare, else General Compare
             if (normalizedType.includes('stats')) return new StatsCompareDiagramRenderer();
             if (normalizedType.includes('bar')) return new BarCompareDiagramRenderer();
             return new ComparisonDiagramRenderer();
         }
-        if (normalizedType.includes('stepup')) {
+        if (normalizedType.includes('stepup') || normalizedType.includes('stair')) {
             return new StepUpDiagramRenderer();
         }
-        if (normalizedType.includes('lanes')) {
+        if (normalizedType.includes('lanes') || normalizedType.includes('diagram')) {
             return new LanesDiagramRenderer();
         }
         if (normalizedType.includes('flow')) { // flow or flowchart
@@ -70,7 +70,7 @@ export class DiagramRendererFactory {
         if (normalizedType.includes('progress')) {
             return new ProgressDiagramRenderer();
         }
-        if (normalizedType.includes('image')) {
+        if (normalizedType.includes('image') || normalizedType.includes('imagetext')) {
             return new ImageTextDiagramRenderer();
         }
 

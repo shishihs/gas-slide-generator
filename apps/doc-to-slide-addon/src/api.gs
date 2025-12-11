@@ -2304,15 +2304,15 @@ A. ${aText}`, { size: 12, color: DEFAULT_THEME.colors.textPrimary });
           if (normalizedType.includes("triangle")) {
             return new TriangleDiagramRenderer();
           }
-          if (normalizedType.includes("comparison")) {
+          if (normalizedType.includes("compare") || normalizedType.includes("comparison") || normalizedType.includes("kaizen")) {
             if (normalizedType.includes("stats")) return new StatsCompareDiagramRenderer();
             if (normalizedType.includes("bar")) return new BarCompareDiagramRenderer();
             return new ComparisonDiagramRenderer();
           }
-          if (normalizedType.includes("stepup")) {
+          if (normalizedType.includes("stepup") || normalizedType.includes("stair")) {
             return new StepUpDiagramRenderer();
           }
-          if (normalizedType.includes("lanes")) {
+          if (normalizedType.includes("lanes") || normalizedType.includes("diagram")) {
             return new LanesDiagramRenderer();
           }
           if (normalizedType.includes("flow")) {
@@ -2333,7 +2333,7 @@ A. ${aText}`, { size: 12, color: DEFAULT_THEME.colors.textPrimary });
           if (normalizedType.includes("progress")) {
             return new ProgressDiagramRenderer();
           }
-          if (normalizedType.includes("image")) {
+          if (normalizedType.includes("image") || normalizedType.includes("imagetext")) {
             return new ImageTextDiagramRenderer();
           }
           return null;

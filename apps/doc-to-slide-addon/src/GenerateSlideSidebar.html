@@ -344,6 +344,12 @@
     <!-- Status / Progress -->
     <div id="status"></div>
 
+    <!-- Mock Mode Indicator -->
+    <div id="mockIndicator"
+      style="display:none; text-align: center; margin-top: 8px; font-size: 11px; color: #e37400; background-color: #fef7e0; padding: 6px; border-radius: 4px; border: 1px dashed #f57c00;">
+      🧪 <b>Mock Mode</b> で実行中 (GCP/AI は使用されません)
+    </div>
+
     <!-- Result -->
     <div id="resultSection" class="section" style="display: none;">
       <div class="section-title">✅ スライド生成完了！</div>
@@ -503,10 +509,24 @@
         .getUserColors();
     }
 
+    // Check if Mock Mode is enabled and show indicator
+    function checkMockMode() {
+      google.script.run
+        .withSuccessHandler(function (settings) {
+          if (settings && settings.useMockResponse === 'true') {
+            document.getElementById('mockIndicator').style.display = 'block';
+          } else {
+            document.getElementById('mockIndicator').style.display = 'none';
+          }
+        })
+        .getCurrentSettings();
+    }
+
 
     // Auto-start generation on load
     window.onload = function () {
       loadColors();
+      checkMockMode();
       startGeneration();
     };
   </script>

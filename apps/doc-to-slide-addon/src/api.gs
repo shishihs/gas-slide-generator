@@ -79,7 +79,18 @@ var global = this;
           for (const slideData of request.slides) {
             const title = new SlideTitle(slideData.title);
             const content = new SlideContent(slideData.content);
-            const layout = slideData.layout || "CONTENT";
+            let layout = slideData.layout;
+            if (!layout && slideData.type) {
+              const typeUpper = String(slideData.type).toUpperCase();
+              if (["TITLE", "AGENDA", "SECTION", "CONCLUSION"].includes(typeUpper)) {
+                layout = typeUpper;
+              } else {
+                layout = "CONTENT";
+              }
+            }
+            if (!layout) {
+              layout = "CONTENT";
+            }
             const slide = new Slide(title, content, layout, slideData.subtitle, slideData.notes, slideData);
             presentation.addSlide(slide);
           }
@@ -2427,7 +2438,6 @@ A. ${aText}`, { size: 12, color: CONFIG.COLORS.text_primary });
       init_GasDiagramSlideGenerator();
       init_SlideConfig();
       GasSlideRepository = class {
-      GasSlideRepository = class {
         createPresentation(presentation, templateId, destinationId, settingsOverride) {
           const slidesApp = SlidesApp;
           const driveApp = DriveApp;
@@ -2469,19 +2479,12 @@ A. ${aText}`, { size: 12, color: CONFIG.COLORS.text_primary });
             showBottomBar: true,
             showDateColumn: true,
             showPageNumber: true,
-          const settings = {
-            primaryColor: CONFIG.COLORS.primary_color,
-            enableGradient: false,
-            showTitleUnderline: true,
-            showBottomBar: true,
-            showDateColumn: true,
-            showPageNumber: true,
             ...CONFIG.COLORS,
-            ...(settingsOverride && settingsOverride.colors ? {
-                primaryColor: settingsOverride.colors.primary,
-                primary_color: settingsOverride.colors.primary,
-                text_primary: settingsOverride.colors.text
-            } : {})
+            ...settingsOverride && settingsOverride.colors ? {
+              primaryColor: settingsOverride.colors.primary,
+              primary_color: settingsOverride.colors.primary,
+              text_primary: settingsOverride.colors.text
+            } : {}
           };
           presentation.slides.forEach((slideModel, index) => {
             const commonData = {
@@ -2573,7 +2576,6 @@ A. ${aText}`, { size: 12, color: CONFIG.COLORS.text_primary });
             destinationId: data.destinationId,
             // Optional ID for existing destination
             settings: data.settings,
-            // Optional settings override
             slides: data.slides.map((s) => ({
               ...s,
               // Spread all valid properties from source

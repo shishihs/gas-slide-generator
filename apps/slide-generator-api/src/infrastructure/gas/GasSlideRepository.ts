@@ -11,7 +11,7 @@ import { CONFIG } from '../../common/config/SlideConfig';
 // It translates Domain objects into GAS API calls.
 export class GasSlideRepository implements ISlideRepository {
 
-    createPresentation(presentation: Presentation, templateId?: string, destinationId?: string): string {
+    createPresentation(presentation: Presentation, templateId?: string, destinationId?: string, settingsOverride?: any): string {
         const slidesApp = SlidesApp;
         const driveApp = DriveApp;
 
@@ -65,7 +65,12 @@ export class GasSlideRepository implements ISlideRepository {
             showBottomBar: true,
             showDateColumn: true,
             showPageNumber: true,
-            ...CONFIG.COLORS
+            ...CONFIG.COLORS,
+            ...(settingsOverride && settingsOverride.colors ? {
+                primaryColor: settingsOverride.colors.primary,
+                primary_color: settingsOverride.colors.primary,
+                text_primary: settingsOverride.colors.text
+            } : {})
         };
 
         presentation.slides.forEach((slideModel, index) => {

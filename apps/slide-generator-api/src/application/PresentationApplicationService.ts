@@ -15,6 +15,7 @@ export interface CreatePresentationRequest {
         notes?: string;
         [key: string]: any; // Allow arbitrary extra properties
     }[];
+    settings?: any; // Added settings
 }
 
 export class PresentationApplicationService {
@@ -30,8 +31,21 @@ export class PresentationApplicationService {
         for (const slideData of request.slides) {
             const title = new SlideTitle(slideData.title);
             const content = new SlideContent(slideData.content);
-            // Cast string to LayoutType, defaulting to 'CONTENT' if undefined
-            const layout = (slideData.layout as any) || 'CONTENT';
+            let layout = (slideData.layout as any);
+
+            // Map 'type' to 'layout' if layout is missing
+            if (!layout && slideData.type) {
+                const typeUpper = String(slideData.type).toUpperCase();
+                if (['TITLE', 'AGENDA', 'SECTION', 'CONCLUSION'].includes(typeUpper)) {
+                    layout = typeUpper;
+                } else {
+                    layout = 'CONTENT';
+                }
+            }
+
+            if (!layout) {
+                layout = 'CONTENT';
+            }
 
             // Pass the entire slideData as rawData
             const slide = new Slide(title, content, layout, slideData.subtitle, slideData.notes, slideData);
@@ -40,6 +54,6 @@ export class PresentationApplicationService {
 
         // Repository now needs to know about templateId. 
         // We should update the interface, but for now let's pass it as a second arg if we update the interface
-        return this.slideRepository.createPresentation(presentation, request.templateId, request.destinationId);
+        return this.slideRepository.createPresentation(presentation, request.templateId, request.destinationId, request.settings);
     }
 }

@@ -37,6 +37,7 @@ function generateSlides(data: any): SlideGenerationResponse {
             title: data.title || '無題のプレゼンテーション',
             templateId: data.templateId, // Optional ID for template
             destinationId: data.destinationId, // Optional ID for existing destination
+            settings: data.settings,
             slides: data.slides.map((s: any) => ({
                 ...s, // Spread all valid properties from source
                 title: s.title,

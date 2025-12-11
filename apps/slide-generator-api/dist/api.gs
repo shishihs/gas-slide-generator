@@ -79,11 +79,22 @@ var global = this;
           for (const slideData of request.slides) {
             const title = new SlideTitle(slideData.title);
             const content = new SlideContent(slideData.content);
-            const layout = slideData.layout || "CONTENT";
+            let layout = slideData.layout;
+            if (!layout && slideData.type) {
+              const typeUpper = String(slideData.type).toUpperCase();
+              if (["TITLE", "AGENDA", "SECTION", "CONCLUSION"].includes(typeUpper)) {
+                layout = typeUpper;
+              } else {
+                layout = "CONTENT";
+              }
+            }
+            if (!layout) {
+              layout = "CONTENT";
+            }
             const slide = new Slide(title, content, layout, slideData.subtitle, slideData.notes, slideData);
             presentation.addSlide(slide);
           }
-          return this.slideRepository.createPresentation(presentation, request.templateId, request.destinationId);
+          return this.slideRepository.createPresentation(presentation, request.templateId, request.destinationId, request.settings);
         }
       };
     }
@@ -705,7 +716,8 @@ var global = this;
           }
         },
         COLORS: {
-          primary_color: "#4285F4",
+          primary_color: "#8FB130",
+          deep_primary: "#526717",
           text_primary: "#333333",
           text_small_font: "#1F2937",
           background_white: "#FFFFFF",
@@ -717,7 +729,7 @@ var global = this;
           lane_border: "#DADCE0",
           card_border: "#DADCE0",
           neutral_gray: "#9AA0A6",
-          process_arrow: "#4285F4"
+          process_arrow: "#8FB130"
         },
         DIAGRAM: {
           laneGap_px: 24,
@@ -2426,7 +2438,7 @@ A. ${aText}`, { size: 12, color: CONFIG.COLORS.text_primary });
       init_GasDiagramSlideGenerator();
       init_SlideConfig();
       GasSlideRepository = class {
-        createPresentation(presentation, templateId, destinationId) {
+        createPresentation(presentation, templateId, destinationId, settingsOverride) {
           const slidesApp = SlidesApp;
           const driveApp = DriveApp;
           let pres;
@@ -2467,7 +2479,12 @@ A. ${aText}`, { size: 12, color: CONFIG.COLORS.text_primary });
             showBottomBar: true,
             showDateColumn: true,
             showPageNumber: true,
-            ...CONFIG.COLORS
+            ...CONFIG.COLORS,
+            ...settingsOverride && settingsOverride.colors ? {
+              primaryColor: settingsOverride.colors.primary,
+              primary_color: settingsOverride.colors.primary,
+              text_primary: settingsOverride.colors.text
+            } : {}
           };
           presentation.slides.forEach((slideModel, index) => {
             const commonData = {
@@ -2558,6 +2575,7 @@ A. ${aText}`, { size: 12, color: CONFIG.COLORS.text_primary });
             // Optional ID for template
             destinationId: data.destinationId,
             // Optional ID for existing destination
+            settings: data.settings,
             slides: data.slides.map((s) => ({
               ...s,
               // Spread all valid properties from source

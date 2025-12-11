@@ -611,7 +611,8 @@ export const CONFIG = {
         }
     },
     COLORS: {
-        primary_color: '#4285F4',
+        primary_color: '#8FB130',
+        deep_primary: '#526717',
         text_primary: '#333333',
         text_small_font: '#1F2937',
         background_white: '#FFFFFF',
@@ -623,7 +624,7 @@ export const CONFIG = {
         lane_border: '#DADCE0',
         card_border: '#DADCE0',
         neutral_gray: '#9AA0A6',
-        process_arrow: '#4285F4'
+        process_arrow: '#8FB130'
     },
     DIAGRAM: {
         laneGap_px: 24,

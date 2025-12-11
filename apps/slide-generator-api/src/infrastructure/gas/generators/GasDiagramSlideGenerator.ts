@@ -37,17 +37,24 @@ export class GasDiagramSlideGenerator implements ISlideGenerator {
         const type = (data.type || data.layout || '').toLowerCase();
         Logger.log('Generating Diagram Slide: ' + type);
 
-        const bodyPlaceholder = slide.getPlaceholder(SlidesApp.PlaceholderType.BODY);
-        const workArea = bodyPlaceholder ?
-            { left: bodyPlaceholder.getLeft(), top: bodyPlaceholder.getTop(), width: bodyPlaceholder.getWidth(), height: bodyPlaceholder.getHeight() } :
+        // Identify the target placeholder to use as the drawing canvas
+        // Priority: BODY -> OBJECT -> PICTURE
+        // This allows users to define the "Diagram Area" using standard placeholders in their Master slides.
+        const placeholders = slide.getPlaceholders();
+        const targetPlaceholder = placeholders.find(p => (p as any).getPlaceholderType() === SlidesApp.PlaceholderType.BODY)
+            || placeholders.find(p => (p as any).getPlaceholderType() === SlidesApp.PlaceholderType.OBJECT)
+            || placeholders.find(p => (p as any).getPlaceholderType() === SlidesApp.PlaceholderType.PICTURE);
+
+        const workArea = targetPlaceholder ?
+            { left: targetPlaceholder.getLeft(), top: targetPlaceholder.getTop(), width: targetPlaceholder.getWidth(), height: targetPlaceholder.getHeight() } :
             layout.getRect('contentSlide.body');
 
-        // Remove the body placeholder to avoid "クリックしてテキストを追加" overlay
-        if (bodyPlaceholder) {
+        // Remove the target placeholder to clear the stage for the diagram
+        if (targetPlaceholder) {
             try {
-                bodyPlaceholder.remove();
+                targetPlaceholder.remove();
             } catch (e) {
-                Logger.log('Warning: Could not remove body placeholder: ' + e);
+                Logger.log('Warning: Could not remove target placeholder: ' + e);
             }
         }
 

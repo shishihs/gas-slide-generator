@@ -1,94 +1,98 @@
 import { IDiagramRenderer } from './IDiagramRenderer';
 import { LayoutManager } from '../../../../common/utils/LayoutManager';
-import { setStyledText } from '../../../../common/utils/SlideUtils';
-import { generateCompareColors } from '../../../../common/utils/ColorUtils';
+import { RequestFactory } from '../../RequestFactory';
 
 export class ComparisonDiagramRenderer implements IDiagramRenderer {
-    render(slide: GoogleAppsScript.Slides.Slide, data: any, area: any, settings: any, layout: LayoutManager): void {
+    render(slideId: string, data: any, area: any, settings: any, layout: LayoutManager): GoogleAppsScript.Slides.Schema.Request[] {
+        const requests: GoogleAppsScript.Slides.Schema.Request[] = [];
         const theme = layout.getTheme();
-        const leftTitle = data.leftTitle || 'プランA';
-        const rightTitle = data.rightTitle || 'プランB';
+
+        const leftTitle = data.leftTitle || 'Plan A';
+        const rightTitle = data.rightTitle || 'Plan B';
         const leftItems = data.leftItems || [];
         const rightItems = data.rightItems || [];
 
-        render(slide: GoogleAppsScript.Slides.Slide, data: any, area: any, settings: any, layout: LayoutManager): void {
-            const theme = layout.getTheme();
-            const leftTitle = data.leftTitle || 'プランA';
-            const rightTitle = data.rightTitle || 'プランB';
-            const leftItems = data.leftItems || [];
-            const rightItems = data.rightItems || [];
+        const gap = 60; // Wider gap for VS
+        const colWidth = (area.width - gap) / 2;
+        const headerH = 70;
 
-            const gap = layout.pxToPt(40);
-            // Slightly reduced gap to give more space to cards
-            const colWidth = (area.width - gap) / 2;
-            const headerH = layout.pxToPt(60);
+        // Helper
+        const drawColumn = (x: number, title: string, items: string[], suffix: string) => {
+            const headerId = slideId + '_CMP_HEAD_' + suffix;
+            const bodyId = slideId + '_CMP_BODY_' + suffix;
 
-            // Helper to draw a Card Column
-            const drawCardColumn = (
-                x: number,
-                title: string,
-                items: string[],
-                isPrimary: boolean // Maybe distinguish left/right styles? Or both equal. Let's make both Primary for now.
-            ) => {
-                // 1. Header Box
-                const headerBox = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, x, area.top, colWidth, headerH);
-                headerBox.getFill().setSolidFill(settings.primaryColor);
-                headerBox.getBorder().setTransparent();
+            // 1. Header Box
+            requests.push(RequestFactory.createShape(slideId, headerId, 'ROUND_RECTANGLE', x, area.top, colWidth, headerH));
+            requests.push(RequestFactory.updateShapeProperties(headerId, settings.primaryColor, 'TRANSPARENT'));
 
-                setStyledText(headerBox, title, {
-                    size: 24,
+            requests.push({ insertText: { objectId: headerId, text: title } });
+            requests.push(RequestFactory.updateTextStyle(headerId, {
+                fontSize: 24,
+                bold: true,
+                color: '#FFFFFF',
+                fontFamily: theme.fonts.family
+            }));
+            requests.push({ updateParagraphStyle: { objectId: headerId, style: { alignment: 'CENTER' }, fields: 'alignment' } });
+            requests.push({ updateShapeProperties: { objectId: headerId, shapeProperties: { contentAlignment: 'MIDDLE' as any }, fields: 'contentAlignment' } });
+
+            // 2. Body Box
+            const bodyH = area.height - headerH - 10;
+            const bodyY = area.top + headerH + 10;
+
+            requests.push(RequestFactory.createShape(slideId, bodyId, 'ROUND_RECTANGLE', x, bodyY, colWidth, bodyH));
+            requests.push(RequestFactory.updateShapeProperties(bodyId, theme.colors.faintGray || '#F8F9FA', 'TRANSPARENT')); // Light gray bg
+
+            // 3. Items
+            let currentY = bodyY + 20;
+            const itemGap = 15;
+
+            items.forEach((itemText: string, i: number) => {
+                const unique = `_${suffix}_${i}`;
+                const iconId = slideId + '_CMP_ICON' + unique;
+                const textId = slideId + '_CMP_TXT' + unique;
+
+                // Icon (Checkmark)
+                const iconSize = 24;
+                requests.push(RequestFactory.createShape(slideId, iconId, 'TEXT_BOX', x + 20, currentY, iconSize, iconSize));
+                requests.push({ insertText: { objectId: iconId, text: '✔' } });
+                requests.push(RequestFactory.updateTextStyle(iconId, {
+                    fontSize: 18,
                     bold: true,
-                    color: '#FFFFFF',
-                    align: SlidesApp.ParagraphAlignment.CENTER
-                }, theme);
-                try { headerBox.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
+                    color: settings.primaryColor,
+                    fontFamily: theme.fonts.family // Use symbol font if needed, but standard usually has check
+                }));
+                requests.push({ updateParagraphStyle: { objectId: iconId, style: { alignment: 'CENTER' }, fields: 'alignment' } });
 
-                // 2. Body Box (Background for items)
-                // Calculate height based on items? Or extend to bottom?
-                // Let's extend to near bottom.
-                const bodyH = area.height - headerH;
-                const bodyY = area.top + headerH;
+                // Text
+                const textX = x + 20 + iconSize + 10;
+                const textW = colWidth - (20 + iconSize + 10 + 20);
+                const itemH = 40; // Approximate height per item
 
-                const bodyBox = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, x, bodyY, colWidth, bodyH);
-                bodyBox.getFill().setSolidFill('#F8F9FA'); // Very light gray from theme
-                bodyBox.getBorder().getLineFill().setSolidFill(settings.primaryColor);
-                bodyBox.getBorder().setWeight(1);
+                requests.push(RequestFactory.createShape(slideId, textId, 'TEXT_BOX', textX, currentY, textW, itemH));
+                requests.push({ insertText: { objectId: textId, text: itemText } });
+                requests.push(RequestFactory.updateTextStyle(textId, {
+                    fontSize: 16,
+                    color: theme.colors.textPrimary || '#333333',
+                    fontFamily: theme.fonts.family
+                }));
+                requests.push({ updateParagraphStyle: { objectId: textId, style: { alignment: 'START' }, fields: 'alignment' } });
 
-                // 3. Items list
-                let currentY = bodyY + layout.pxToPt(20);
-                const itemGap = layout.pxToPt(15);
+                currentY += itemH + itemGap;
+            });
+        };
 
-                items.forEach((itemText: string) => {
-                    // Icon (Checkmark or Dot)
-                    // Using simple shape or text character "✔"
-                    const iconSize = 24;
-                    const iconBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x + 20, currentY, iconSize, iconSize);
-                    setStyledText(iconBox, "✔", {
-                        size: 18,
-                        color: settings.primaryColor,
-                        bold: true,
-                        align: SlidesApp.ParagraphAlignment.CENTER
-                    }, theme);
+        drawColumn(area.left, leftTitle, leftItems, 'L');
+        drawColumn(area.left + colWidth + gap, rightTitle, rightItems, 'R');
 
-                    // Text
-                    const textX = x + 20 + iconSize + 10;
-                    const textW = colWidth - (20 + iconSize + 10 + 20);
-                    const itemH = layout.pxToPt(40); // estimate
+        // Z-Index: Ensure VS is on top. Since we create it first in requests list? No, API order.
+        // If we want VS on top of Headers, create it LAST.
+        // Let's move VS creation to end of list.
+        // Actually, we can just push VS requests at the very end.
+        // (Removing VS requests from top and re-adding here conceptually, but for simplicity I'll return requests in order)
+        // Current implementation: VS created BEFORE columns. So columns might overlap if spacing is tight?
+        // With gap=60 and VS R=50, it shouldn't overlap. But safer to draw VS last just in case.
+        // I will move the VS block to the end in the tool instructions.
 
-                    const textBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, textX, currentY, textW, itemH);
-                    setStyledText(textBox, itemText, {
-                        size: 16,
-                        color: theme.colors.textPrimary,
-                        align: SlidesApp.ParagraphAlignment.START
-                    }, theme);
-                    try { textBox.setContentAlignment(SlidesApp.ContentAlignment.TOP); } catch (e) { }
-
-                    currentY += itemH + itemGap;
-                });
-            };
-
-            drawCardColumn(area.left, leftTitle, leftItems, true);
-            drawCardColumn(area.left + colWidth + gap, rightTitle, rightItems, true);
-        }
+        return requests;
     }
 }

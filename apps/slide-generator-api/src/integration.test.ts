@@ -13,6 +13,7 @@ beforeEach(() => {
 
     // Override specific behavior for integration test
     slidesApp.create.mockImplementation((title) => ({
+        getId: vi.fn().mockReturnValue('mock-presentation-id'),
         getUrl: vi.fn().mockReturnValue('https://mock-slide.com'),
         getPageWidth: vi.fn().mockReturnValue(960),
         getPageHeight: vi.fn().mockReturnValue(540),
@@ -24,6 +25,7 @@ beforeEach(() => {
             { getLayoutName: vi.fn().mockReturnValue('TITLE_AND_BODY') }
         ]),
         appendSlide: vi.fn().mockImplementation(() => ({
+            getObjectId: vi.fn().mockReturnValue('mock-slide-id'),
             getBackground: vi.fn().mockReturnValue({
                 setSolidFill: vi.fn()
             }),
@@ -85,6 +87,7 @@ beforeEach(() => {
     }));
 
     slidesApp.openById.mockImplementation(() => ({
+        getId: vi.fn().mockReturnValue('mock-presentation-id'),
         getUrl: vi.fn().mockReturnValue('https://template-copy.com'),
         getPageWidth: vi.fn().mockReturnValue(960),
         getPageHeight: vi.fn().mockReturnValue(540),
@@ -93,9 +96,11 @@ beforeEach(() => {
         getLayouts: vi.fn().mockReturnValue([
             { getLayoutName: vi.fn().mockReturnValue('TITLE') },
             { getLayoutName: vi.fn().mockReturnValue('SECTION_HEADER') },
-            { getLayoutName: vi.fn().mockReturnValue('TITLE_AND_BODY') }
+            { getLayoutName: vi.fn().mockReturnValue('TITLE_AND_BODY') },
+            { getLayoutName: vi.fn().mockReturnValue('BLANK') }
         ]),
         appendSlide: vi.fn().mockImplementation(() => ({
+            getObjectId: vi.fn().mockReturnValue('mock-slide-id-2'),
             getBackground: vi.fn().mockReturnValue({
                 setSolidFill: vi.fn()
             }),

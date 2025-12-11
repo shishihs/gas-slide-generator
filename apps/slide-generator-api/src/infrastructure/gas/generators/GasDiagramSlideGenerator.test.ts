@@ -106,7 +106,7 @@ describe('GasDiagramSlideGenerator', () => {
         setupGasGlobals();
     });
 
-    it('drawTimeline should correctly set border color using getLineFill() and use ColorUtils', () => {
+    it('drawTimeline should generate correct requests', () => {
         const generator = new GasDiagramSlideGenerator(null);
         const data = {
             type: 'timeline',
@@ -117,19 +117,19 @@ describe('GasDiagramSlideGenerator', () => {
         const settings = { primaryColor: '#4285F4', showBottomBar: true };
 
         // Execute
-        generator.generate(mockSlide as any, data, mockLayout as any, 1, settings);
+        const results = generator.generate('slide-id', data, mockLayout as any, 1, settings);
 
         // Verification
-        expect(mockSlide.insertShape).toHaveBeenCalled();
+        expect(Array.isArray(results)).toBe(true);
+        // Should have created lines (axis) and shapes (cards)
+        const shapeReq = results.find(r => r.createShape && r.createShape.shapeType === 'ROUND_RECTANGLE');
+        const lineReq = results.find(r => r.createLine);
 
-        // Ensure color generation was called
-        // We can check if the mocked function was called directly without requiring relevant module again if we exported the mock,
-        // but here we are relying on module mocking side effects.
-        // Actually, require won't work nicely with ESM mocks in Vitest.
-        // We should import the mocked modules.
+        expect(shapeReq).toBeDefined();
+        expect(lineReq).toBeDefined();
     });
 
-    it('drawProcess should generate process steps', () => {
+    it('drawProcess should generate process requests', () => {
         const generator = new GasDiagramSlideGenerator(null);
         const data = {
             type: 'process',
@@ -137,8 +137,10 @@ describe('GasDiagramSlideGenerator', () => {
         };
         const settings = { primaryColor: '#4285F4' };
 
-        generator.generate(mockSlide as any, data, mockLayout as any, 1, settings);
+        const results = generator.generate('slide-id', data, mockLayout as any, 1, settings);
 
-        expect(mockSlide.insertShape).toHaveBeenCalled();
+        expect(Array.isArray(results)).toBe(true);
+        const shapeReq = results.find(r => r.createShape && r.createShape.shapeType === 'TEXT_BOX');
+        expect(shapeReq).toBeDefined();
     });
 });

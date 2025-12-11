@@ -1,150 +1,57 @@
+
 import { ISlideGenerator } from '../../../domain/services/ISlideGenerator';
 import { LayoutManager } from '../../../common/utils/LayoutManager';
-import { addFooter } from '../../../common/utils/SlideUtils';
-import * as ColorUtils from '../../../common/utils/ColorUtils';
 import { DiagramRendererFactory } from './diagrams/DiagramRendererFactory';
+import { RequestFactory } from '../RequestFactory';
 
 export class GasDiagramSlideGenerator implements ISlideGenerator {
     constructor(private creditImageBlob: GoogleAppsScript.Base.BlobSource | null) { }
 
-    generate(slide: GoogleAppsScript.Slides.Slide, data: any, layout: LayoutManager, pageNum: number, settings: any, imageUpdateOption: string = 'update') {
-        Logger.log(`[GasDiagramSlideGenerator] Generating Diagram Slide: ${data.layout || data.type}`);
-        Logger.log(`[Debug] ColorUtils loaded: ${!!ColorUtils}`); // Ensure dependency is kept by bundler
+    generate(slideId: string, data: any, layout: LayoutManager, pageNum: number, settings: any): GoogleAppsScript.Slides.Schema.Request[] {
+        const requests: GoogleAppsScript.Slides.Schema.Request[] = [];
 
-        // Set Title
+        // 1. Title
+        if (data.title) {
+            const titleId = slideId + '_TITLE';
+            const titleRect = layout.getRect('contentSlide.title') || { left: 30, top: 20, width: 900, height: 60 };
 
-        const titlePlaceholder = slide.getPlaceholder(SlidesApp.PlaceholderType.TITLE) || slide.getPlaceholder(SlidesApp.PlaceholderType.CENTERED_TITLE);
-        if (titlePlaceholder) {
-            try {
-                const textRange = titlePlaceholder.asShape().getText();
-                textRange.setText(data.title || '');
-                textRange.getTextStyle().setBold(true);
-            } catch (e) {
-                Logger.log(`Warning: Title placeholder found but text could not be set. ${e}`);
-            }
+            requests.push(RequestFactory.createShape(slideId, titleId, 'TEXT_BOX', titleRect.left, titleRect.top, titleRect.width, titleRect.height));
+            requests.push({ insertText: { objectId: titleId, text: data.title } });
+            requests.push(RequestFactory.updateTextStyle(titleId, {
+                fontSize: 32,
+                bold: true,
+                color: settings.primaryColor,
+                fontFamily: layout.getTheme().fonts.family
+            }));
+            requests.push({ updateParagraphStyle: { objectId: titleId, style: { alignment: 'START' }, fields: 'alignment' } });
+            requests.push({ updateShapeProperties: { objectId: titleId, shapeProperties: { contentAlignment: 'BOTTOM' as any }, fields: 'contentAlignment' } });
         }
 
-        // Priority: JSON type field > layout field
+
+        // 2. Delegate to Renderer
         const type = (data.type || data.layout || '').toLowerCase();
-        Logger.log('Generating Diagram Slide: ' + type);
+        const renderer = DiagramRendererFactory.getRenderer(type);
 
-        // Identify the target placeholder to use as the drawing canvas
-        // Priority: BODY -> OBJECT -> PICTURE
-        const placeholders = slide.getPlaceholders();
-        const getPlaceholderTypeSafe = (p: GoogleAppsScript.Slides.PageElement): GoogleAppsScript.Slides.PlaceholderType | null => {
-            try {
-                const shape = p.asShape();
-                if (shape) {
-                    return shape.getPlaceholderType();
-                }
-            } catch (e) {
-                // Not a shape or error getting type
-            }
-            return null;
-        };
-
-        const targetPlaceholder = placeholders.find(p => getPlaceholderTypeSafe(p) === SlidesApp.PlaceholderType.BODY)
-            || placeholders.find(p => getPlaceholderTypeSafe(p) === SlidesApp.PlaceholderType.OBJECT)
-            || placeholders.find(p => getPlaceholderTypeSafe(p) === SlidesApp.PlaceholderType.PICTURE);
-
-        // Get work area with fallback to layout positions
-        let workArea: { left: number; top: number; width: number; height: number };
-        if (targetPlaceholder) {
-            workArea = {
-                left: targetPlaceholder.getLeft(),
-                top: targetPlaceholder.getTop(),
-                width: targetPlaceholder.getWidth(),
-                height: targetPlaceholder.getHeight()
-            };
-        } else {
-            // Use type-specific layout area or fallback to contentSlide.body
+        if (renderer) {
+            // Calculate work area
+            // In API, we can't easily "find placeholders" without a read.
+            // Assumption: Use standard Layout area defined in LayoutManager
             const typeKey = `${type}Slide`;
             const areaRect = layout.getRect(`${typeKey}.area`) || layout.getRect('contentSlide.body');
-            workArea = areaRect;
+            // Mock area structure that Renderers expect
+            const workArea = {
+                left: areaRect.left,
+                top: areaRect.top,
+                width: areaRect.width,
+                height: areaRect.height
+            };
+
+            const diagramReqs = renderer.render(slideId, data, workArea, settings, layout);
+            requests.push(...diagramReqs);
+        } else {
+            Logger.log('Diagram logic not implemented for type: ' + type);
         }
 
-        Logger.log(`WorkArea for ${type}: left=${workArea.left}, top=${workArea.top}, width=${workArea.width}, height=${workArea.height}`);
-
-        // Remove the target placeholder to clear the stage for the diagram
-        if (targetPlaceholder) {
-            try {
-                targetPlaceholder.remove();
-            } catch (e) {
-                Logger.log('Warning: Could not remove target placeholder: ' + e);
-            }
-        }
-
-        // Get elements before drawing (to identify new ones later)
-        const elementsBefore = slide.getPageElements().map(e => e.getObjectId());
-
-        // Delegate to Renderer
-        try {
-            const renderer = DiagramRendererFactory.getRenderer(type);
-            if (renderer) {
-                renderer.render(slide, data, workArea, settings, layout);
-            } else {
-                Logger.log('Diagram logic not implemented for type: ' + type);
-            }
-        } catch (e) {
-            Logger.log(`ERROR in drawing ${type}: ${e}`);
-        }
-
-        // Get new elements created during drawing and group them
-        // Exclude placeholders (title, subtitle) - only group content/diagram elements
-        const newElements = slide.getPageElements().filter(e => {
-            // Must be a new element (not existing before drawing)
-            if (elementsBefore.includes(e.getObjectId())) return false;
-
-            // Exclude placeholder shapes (title, subtitle)
-            try {
-                const shape = e.asShape();
-                if (shape) {
-                    const placeholderType = shape.getPlaceholderType();
-                    if (placeholderType === SlidesApp.PlaceholderType.TITLE ||
-                        placeholderType === SlidesApp.PlaceholderType.SUBTITLE ||
-                        placeholderType === SlidesApp.PlaceholderType.CENTERED_TITLE) {
-                        return false;
-                    }
-                }
-            } catch (e) {
-                // Not a shape or can't determine placeholder type - include it
-            }
-            return true;
-        });
-
-        let generatedGroup: GoogleAppsScript.Slides.PageElement | null = null;
-
-        if (newElements.length > 1) {
-            try {
-                generatedGroup = slide.group(newElements) as any;
-                Logger.log(`Grouped ${newElements.length} content elements for ${type}`);
-            } catch (e) {
-                Logger.log(`Warning: Could not group elements: ${e}`);
-            }
-        } else if (newElements.length === 1) {
-            generatedGroup = newElements[0];
-        }
-
-        // Center the generated content within the work area
-        if (generatedGroup) {
-            // Force Update of the group dimensions after creation
-            const groupWidth = generatedGroup.getWidth();
-            const groupHeight = generatedGroup.getHeight();
-
-            // Calculate center of the Work Area
-            const workAreaCenterX = workArea.left + (workArea.width / 2);
-            const workAreaCenterY = workArea.top + (workArea.height / 2);
-
-            // Calculate new Top/Left for the Group to align centers
-            const newLeft = workAreaCenterX - (groupWidth / 2);
-            const newTop = workAreaCenterY - (groupHeight / 2);
-
-            generatedGroup.setLeft(newLeft);
-            generatedGroup.setTop(newTop);
-
-            Logger.log(`Centered Group: left=${newLeft}, top=${newTop} (Area Center: ${workAreaCenterX}, ${workAreaCenterY})`);
-        }
-
-        addFooter(slide, layout, pageNum, settings, this.creditImageBlob);
+        return requests;
     }
 }

@@ -3,11 +3,10 @@ import { LayoutManager } from '../../common/utils/LayoutManager';
 
 export interface ISlideGenerator {
     generate(
-        slide: GoogleAppsScript.Slides.Slide,
+        slideId: string,
         data: any,
         layout: LayoutManager,
         pageNum: number,
-        settings: any,
-        imageUpdateOption?: string
-    ): void;
+        settings: any
+    ): GoogleAppsScript.Slides.Schema.Request[];
 }

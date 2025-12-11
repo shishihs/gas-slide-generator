@@ -1,79 +1,86 @@
 import { IDiagramRenderer } from './IDiagramRenderer';
 import { LayoutManager } from '../../../../common/utils/LayoutManager';
+import { RequestFactory } from '../../RequestFactory';
 import { setStyledText } from '../../../../common/utils/SlideUtils';
 import { generateProcessColors } from '../../../../common/utils/ColorUtils';
 
 export class ProcessDiagramRenderer implements IDiagramRenderer {
-    render(slide: GoogleAppsScript.Slides.Slide, data: any, area: any, settings: any, layout: LayoutManager): void {
+    render(slideId: string, data: any, area: any, settings: any, layout: LayoutManager): GoogleAppsScript.Slides.Schema.Request[] {
+        const requests: GoogleAppsScript.Slides.Schema.Request[] = [];
         const theme = layout.getTheme();
         const steps = data.steps || data.items || [];
-        if (!steps.length) return;
+        if (!steps.length) return requests;
 
         const count = steps.length;
-        // Layout: Horizontal flow? Or Vertical?
-        // Process usually Horizontal L->R. User request "Chevron Layout" implies widely used horizontal bars.
-        // Let's do Horizontal flow if it fits, else Vertical list with arrows.
-        // Given text length might be long, Vertical List with "Chevron-like" headers might be safer?
-        // But "Process" usually implies timeline-ish.
-        // Let's stick to Vertical List but make it look like a "Chain".
-
-        // Vertical Chain Layout
-        const itemHeight = Math.min(area.height / count, 120);
-        const gap = 10;
-        const boxWidth = area.width;
+        const gap = -15; // Overlap for Chevron interlocking
+        const itemWidth = (area.width - (gap * (count - 1))) / count;
+        const itemHeight = Math.min(area.height, 150); // Limit height
+        const y = area.top + (area.height - itemHeight) / 2; // Vertically center within area
 
         steps.forEach((step: string, i: number) => {
-            const y = area.top + (i * itemHeight);
-            const h = itemHeight - gap;
+            const x = area.left + (i * (itemWidth + gap));
+            const unique = `_${i}`;
+            const shapeId = slideId + '_PR_CHEV_' + unique;
 
-            // 1. Pentagon/Chevron Shape for the container? 
-            // Let's use a Rounded Rectangle with a heavy left border or number circle.
+            // 1. Chevron Shape
+            requests.push(RequestFactory.createShape(slideId, shapeId, 'CHEVRON', x, y, itemWidth, itemHeight));
 
-            // Container Box
-            const box = slide.insertShape(SlidesApp.ShapeType.ROUND_RECTANGLE, area.left, y, boxWidth, h);
-            box.getFill().setSolidFill(settings.card_bg || '#F8F9FA');
-            box.getBorder().setTransparent();
+            // Alternate colors
+            const bgColor = i % 2 === 0 ? theme.colors.primary : theme.colors.deepPrimary || theme.colors.primary;
 
-            // 2. Number Circle (Left)
-            const circleSize = 40;
-            const circleX = area.left + 20;
-            const circleY = y + (h - circleSize) / 2;
+            requests.push({
+                updateShapeProperties: {
+                    objectId: shapeId,
+                    shapeProperties: {
+                        shapeBackgroundFill: { solidFill: { color: { rgbColor: this.hexToRgb(bgColor) } } },
+                        outline: { propertyState: 'NOT_RENDERED' },
+                        contentAlignment: 'MIDDLE'
+                    },
+                    fields: 'shapeBackgroundFill,outline,contentAlignment'
+                }
+            });
 
-            const circle = slide.insertShape(SlidesApp.ShapeType.ELLIPSE, circleX, circleY, circleSize, circleSize);
-            circle.getFill().setSolidFill(settings.primaryColor);
-            circle.getBorder().setTransparent();
+            // 2. Text Content
+            // Step Number (Large) + Text
+            // We can put them in the same text box (the shape itself)
+            const cleanText = String(step || '').replace(/^\s*\d+[\.\s]*/, '');
+            const fullText = `${i + 1}\n${cleanText}`;
 
-            // Number
-            setStyledText(circle, String(i + 1), {
-                size: 18,
+            requests.push({ insertText: { objectId: shapeId, text: fullText } });
+
+            // Style Number
+            requests.push(RequestFactory.updateTextStyle(shapeId, {
+                fontSize: 32,
                 bold: true,
                 color: '#FFFFFF',
-                align: SlidesApp.ParagraphAlignment.CENTER
-            }, theme);
-            try { circle.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
+                fontFamily: theme.fonts.family
+            }, 0, String(i + 1).length));
 
-            // 3. Arrow Down (between items)? Only if not last.
-            if (i < count - 1) {
-                // Draw a small arrow pointing down from this box to next?
-                // Or just the boxes themselves imply flow.
-            }
+            // Style Body
+            requests.push(RequestFactory.updateTextStyle(shapeId, {
+                fontSize: 14,
+                bold: false,
+                color: '#FFFFFF', // White text on colored background
+                fontFamily: theme.fonts.family
+            }, String(i + 1).length + 1, cleanText.length + 1)); // length fix? Call was (start, length)
 
-            // 4. Content
-            const textX = circleX + circleSize + 20;
-            const textW = boxWidth - (textX - area.left) - 20;
-
-            const textBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, textX, y + 5, textW, h - 10);
-            const cleanText = String(step || '').replace(/^\s*\d+[\.\s]*/, '');
-
-            setStyledText(textBox, cleanText, {
-                size: 14,
-                color: theme.colors.textPrimary,
-                align: SlidesApp.ParagraphAlignment.START,
-                bold: false
-            }, theme);
-            // Vertically center text
-            try { textBox.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
+            requests.push({
+                updateParagraphStyle: {
+                    objectId: shapeId,
+                    style: { alignment: 'CENTER' },
+                    fields: 'alignment'
+                }
+            });
         });
+
+        return requests;
+    }
+
+    private hexToRgb(hex: string): GoogleAppsScript.Slides.Schema.RgbColor {
+        const r = parseInt(hex.slice(1, 3), 16) / 255;
+        const g = parseInt(hex.slice(3, 5), 16) / 255;
+        const b = parseInt(hex.slice(5, 7), 16) / 255;
+        return { red: r, green: g, blue: b };
     }
 }
-```
+

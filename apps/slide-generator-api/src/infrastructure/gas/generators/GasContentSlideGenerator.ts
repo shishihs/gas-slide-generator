@@ -1,189 +1,105 @@
 
 import { ISlideGenerator } from '../../../domain/services/ISlideGenerator';
 import { LayoutManager } from '../../../common/utils/LayoutManager';
-import {
-    insertImageFromUrlOrFileId,
-    setStyledText,
-    adjustShapeText_External,
-    addFooter,
-    offsetRect,
-    drawStandardTitleHeader,
-    drawSubheadIfAny,
-    createContentCushion,
-    setBulletsWithInlineStyles,
-    renderImagesInArea,
-    normalizeImages,
-    setBoldTextSize,
-    adjustAreaForSubhead
-} from '../../../common/utils/SlideUtils';
+import { RequestFactory } from '../RequestFactory';
 
 export class GasContentSlideGenerator implements ISlideGenerator {
     constructor(private creditImageBlob: GoogleAppsScript.Base.BlobSource | null) { }
 
-    generate(slide: GoogleAppsScript.Slides.Slide, data: any, layout: LayoutManager, pageNum: number, settings: any, imageUpdateOption: string = 'update') {
+    generate(slideId: string, data: any, layout: LayoutManager, pageNum: number, settings: any): GoogleAppsScript.Slides.Schema.Request[] {
+        const requests: GoogleAppsScript.Slides.Schema.Request[] = [];
         const theme = layout.getTheme();
 
+        // 1. Title
+        if (data.title) {
+            const titleId = slideId + '_TITLE';
+            const titleRect = layout.getRect('contentSlide.title') || { left: 30, top: 20, width: 900, height: 60 };
 
-        // Title Placeholder
-        const titlePlaceholder = slide.getPlaceholder(SlidesApp.PlaceholderType.TITLE) || slide.getPlaceholder(SlidesApp.PlaceholderType.CENTERED_TITLE);
-        if (titlePlaceholder) {
-            if (data.title) {
-                // Using simple setText to respect template style
-                try {
-                    const textRange = titlePlaceholder.asShape().getText();
-                    textRange.setText(data.title);
-                    textRange.getTextStyle().setBold(true);
-                } catch (e) {
-                    Logger.log(`Warning: Content Title placeholder found but text could not be set. ${e}`);
-                }
-            } else {
-                titlePlaceholder.remove();
-            }
+            requests.push(RequestFactory.createShape(slideId, titleId, 'TEXT_BOX', titleRect.left, titleRect.top, titleRect.width, titleRect.height));
+            requests.push({ insertText: { objectId: titleId, text: data.title } });
+            requests.push(RequestFactory.updateTextStyle(titleId, {
+                fontSize: 32,
+                bold: true,
+                color: settings.primaryColor,
+                fontFamily: theme.fonts.family
+            }));
+            requests.push({ updateParagraphStyle: { objectId: titleId, style: { alignment: 'START' }, fields: 'alignment' } });
+            requests.push({ updateShapeProperties: { objectId: titleId, shapeProperties: { contentAlignment: 'BOTTOM' as any }, fields: 'contentAlignment' } });
         }
 
-        const subheadWidthPt = (data && typeof data._subhead_widthPt === 'number') ?
-            data._subhead_widthPt : null;
-        // Keep manual Subhead for now as it doesn't map cleanly to standard placeholders.
-        // But we should consider if Subtitle placeholder is available.
-        // Usually Content slides don't have Subtitle placeholder.
-        const dy = drawSubheadIfAny(slide, layout, 'contentSlide', data.subhead, subheadWidthPt);
+        // 2. Subhead
+        let subheadHeight = 0;
+        if (data.subhead) {
+            const subId = slideId + '_SUBHEAD';
+            const subRect = layout.getRect('contentSlide.subhead') || { left: 30, top: 90, width: 900, height: 30 };
 
-
-        let points = Array.isArray(data.points) ? data.points.slice(0) : [];
-        const isAgenda = /(agenda|アジェンダ|目次|本日お伝えすること)/i.test(String(data.title || ''));
-
-        if (isAgenda) {
-            // Force white background for Agenda
-            slide.getBackground().setSolidFill('#FFFFFF');
-
-            if (points.length === 0) {
-                points = ['本日の目的', '進め方', '次のアクション'];
-            }
+            requests.push(RequestFactory.createShape(slideId, subId, 'TEXT_BOX', subRect.left, subRect.top, subRect.width, subRect.height));
+            requests.push({ insertText: { objectId: subId, text: data.subhead } });
+            requests.push(RequestFactory.updateTextStyle(subId, {
+                fontSize: 18,
+                bold: true,
+                color: theme.colors.neutralGray,
+                fontFamily: theme.fonts.family
+            }));
+            subheadHeight = subRect.height;
         }
 
-        const hasImages = Array.isArray(data.images) && data.images.length > 0;
-        const isTwo = !!(data.twoColumn || data.columns);
+        // 3. Body Content (Bullets)
+        const points = Array.isArray(data.points) ? data.points : [];
+        const columns = data.columns || [];
+        const isTwoColumn = (columns.length === 2) || (data.twoColumn);
 
-        // Body Placeholders
-        const bodies = slide.getPlaceholders().filter(p => {
-            // Check direct method (standard Placeholder interface)
-            if (typeof (p as any).getPlaceholderType === 'function') {
-                return (p as any).getPlaceholderType() === SlidesApp.PlaceholderType.BODY;
+        const bodyRect = layout.getRect('contentSlide.body') || { left: 30, top: 130, width: 900, height: 380 };
+        const topY = bodyRect.top + (data.subhead ? 10 : 0); // adjust for subhead if needed, or assume fixed layout
+        // Simplified: use layout manager's body top
+
+        if (isTwoColumn) {
+            const gap = 30;
+            const colW = (bodyRect.width - gap) / 2;
+
+            const leftPoints = columns[0] || (points.slice(0, Math.ceil(points.length / 2)));
+            const rightPoints = columns[1] || (points.slice(Math.ceil(points.length / 2)));
+
+            requests.push(...this.createBulletRequests(slideId, slideId + '_BODY_0', leftPoints, bodyRect.left, topY, colW, bodyRect.height, theme));
+            requests.push(...this.createBulletRequests(slideId, slideId + '_BODY_1', rightPoints, bodyRect.left + colW + gap, topY, colW, bodyRect.height, theme));
+        } else {
+            requests.push(...this.createBulletRequests(slideId, slideId + '_BODY', points, bodyRect.left, topY, bodyRect.width, bodyRect.height, theme));
+        }
+
+        return requests;
+    }
+
+    private createBulletRequests(slideId: string, objectId: string, points: string[], x: number, y: number, w: number, h: number, theme: any): GoogleAppsScript.Slides.Schema.Request[] {
+        const reqs: GoogleAppsScript.Slides.Schema.Request[] = [];
+        if (!points || points.length === 0) return reqs;
+
+        // Create Shape
+        reqs.push(RequestFactory.createShape(slideId, objectId, 'TEXT_BOX', x, y, w, h));
+
+        // Insert Text
+        const fullText = points.join('\n');
+        reqs.push({ insertText: { objectId: objectId, text: fullText } });
+
+        // Style Text (Body)
+        reqs.push(RequestFactory.updateTextStyle(objectId, {
+            fontSize: 18,
+            color: theme.colors.textPrimary,
+            fontFamily: theme.fonts.family
+        }));
+
+        // Apply Bullets
+        reqs.push({
+            createParagraphBullets: {
+                objectId: objectId,
+                textRange: { type: 'ALL' },
+                bulletPreset: 'BULLET_DISC_CIRCLE_SQUARE'
             }
-            // Check via asShape (sometimes needed depending on internal object structure)
-            try {
-                const s = p.asShape();
-                if (typeof s.getPlaceholderType === 'function') {
-                    return s.getPlaceholderType() === SlidesApp.PlaceholderType.BODY;
-                }
-            } catch (e) {
-                // Not a shape, or error
-            }
-            return false;
         });
 
-        // Dynamic Adjustment: Shift Body Placeholders down if Subhead was inserted
-        if (dy > 0) {
-            bodies.forEach(p => {
-                try {
-                    const s = p.asShape();
-                    // Only shift if it looks like it might overlap (e.g. top is high)
-                    // But safest is to always shift if we injected a subhead that wasn't part of the original layout
-                    s.setTop(s.getTop() + dy);
-                    s.setHeight(s.getHeight() - dy);
-                } catch (e) {
-                    Logger.log('Could not adjust body placeholder: ' + e);
-                }
-            });
-        }
+        // Align Top-Left
+        reqs.push({ updateParagraphStyle: { objectId: objectId, style: { alignment: 'START' }, fields: 'alignment' } });
+        reqs.push({ updateShapeProperties: { objectId: objectId, shapeProperties: { contentAlignment: 'TOP' as any }, fields: 'contentAlignment' } });
 
-        if (isTwo && bodies.length >= 2) {
-            // If we have at least 2 body placeholders, use them!
-            let L = [], R = [];
-            if (Array.isArray(data.columns) && data.columns.length === 2) {
-                L = data.columns[0] || [];
-                R = data.columns[1] || [];
-            } else {
-                const mid = Math.ceil(points.length / 2);
-                L = points.slice(0, mid);
-                R = points.slice(mid);
-            }
-            // Assume bodies[0] is Left, bodies[1] is Right (usually order of creation or x-pos)
-            // We might want to sort by Left position to be safe.
-            const sortedBodies = bodies.map(p => p.asShape()).sort((a, b) => a.getLeft() - b.getLeft());
-            setBulletsWithInlineStyles(sortedBodies[0], L, theme); // Use setBulletsWithInlineStyles for content
-            setBulletsWithInlineStyles(sortedBodies[1], R, theme);
-
-        } else if (isTwo) {
-            // User wants 2 columns but Layout doesn't have 2 body placeholders.
-            // Fallback to manual (Canvas Painting) OR Split single body?
-            // Since we are moving to "Template Support", manually drawing boxes on top of a template is messy.
-            // But we shouldn't fail.
-            // Let's try manual fallback for Two Column IF layout doesn't support it.
-            // Original logic for two columns:
-            if (Array.isArray(data.columns) && data.columns.length === 2) {
-                // ... manual logic ...
-            }
-            // For brevity in this refactor, let's keep the manual 2-column logic from before ONLY AS FALLBACK.
-            // Copying original manual logic:
-            let L = [], R = [];
-            if (Array.isArray(data.columns) && data.columns.length === 2) {
-                L = data.columns[0] || [];
-                R = data.columns[1] || [];
-            } else {
-                const mid = Math.ceil(points.length / 2);
-                L = points.slice(0, mid);
-                R = points.slice(mid);
-            }
-            const baseLeftRect = layout.getRect('contentSlide.twoColLeft');
-            const baseRightRect = layout.getRect('contentSlide.twoColRight');
-            // We use base rects. Note: layout.getRect relies on hardcoded data, which we wanted to avoid.
-            // But as a fallback it's fine.
-            const adjustedLeftRect = adjustAreaForSubhead(baseLeftRect, data.subhead, layout);
-            const adjustedRightRect = adjustAreaForSubhead(baseRightRect, data.subhead, layout);
-            const leftRect = offsetRect(adjustedLeftRect, 0, dy);
-            const rightRect = offsetRect(adjustedRightRect, 0, dy);
-            // createContentCushion(slide, leftRect, settings, layout); // Optional cushion
-
-            const padding = layout.pxToPt(20);
-            const leftTextRect = { left: leftRect.left + padding, top: leftRect.top + padding, width: leftRect.width - (padding * 2), height: leftRect.height - (padding * 2) };
-            const rightTextRect = { left: rightRect.left + padding, top: rightRect.top + padding, width: rightRect.width - (padding * 2), height: rightRect.height - (padding * 2) };
-
-            const leftShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, leftTextRect.left, leftTextRect.top, leftTextRect.width, leftTextRect.height);
-            const rightShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, rightTextRect.left, rightTextRect.top, rightTextRect.width, rightTextRect.height);
-            setBulletsWithInlineStyles(leftShape, L, theme);
-            setBulletsWithInlineStyles(rightShape, R, theme);
-        } else {
-            // Single Column case
-            if (bodies.length > 0) {
-                const bodyShape = bodies[0].asShape();
-                // We apply content.
-                setBulletsWithInlineStyles(bodyShape, points, theme);
-                // We do NOT manual bold/size settings to respect template.
-            } else {
-                // Fallback: No body placeholder found. Draw manually.
-                // This effectively handles "Generic Fallback" for any layout issues.
-                const baseBodyRect = layout.getRect('contentSlide.body');
-                const adjustedBodyRect = adjustAreaForSubhead(baseBodyRect, data.subhead, layout);
-                const bodyRect = offsetRect(adjustedBodyRect, 0, dy);
-                // createContentCushion(slide, bodyRect, settings, layout);
-
-                const padding = layout.pxToPt(20);
-                const textRect = { left: bodyRect.left + padding, top: bodyRect.top + padding, width: bodyRect.width - (padding * 2), height: bodyRect.height - (padding * 2) };
-                const bodyShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, textRect.left, textRect.top, textRect.width, textRect.height);
-                setBulletsWithInlineStyles(bodyShape, points, theme);
-            }
-        }
-
-        if (hasImages && !points.length && !isTwo) {
-            const baseArea = layout.getRect('contentSlide.body');
-            const adjustedArea = adjustAreaForSubhead(baseArea, data.subhead, layout);
-            const area = offsetRect(adjustedArea, 0, dy);
-            createContentCushion(slide, area, settings, layout);
-            renderImagesInArea(slide, layout, area, normalizeImages(data.images), imageUpdateOption);
-        }
-
-
-        addFooter(slide, layout, pageNum, settings, this.creditImageBlob);
+        return reqs;
     }
 }

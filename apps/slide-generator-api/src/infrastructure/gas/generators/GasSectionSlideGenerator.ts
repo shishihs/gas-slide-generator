@@ -1,101 +1,63 @@
 
 import { ISlideGenerator } from '../../../domain/services/ISlideGenerator';
 import { LayoutManager } from '../../../common/utils/LayoutManager';
-import { SlideTheme } from '../../../common/config/SlideTheme';
-import {
-    insertImageFromUrlOrFileId,
-    setStyledText,
-    adjustShapeText_External,
-    addFooter
-} from '../../../common/utils/SlideUtils';
+import { RequestFactory } from '../RequestFactory';
 
 export class GasSectionSlideGenerator implements ISlideGenerator {
     private sectionCounter = 0;
 
     constructor(private creditImageBlob: GoogleAppsScript.Base.BlobSource | null) { }
 
-    generate(slide: GoogleAppsScript.Slides.Slide, data: any, layout: LayoutManager, pageNum: number, settings: any, imageUpdateOption: string = 'update') {
+    // API Version
+    generate(slideId: string, data: any, layout: LayoutManager, pageNum: number, settings: any): GoogleAppsScript.Slides.Schema.Request[] {
+        const requests: GoogleAppsScript.Slides.Schema.Request[] = [];
         const theme = layout.getTheme();
 
-        // Handle Section Numbering (simplified for state)
+        // 1. Ghost Number (Background) - Create FIRST for Z-order
         this.sectionCounter++;
         const parsedNum = (() => {
-            if (Number.isFinite(data.sectionNo)) {
-                return Number(data.sectionNo);
-            }
+            if (Number.isFinite(data.sectionNo)) return Number(data.sectionNo);
             const m = String(data.title || '').match(/^\s*(\d+)[\.．]/);
             return m ? Number(m[1]) : this.sectionCounter;
         })();
         const num = String(parsedNum).padStart(2, '0');
 
-        const ghostRect = layout.getRect('sectionSlide.ghostNum');
-        let ghostImageInserted = false;
+        const ghostRect = layout.getRect('sectionSlide.ghostNum') || { left: 680, top: 320, width: 280, height: 200 };
+        const ghostId = slideId + '_GHOST';
 
-        if (imageUpdateOption === 'update') {
-            if (data.ghostImageBase64 && ghostRect) {
-                try {
-                    const imageData = insertImageFromUrlOrFileId(data.ghostImageBase64);
-                    // Check if imageData is correct type
-                    if (imageData && typeof imageData !== 'string') {
-                        const ghostImage = slide.insertImage(imageData as GoogleAppsScript.Base.BlobSource);
-                        const imgWidth = ghostImage.getWidth();
-                        const imgHeight = ghostImage.getHeight();
-                        const scale = Math.min(ghostRect.width / imgWidth, ghostRect.height / imgHeight);
-                        const w = imgWidth * scale;
-                        const h = imgHeight * scale;
-                        ghostImage.setWidth(w).setHeight(h)
-                            .setLeft(ghostRect.left + (ghostRect.width - w) / 2)
-                            .setTop(ghostRect.top + (ghostRect.height - h) / 2);
-                        ghostImageInserted = true;
-                    }
-                } catch (e) {
-                }
-            }
-        }
+        requests.push(RequestFactory.createShape(
+            slideId, ghostId, 'TEXT_BOX',
+            ghostRect.left, ghostRect.top, ghostRect.width, ghostRect.height
+        ));
+        requests.push({ insertText: { objectId: ghostId, text: num } });
+        requests.push(RequestFactory.updateTextStyle(ghostId, {
+            bold: true,
+            fontSize: theme.fonts.sizes.ghostNum || 250,
+            color: theme.colors.ghostGray,
+            fontFamily: theme.fonts.family
+        }));
+        requests.push({ updateParagraphStyle: { objectId: ghostId, style: { alignment: 'CENTER' }, fields: 'alignment' } });
 
-        if (!ghostImageInserted && ghostRect && imageUpdateOption === 'update') {
-            const ghost = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, ghostRect.left, ghostRect.top, ghostRect.width, ghostRect.height);
-            ghost.getText().setText(num);
-            const ghostTextStyle = ghost.getText().getTextStyle();
-            ghostTextStyle.setFontFamily(theme.fonts.family)
-                .setFontSize(theme.fonts.sizes.ghostNum)
-                .setBold(true);
-            try {
-                ghostTextStyle.setForegroundColor(theme.colors.ghostGray);
-            } catch (e) {
-                ghostTextStyle.setForegroundColor(theme.colors.ghostGray);
-            }
-            try {
-                ghost.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
-            } catch (e) { }
-            ghost.sendToBack();
-        }
+        // 2. Title (Foreground)
+        const titleId = slideId + '_TITLE';
+        if (data.title) {
+            const titleRect = layout.getRect('sectionSlide.title') || { left: 40, top: 200, width: 700, height: 100 };
 
-        // Title Placeholder
-        const titlePlaceholder = slide.getPlaceholder(SlidesApp.PlaceholderType.TITLE) || slide.getPlaceholder(SlidesApp.PlaceholderType.CENTERED_TITLE);
-        if (titlePlaceholder) {
-            try {
-                const textRange = titlePlaceholder.asShape().getText();
-                textRange.setText(data.title || '');
-                textRange.getTextStyle().setBold(true);
-            } catch (e) {
-                Logger.log(`Warning: Section Title placeholder found but text could not be set. ${e}`);
-            }
-            // Use manual alignment if needed, but template usually handles it.
-            // sectionTitle size is also handled by template.
-        } else {
-            // Fallback
-            const titleRect = layout.getRect('sectionSlide.title');
-            const titleShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, titleRect.left, titleRect.top, titleRect.width, titleRect.height);
-            titleShape.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
-            setStyledText(titleShape, data.title, {
-                size: theme.fonts.sizes.sectionTitle,
+            requests.push(RequestFactory.createShape(
+                slideId, titleId, 'TEXT_BOX',
+                titleRect.left, titleRect.top, titleRect.width, titleRect.height
+            ));
+            requests.push({ insertText: { objectId: titleId, text: data.title } });
+            requests.push(RequestFactory.updateTextStyle(titleId, {
                 bold: true,
-                align: SlidesApp.ParagraphAlignment.CENTER,
-                fontType: 'large'
-            }, theme);
+                fontSize: theme.fonts.sizes.sectionTitle || 52,
+                color: theme.colors.primary,
+                fontFamily: theme.fonts.family
+            }));
+            requests.push({ updateParagraphStyle: { objectId: titleId, style: { alignment: 'START' }, fields: 'alignment' } });
+            requests.push({ updateShapeProperties: { objectId: titleId, shapeProperties: { contentAlignment: 'BOTTOM' as any }, fields: 'contentAlignment' } });
         }
 
-        addFooter(slide, layout, pageNum, settings, this.creditImageBlob);
+        return requests;
     }
 }

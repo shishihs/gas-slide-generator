@@ -66,19 +66,30 @@ export const createMockDriveApp = () => ({
 });
 
 /**
+ * Creates a mock Slides (Advanced Service).
+ */
+export const createMockSlides = () => ({
+    Presentations: {
+        batchUpdate: vi.fn()
+    }
+});
+
+/**
  * Helper to setup global GAS environment mocks in tests.
  */
 export const setupGasGlobals = () => {
     const slidesApp = createMockSlidesApp();
     const logger = createMockLogger();
     const driveApp = createMockDriveApp();
+    const slides = createMockSlides();
 
     // Use globalThis to safely access global scope in Node environment
     (globalThis as any).SlidesApp = slidesApp;
     (globalThis as any).Logger = logger;
     (globalThis as any).DriveApp = driveApp;
+    (globalThis as any).Slides = slides;
 
-    return { slidesApp, logger, driveApp };
+    return { slidesApp, logger, driveApp, slides };
 };
 
 export type MockSlidesApp = ReturnType<typeof createMockSlidesApp>;

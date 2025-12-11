@@ -50,7 +50,11 @@ describe('GasDiagramSlideGenerator', () => {
 
         // Setup Layout Mock
         mockLayout = {
-            getRect: vi.fn().mockReturnValue({ left: 0, top: 0, width: 100, height: 100 })
+            getRect: vi.fn().mockReturnValue({ left: 0, top: 0, width: 100, height: 100 }),
+            getTheme: vi.fn().mockReturnValue({
+                fonts: { family: 'Arial', sizes: { title: 40, body: 20 } },
+                colors: { primary: '#000000', neutralGray: '#666666' }
+            })
         };
     });
 
@@ -59,10 +63,14 @@ describe('GasDiagramSlideGenerator', () => {
         const data = { type: 'cards', items: [] };
         const settings = { primaryColor: '#000' };
 
-        generator.generate(mockSlide, data, mockLayout, 1, settings);
+        // Mock renderer to return empty requests
+        mockRenderer.render.mockReturnValue([]);
+
+        const result = generator.generate('slide-id', data, mockLayout as any, 1, settings);
 
         expect(DiagramRendererFactory.getRenderer).toHaveBeenCalledWith('cards');
-        expect(mockRenderer.render).toHaveBeenCalledWith(mockSlide, data, expect.any(Object), settings, mockLayout);
+        expect(mockRenderer.render).toHaveBeenCalledWith('slide-id', data, expect.any(Object), settings, mockLayout);
+        expect(Array.isArray(result)).toBe(true);
     });
 
     it('should handle "statsCompare" type', () => {
@@ -70,22 +78,25 @@ describe('GasDiagramSlideGenerator', () => {
         const data = { type: 'statsCompare', stats: [] };
         const settings = { primaryColor: '#000' };
 
-        generator.generate(mockSlide, data, mockLayout, 1, settings);
+        mockRenderer.render.mockReturnValue([]);
 
-        expect(DiagramRendererFactory.getRenderer).toHaveBeenCalledWith('statscompare'); // lowercased in implementation
+        const result = generator.generate('slide-id', data, mockLayout as any, 1, settings);
+
+        expect(DiagramRendererFactory.getRenderer).toHaveBeenCalledWith('statscompare');
         expect(mockRenderer.render).toHaveBeenCalled();
+        expect(Array.isArray(result)).toBe(true);
     });
 
-    it('should set title if placeholder exists', () => {
-        const mockTitleShape = { getText: vi.fn().mockReturnValue({ setText: vi.fn() }) };
-        const mockTitlePlaceholder = { asShape: vi.fn().mockReturnValue(mockTitleShape) };
-        mockSlide.getPlaceholder.mockReturnValue(mockTitlePlaceholder);
-
+    it('should generate title requests if title is present', () => {
         const generator = new GasDiagramSlideGenerator(null);
         const data = { type: 'cards', title: 'Test Title' };
 
-        generator.generate(mockSlide, data, mockLayout, 1, {});
+        mockRenderer.render.mockReturnValue([]);
 
-        expect(mockTitleShape.getText().setText).toHaveBeenCalledWith('Test Title');
+        const result = generator.generate('slide-id', data, mockLayout as any, 1, {});
+
+        // Check for insertText request
+        const textReq = result.find(r => r.insertText && r.insertText.text === 'Test Title');
+        expect(textReq).toBeDefined();
     });
 });

@@ -1,11 +1,13 @@
-import { IDiagramRenderer } from '../IDiagramRenderer';
-import { LayoutManager } from '../../../../../common/utils/LayoutManager';
-import { SlideUtils } from '../../../../../common/utils/SlideUtils';
+import { IDiagramRenderer } from './IDiagramRenderer';
+import { LayoutManager } from '../../../../common/utils/LayoutManager';
+import { RequestFactory } from '../../RequestFactory';
 
 export class AgendaDiagramRenderer implements IDiagramRenderer {
-    render(slide: GoogleAppsScript.Slides.Slide, data: any, area: any, settings: any, layout: LayoutManager): void {
+    render(slideId: string, data: any, area: any, settings: any, layout: LayoutManager): GoogleAppsScript.Slides.Schema.Request[] {
+        const requests: GoogleAppsScript.Slides.Schema.Request[] = [];
+        const theme = layout.getTheme();
         const items: string[] = data.items || [];
-        if (items.length === 0) return;
+        if (items.length === 0) return requests;
 
         // Configuration
         const COLUMN_COUNT = 2;
@@ -16,7 +18,7 @@ export class AgendaDiagramRenderer implements IDiagramRenderer {
         const GAP_Y = 25;
 
         const itemWidth = (area.width - (GAP_X * (COLUMN_COUNT - 1))) / COLUMN_COUNT;
-        const itemHeight = Math.min((area.height - (GAP_Y * (ROW_COUNT - 1))) / ROW_COUNT, 80); // Cap height to keep it card-like
+        const itemHeight = Math.min((area.height - (GAP_Y * (ROW_COUNT - 1))) / ROW_COUNT, 80);
 
         items.forEach((itemText: string, index: number) => {
             const col = index % COLUMN_COUNT;
@@ -25,45 +27,50 @@ export class AgendaDiagramRenderer implements IDiagramRenderer {
             const x = area.left + (col * (itemWidth + GAP_X));
             const y = area.top + (row * (itemHeight + GAP_Y));
 
-            // 1. Group container (conceptual)
+            const uniqueId = `_AG_${index}`;
+            const numShapeId = slideId + uniqueId + '_NUM';
+            const cardShapeId = slideId + uniqueId + '_CARD';
 
             // 2. Number Box (Square on the left)
             const numberSize = itemHeight; // Square
-            const numberShape = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, x, y, numberSize, numberSize);
-            numberShape.getBorder().setTransparent();
-            numberShape.getFill().setSolidFill(settings.primaryColor); // Changed from hex to settings.primaryColor
+            requests.push(RequestFactory.createShape(slideId, numShapeId, 'RECTANGLE', x, y, numberSize, numberSize));
+            requests.push(RequestFactory.updateShapeProperties(numShapeId, settings.primaryColor, 'TRANSPARENT'));
 
-            const numberText = numberShape.getText();
-            numberText.setText((index + 1).toString().padStart(2, '0'));
-            const numberStyle = numberText.getTextStyle();
-            numberStyle.setForegroundColor('#FFFFFF');
-            numberStyle.setFontSize(28); // Large number
-            numberStyle.setBold(true);
-            numberText.getParagraphStyle().setParagraphAlignment(SlidesApp.ParagraphAlignment.CENTER);
+            const numStr = (index + 1).toString().padStart(2, '0');
+            requests.push({ insertText: { objectId: numShapeId, text: numStr } });
+            requests.push(RequestFactory.updateTextStyle(numShapeId, {
+                fontSize: 28,
+                bold: true,
+                color: '#FFFFFF',
+                fontFamily: theme.fonts.family
+            }));
+            requests.push({ updateParagraphStyle: { objectId: numShapeId, style: { alignment: 'CENTER' }, fields: 'alignment' } });
+            requests.push({ updateShapeProperties: { objectId: numShapeId, shapeProperties: { contentAlignment: 'MIDDLE' as any }, fields: 'contentAlignment' } });
 
             // 3. Text Box (Right side)
             const textWidth = itemWidth - numberSize;
             const textX = x + numberSize;
 
             // Background for text (Subtle card)
-            const cardShape = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, textX, y, textWidth, itemHeight);
-            cardShape.getFill().setSolidFill(settings.card_bg || '#F5F5F5'); // Very light gray from theme
-            cardShape.getBorder().setTransparent();
+            requests.push(RequestFactory.createShape(slideId, cardShapeId, 'RECTANGLE', textX, y, textWidth, itemHeight));
+            requests.push(RequestFactory.updateShapeProperties(cardShapeId, settings.card_bg || '#F5F5F5', 'TRANSPARENT'));
 
             // Text content
-            const textRange = cardShape.getText();
-            textRange.setText(itemText);
-            const textStyle = textRange.getTextStyle();
-            textStyle.setForegroundColor(settings.text_primary || '#333333');
-            textStyle.setFontSize(18); // Readable size
-
-            // Vertical alignment
-            textRange.getParagraphStyle().setParagraphAlignment(SlidesApp.ParagraphAlignment.START);
-            // Center vertically is tricky in GAS, usually done by padding or Shape alignment. 
-            // SlidesApp doesn't have 'setVerticalAlignment' easily on shape text, so we rely on padding.
-
-            // Group the item parts
-            slide.group([numberShape, cardShape]);
+            requests.push({ insertText: { objectId: cardShapeId, text: itemText } });
+            requests.push(RequestFactory.updateTextStyle(cardShapeId, {
+                fontSize: 18,
+                color: settings.text_primary || '#333333',
+                fontFamily: theme.fonts.family
+            }));
+            requests.push({
+                updateShapeProperties: {
+                    objectId: cardShapeId,
+                    shapeProperties: { contentAlignment: 'MIDDLE' as any },
+                    fields: 'contentAlignment'
+                }
+            });
         });
+
+        return requests;
     }
 }

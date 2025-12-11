@@ -42,6 +42,15 @@ export class GasDiagramSlideGenerator implements ISlideGenerator {
             { left: bodyPlaceholder.getLeft(), top: bodyPlaceholder.getTop(), width: bodyPlaceholder.getWidth(), height: bodyPlaceholder.getHeight() } :
             layout.getRect('contentSlide.body');
 
+        // Remove the body placeholder to avoid "クリックしてテキストを追加" overlay
+        if (bodyPlaceholder) {
+            try {
+                bodyPlaceholder.remove();
+            } catch (e) {
+                Logger.log('Warning: Could not remove body placeholder: ' + e);
+            }
+        }
+
         // switch logic for diagram types - wrapped in try-catch for robustness
         try {
             if (type.includes('timeline')) {

@@ -1449,6 +1449,13 @@ var global = this;
           Logger.log("Generating Diagram Slide: " + type);
           const bodyPlaceholder = slide.getPlaceholder(SlidesApp.PlaceholderType.BODY);
           const workArea = bodyPlaceholder ? { left: bodyPlaceholder.getLeft(), top: bodyPlaceholder.getTop(), width: bodyPlaceholder.getWidth(), height: bodyPlaceholder.getHeight() } : layout.getRect("contentSlide.body");
+          if (bodyPlaceholder) {
+            try {
+              bodyPlaceholder.remove();
+            } catch (e) {
+              Logger.log("Warning: Could not remove body placeholder: " + e);
+            }
+          }
           try {
             if (type.includes("timeline")) {
               this.drawTimeline(slide, data, workArea, settings, layout);

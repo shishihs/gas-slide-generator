@@ -207,10 +207,12 @@ function createTemplateSlide() {
         );
 
         Logger.log('Template created: ' + result.id);
+        return result;
 
     } catch (error) {
         ui.alert('エラー', 'テンプレート作成に失敗しました: ' + error.toString(), ui.ButtonSet.OK);
         Logger.log('Error creating template: ' + error.toString());
+        throw error;
     }
 }
 
@@ -663,143 +665,185 @@ function callVertexAI(documentContent) {
     const useMock = userProperties.getProperty('USE_MOCK_RESPONSE') === 'true';
 
     if (useMock) {
-        Logger.log('Using Mock Vertex AI Response - Comprehensive Test Data');
-        // Comprehensive test data covering all slide types and chart types
-        // Comprehensive test data: 'Project Phoenix' DX Strategy Scenario
+        // ============================================================
+        // COMPREHENSIVE TEST MOCK DATA
+        // This mock covers ALL implemented slide types for verification.
+        // Each slide is labeled with its type for easy identification during testing.
+        // ============================================================
         return [
-            { "type": "title", "title": "全社DX推進プロジェクト 'Project Phoenix'\n中期経営計画 2025-2027", "subtitle": "持続可能な成長に向けたデジタル変革の青写真", "date": "2025年12月11日", "notes": "本日は全社DXプロジェクトの概要、特にこれからの3カ年のロードマップについてご説明します。" },
+            // === STRUCTURE SLIDES ===
+            { "type": "title", "title": "[TEST] title タイプ", "subtitle": "全パターン検証用テストデータ", "date": "2025.12.11", "notes": "タイトルスライドのテスト" },
 
-            { "type": "agenda", "title": "本日のアジェンダ", "subhead": "戦略的変革の5つの柱", "items": ["市場環境とDXの必要性", "新システム導入ロードマップ", "組織改革と人材育成プラン", "投資対効果とKPI目標", "リスク管理と今後のステップ"], "notes": "全体の構成は5つのパートに分かれています。質疑応答は最後にまとめて行います。" },
+            { "type": "agenda", "title": "[TEST] agenda タイプ", "subhead": "目次・アジェンダ形式", "items": ["項目1: 基本機能", "項目2: 拡張機能", "項目3: 検証項目"], "notes": "アジェンダスライドのテスト" },
 
-            { "type": "section", "title": "Part 1: 市場環境分析", "sectionNo": 1, "notes": "まずは外部環境の変化と、なぜ今DXが必要なのかについて共有します。" },
+            { "type": "section", "title": "[TEST] section タイプ", "sectionNo": 1, "notes": "セクションスライドのテスト" },
 
+            // === CONTENT SLIDES ===
+            { "type": "content", "title": "[TEST] content タイプ (通常)", "subhead": "箇条書きコンテンツ", "points": ["ポイント1: 通常のテキスト", "ポイント2: 複数行のテキスト\\n改行を含む内容", "ポイント3: 最後の項目"], "notes": "通常コンテンツスライドのテスト" },
+
+            // === CARD TYPES ===
             {
-                "type": "content", "title": "市場急変：デジタルの波", "subhead": "3つの主要な外部要因", "points": [
-                    "消費者のデジタルシフト：\nオンラインでの購買行動が全体の60%を超え、実店舗のみのビジネスモデルが限界を迎えている。",
-                    "競合他社の動向：\nAIを活用したダイナミックプライシングやパーソナライズ広告により、競合A社は昨対比120%の成長を記録。",
-                    "労働力不足の深刻化：\n2030年問題を見据え、一人当たりの生産性を現在の1.5倍に引き上げる必要がある。"
-                ],
-                "notes": "特に2点目の競合動向は脅威です。データを活用した意思決定基盤の構築が急務です。"
+                "type": "cards", "title": "[TEST] cards タイプ (文字列配列)", "subhead": "items が文字列の場合", "columns": 3, "items": [
+                    "カード1タイトル\\n説明文がここに入ります。複数行対応。",
+                    "カード2タイトル\\n別の説明文です。",
+                    "カード3タイトル\\n3つ目の説明。"
+                ], "notes": "cards (文字列配列) のテスト"
             },
 
             {
-                "type": "cards", "title": "競合ベンチマーク分析", "subhead": "主要プレイヤーのDX取り組み状況", "columns": 3, "items": [
-                    "A社: AI活用\n顧客データのAI解析によりLTVが20%向上。サブスクリプションモデルへの転換に成功。",
-                    "B社: SCM最適化\nサプライチェーン全体の可視化により在庫ロスを半減。リードタイムも3日短縮。",
-                    "C社: UI/UX刷新\nアプリのUXを抜本的に改善し、MAUが急増。若年層の取り込みに成功。",
-                    "自社: 現状維持\nレガシーシステムへの依存度が高く、データのサイロ化が課題。意思決定に時間を要している。",
-                    "市場平均\n多くの企業がクラウド移行を完了し、データ活用のフェーズに入っている。",
-                    "新規参入D社\nデジタルネイティブな組織構造で、圧倒的なスピード感でシェアを拡大中。"
-                ],
-                "notes": "自社は技術的負債の解消が遅れており、これが競争力低下の直接的な原因となっています。"
+                "type": "cards", "title": "[TEST] cards タイプ (オブジェクト配列)", "subhead": "items がオブジェクトの場合", "columns": 2, "items": [
+                    { "title": "機能A", "desc": "機能Aの詳細説明。オブジェクト形式での記述。" },
+                    { "title": "機能B", "desc": "機能Bの詳細説明。" }
+                ], "notes": "cards (オブジェクト配列) のテスト"
             },
 
             {
-                "type": "headerCards", "title": "DX推進の3つの基本方針", "subhead": "変革を支える指針", "columns": 3, "items": [
-                    { "title": "顧客中心", "desc": "すべてのデジタル施策は、顧客体験(CX)の向上を起点とする。\n技術ありきではなく、課題解決型の導入を徹底する。" },
-                    { "title": "データドリブン", "desc": "勘と経験への依存から脱却し、事実とデータに基づいた迅速な意思決定プロセスを確立する。" },
-                    { "title": "アジャイル", "desc": "完璧を求めず、まずは小さく始めて改善を繰り返す。\n変化に柔軟に対応できる組織文化を醸成する。" }
-                ], "notes": "これら3つの方針が、すべての判断基準となります。"
+                "type": "headerCards", "title": "[TEST] headerCards タイプ", "subhead": "ヘッダー付きカード", "columns": 3, "items": [
+                    { "title": "ヘッダー1", "desc": "ヘッダー付きカードの本文。色付きヘッダーが表示されるべき。" },
+                    { "title": "ヘッダー2", "desc": "2枚目のカード本文。" },
+                    { "title": "ヘッダー3", "desc": "3枚目のカード本文。" }
+                ], "notes": "headerCards のテスト"
             },
 
-            { "type": "section", "title": "Part 2: 戦略とロードマップ", "sectionNo": 2 },
-
+            // === KPI ===
             {
-                "type": "timeline", "title": "3カ年変革ロードマップ", "subhead": "フェーズごとの重点施策", "milestones": [
-                    { "label": "基盤構築フェーズ\nクラウド移行とデータ統合", "date": "2025年", "state": "current" },
-                    { "label": "活用展開フェーズ\nBIツール導入とAI実証実験", "date": "2026年", "state": "future" },
-                    { "label": "価値創出フェーズ\n新規デジタルサービスの立ち上げ", "date": "2027年", "state": "future" }
-                ],
-                "notes": "最初の1年は「守りのDX」、つまり基盤整備に集中します。2年目から「攻めのDX」へと転じます。"
+                "type": "kpi", "title": "[TEST] kpi タイプ", "subhead": "KPIダッシュボード", "items": [
+                    { "label": "売上", "value": "¥1.2億", "change": "+15%", "status": "good" },
+                    { "label": "コスト", "value": "¥3,500万", "change": "-5%", "status": "good" },
+                    { "label": "顧客数", "value": "1,234", "change": "-2%", "status": "bad" },
+                    { "label": "NPS", "value": "72", "change": "+8pt", "status": "good" }
+                ], "notes": "KPIカードのテスト。good/bad ステータスで色が変わるべき。"
             },
 
+            // === PROGRESS ===
             {
-                "type": "process", "title": "システム刷新プロセス", "subhead": "確実な移行を実現する4ステップ", "steps": [
-                    "現状分析 (AS-IS)\n業務フローの棚卸しと課題抽出\nレガシー資産の調査",
-                    "要件定義 (TO-BE)\n新業務フローの策定\nRFP作成とベンダー選定",
-                    "開発・移行\nアジャイル開発による段階的リリース\n旧システムからのデータ移行",
-                    "定着化・改善\nユーザートレーニング\n利用状況モニタリングと機能改善"
-                ],
-                "notes": "特に「要件定義」のフェーズで現場の声を十分に反映させることが、後の定着化の鍵となります。"
+                "type": "progress", "title": "[TEST] progress タイプ", "subhead": "進捗バー表示", "items": [
+                    { "label": "設計フェーズ", "percent": 100 },
+                    { "label": "開発フェーズ", "percent": 75 },
+                    { "label": "テストフェーズ", "percent": 30 },
+                    { "label": "リリース", "percent": 0 }
+                ], "notes": "プログレスバーのテスト。%表示が正しいか確認。"
             },
 
-            { "type": "section", "title": "Part 3: 定量目標と効果", "sectionNo": 3 },
-
+            // === TABLE ===
             {
-                "type": "statsCompare", "title": "主要KPI改善目標", "subhead": "システム導入による業務効率化効果", "leftTitle": "現状 (2025)", "rightTitle": "導入後 (2027)", "stats": [
-                    { "label": "月次決算リードタイム", "leftValue": "15営業日", "rightValue": "5営業日", "trend": "down" },
-                    { "label": "在庫回転率", "leftValue": "4.5回/年", "rightValue": "8.0回/年", "trend": "up" },
-                    { "label": "顧客問い合わせ対応時間", "leftValue": "平均24時間", "rightValue": "平均2時間", "trend": "down" },
-                    { "label": "従業員エンゲージメント", "leftValue": "58点", "rightValue": "75点", "trend": "up" }
-                ],
-                "notes": "定型業務の自動化により、決算業務の大幅な短縮が見込まれます。また、CS向上にも直結します。"
+                "type": "table", "title": "[TEST] table タイプ", "subhead": "表形式データ", "headers": ["項目", "値", "備考"], "rows": [
+                    ["データ1", "100", "正常"],
+                    ["データ2", "200", "注意"],
+                    ["データ3", "300", "完了"]
+                ], "notes": "テーブルのテスト。ヘッダー行と交互の背景色を確認。"
             },
 
+            // === FAQ ===
             {
-                "type": "barCompare", "title": "売上高・営業利益シミュレーション", "subhead": "DX投資による収益構造の変革", "leftTitle": "従来予測", "rightTitle": "DX推進後", "stats": [
-                    { "label": "売上高 (2027)", "leftValue": "500億円", "rightValue": "650億円", "trend": "up" },
-                    { "label": "営業利益 (2027)", "leftValue": "40億円", "rightValue": "85億円", "trend": "up" },
-                    { "label": "販管費比率", "leftValue": "25%", "rightValue": "18%", "trend": "down" }
-                ]
+                "type": "faq", "title": "[TEST] faq タイプ", "subhead": "Q&A形式", "items": [
+                    { "q": "質問1: FAQスライドはどう表示されますか？", "a": "回答1: Qマークと質問・回答がセットで表示されます。" },
+                    { "q": "質問2: 複数のQ&Aは対応していますか？", "a": "回答2: はい、複数表示されます。" }
+                ], "notes": "FAQスライドのテスト。Q/A の視覚的区別を確認。"
             },
 
-            { "type": "section", "title": "Part 4: 組織と業務フロー", "sectionNo": 4 },
+            // === QUOTE ===
+            { "type": "quote", "title": "[TEST] quote タイプ", "subhead": "引用・メッセージ", "text": "これはテスト用の引用文です。大きく中央揃えで表示されるべきです。", "author": "テスト担当者", "notes": "引用スライドのテスト。引用符と著者名を確認。" },
 
+            // === TIMELINE ===
             {
-                "type": "diagram", "title": "新・業務プロセスフロー", "subhead": "部門間の連携強化とデータ一元化", "lanes": [
-                    { "title": "営業部門", "items": ["リード獲得(MA)", "商談管理(SFA)", "受注登録(CRM)"] },
-                    { "title": "製造・物流", "items": ["需要予測連動", "生産計画自動立案", "在庫最適化"] },
-                    { "title": "経営管理", "items": ["リアルタイム売上把握", "予実管理ダッシュボード", "投資判断"] }
-                ],
-                "notes": "データが各部門をシームレスに流れることで、製造部門は営業の受注状況をリアルタイムに把握し、生産計画に反映できます。"
+                "type": "timeline", "title": "[TEST] timeline タイプ", "subhead": "時系列表示", "milestones": [
+                    { "label": "過去イベント", "date": "2024年", "state": "past" },
+                    { "label": "現在進行中", "date": "2025年", "state": "current" },
+                    { "label": "将来の計画", "date": "2026年", "state": "future" }
+                ], "notes": "タイムラインのテスト。past/current/future の状態表示を確認。"
             },
 
+            // === PROCESS ===
             {
-                "type": "pyramid", "title": "DX人材育成ピラミッド", "subhead": "全社員のデジタルリテラシー向上", "levels": [
-                    { "title": "ビジネスアーキテクト", "description": "DX戦略の立案と推進をリードする変革リーダー層 (TOP 5%)" },
-                    { "title": "データサイエンティスト/エンジニア", "description": "高度な分析とシステム構築を担う専門技術者層 (15%)" },
-                    { "title": "デジタル活用人材", "description": "ツールを活用し業務改善を推進する現場リーダー層 (30%)" },
-                    { "title": "デジタル基礎人材", "description": "ITの基礎知識を持ち、安全にシステムを利用できる全社員 (50%)" }
-                ]
+                "type": "process", "title": "[TEST] process タイプ", "subhead": "プロセスフロー", "steps": [
+                    "Step 1\\n最初のステップ",
+                    "Step 2\\n2番目のステップ",
+                    "Step 3\\n3番目のステップ",
+                    "Step 4\\n最後のステップ"
+                ], "notes": "プロセスフローのテスト。矢印の接続を確認。"
             },
 
+            // === FLOWCHART ===
             {
-                "type": "triangle", "title": "PJ成功の3要素 (QCD)", "subhead": "バランスの取れたプロジェクト管理", "items": [
-                    { "title": "Quality", "desc": "ユーザー体験重視\nバグゼロ基準" },
-                    { "title": "Cost", "desc": "クラウド活用による\nTCO削減" },
-                    { "title": "Delivery", "desc": "アジャイルによる\n早期リリース" }
-                ]
+                "type": "flowChart", "title": "[TEST] flowChart タイプ", "subhead": "フローチャート形式", "steps": [
+                    "開始",
+                    "処理A",
+                    "処理B",
+                    "終了"
+                ], "notes": "フローチャートのテスト。ボックスと矢印の表示を確認。"
             },
 
+            // === STEPUP ===
             {
-                "type": "cycle", "title": "継続的な改善プロセス", "subhead": "アジャイルな開発サイクル", "items": [
-                    { "label": "Plan", "subLabel": "バックログ作成" },
-                    { "label": "Do", "subLabel": "スプリント開発" },
-                    { "label": "Check", "subLabel": "レビュー会" },
-                    { "label": "Act", "subLabel": "改善反映" }
-                ], "centerText": "Scrum", "notes": "2週間単位のスプリントを回し、常に変化するビジネス要件に対応します。"
+                "type": "stepUp", "title": "[TEST] stepUp タイプ", "subhead": "ステップアップ (階段表示)", "items": [
+                    { "title": "Level 1", "desc": "基礎レベル" },
+                    { "title": "Level 2", "desc": "中級レベル" },
+                    { "title": "Level 3", "desc": "上級レベル" }
+                ], "notes": "ステップアップのテスト。階段状の表示を確認。"
             },
 
-            { "type": "section", "title": "Part 5: まとめ", "sectionNo": 5 },
-
+            // === CYCLE ===
             {
-                "type": "table", "title": "想定リスクと対策", "subhead": "プロジェクト阻害要因への対応策", "headers": ["リスク項目", "影響度", "発生確率", "対応策"], "rows": [
-                    ["現場の抵抗", "高", "中", "早期からのキーマン巻き込みと十分な説明会の実施"],
-                    ["要件の肥大化", "中", "高", "MVP（実用最小限の製品）アプローチの徹底とスコープ管理"],
-                    ["ベンダーロックイン", "中", "低", "オープンソース技術の活用と標準仕様の採用"],
-                    ["セキュリティ事故", "甚大", "低", "ゼロトラストアーキテクチャの採用と定期的な監査"]
-                ]
+                "type": "cycle", "title": "[TEST] cycle タイプ", "subhead": "循環フロー", "items": [
+                    { "label": "計画", "subLabel": "Plan" },
+                    { "label": "実行", "subLabel": "Do" },
+                    { "label": "評価", "subLabel": "Check" },
+                    { "label": "改善", "subLabel": "Act" }
+                ], "centerText": "PDCA", "notes": "サイクル図のテスト。円形配置と中心テキストを確認。"
             },
 
+            // === TRIANGLE ===
             {
-                "type": "content", "title": "Project Phoenix が目指す未来", "subhead": "テクノロジーの力で、人と企業の可能性を最大化する", "points": [
-                    "全ての従業員がクリエイティブな業務に注力できる環境",
-                    "顧客一人ひとりに寄り添ったパーソナライズされた体験の提供",
-                    "変化に即応し、進化し続ける強靭な企業体質"
-                ]
+                "type": "triangle", "title": "[TEST] triangle タイプ", "subhead": "三角形構造", "items": [
+                    { "title": "頂点A", "desc": "説明A" },
+                    { "title": "頂点B", "desc": "説明B" },
+                    { "title": "頂点C", "desc": "説明C" }
+                ], "notes": "三角形図のテスト。3つの頂点が正しく配置されるか確認。"
             },
 
-            { "type": "closing", "notes": "ご清聴ありがとうございました。DXは終わりなき旅ですが、最初の一歩を共に踏み出しましょう。" }
+            // === PYRAMID ===
+            {
+                "type": "pyramid", "title": "[TEST] pyramid タイプ", "subhead": "ピラミッド構造", "levels": [
+                    { "title": "トップ層", "description": "最上位の説明" },
+                    { "title": "中間層", "description": "中間層の説明" },
+                    { "title": "ベース層", "description": "基盤となる説明" }
+                ], "notes": "ピラミッド図のテスト。上から下への階層表示を確認。"
+            },
+
+            // === DIAGRAM (LANES) ===
+            {
+                "type": "diagram", "title": "[TEST] diagram タイプ (レーン)", "subhead": "レーン形式の図", "lanes": [
+                    { "title": "レーン1", "items": ["項目A", "項目B", "項目C"] },
+                    { "title": "レーン2", "items": ["項目X", "項目Y"] },
+                    { "title": "レーン3", "items": ["単一項目"] }
+                ], "notes": "レーン図のテスト。複数レーンと項目の表示を確認。"
+            },
+
+            // === COMPARE ===
+            { "type": "compare", "title": "[TEST] compare タイプ (基本比較)", "subhead": "左右比較レイアウト", "leftTitle": "オプションA", "rightTitle": "オプションB", "leftItems": ["A の特徴1", "A の特徴2", "A の利点"], "rightItems": ["B の特徴1", "B の特徴2", "B の利点"], "notes": "基本比較スライドのテスト。左右のタイトルと項目を確認。" },
+
+            // === STATSCOMPARE ===
+            {
+                "type": "statsCompare", "title": "[TEST] statsCompare タイプ", "subhead": "数値比較 (統計)", "leftTitle": "Before", "rightTitle": "After", "stats": [
+                    { "label": "指標1", "leftValue": "100", "rightValue": "150", "trend": "up" },
+                    { "label": "指標2", "leftValue": "50", "rightValue": "30", "trend": "down" }
+                ], "notes": "統計比較のテスト。up/down の矢印表示を確認。"
+            },
+
+            // === BARCOMPARE ===
+            {
+                "type": "barCompare", "title": "[TEST] barCompare タイプ", "subhead": "バーチャート比較", "leftTitle": "カテゴリA", "rightTitle": "カテゴリB", "stats": [
+                    { "label": "項目1", "leftValue": "40", "rightValue": "80" },
+                    { "label": "項目2", "leftValue": "70", "rightValue": "50" }
+                ], "notes": "バー比較のテスト。バーの長さが値に比例しているか確認。"
+            },
+
+            // === IMAGETEXT ===
+            { "type": "imageText", "title": "[TEST] imageText タイプ", "subhead": "画像とテキスト", "image": "https://via.placeholder.com/400x300.png?text=Test+Image", "imagePosition": "left", "points": ["画像の右側にテキストが表示されるべき", "複数のポイントを記載可能"], "notes": "imageText のテスト。画像プレースホルダーとテキストの配置を確認。" },
+
+            // === CLOSING ===
+            { "type": "closing", "title": "[TEST] closing タイプ", "notes": "クロージングスライドのテスト。" }
         ];
     }
     // =============================

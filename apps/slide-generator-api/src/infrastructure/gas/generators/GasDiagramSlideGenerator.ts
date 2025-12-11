@@ -33,53 +33,59 @@ export class GasDiagramSlideGenerator implements ISlideGenerator {
             }
         }
 
-        const type = (data.layout || data.type || '').toLowerCase();
+        // Priority: JSON type field > layout field
+        const type = (data.type || data.layout || '').toLowerCase();
+        Logger.log('Generating Diagram Slide: ' + type);
 
         const bodyPlaceholder = slide.getPlaceholder(SlidesApp.PlaceholderType.BODY);
         const workArea = bodyPlaceholder ?
             { left: bodyPlaceholder.getLeft(), top: bodyPlaceholder.getTop(), width: bodyPlaceholder.getWidth(), height: bodyPlaceholder.getHeight() } :
             layout.getRect('contentSlide.body');
 
-        // switch logic for diagram types
-        if (type.includes('timeline')) {
-            this.drawTimeline(slide, data, workArea, settings, layout);
-        } else if (type.includes('process')) {
-            this.drawProcess(slide, data, workArea, settings, layout);
-        } else if (type.includes('cycle')) {
-            this.drawCycle(slide, data, workArea, settings, layout);
-        } else if (type.includes('pyramid')) {
-            this.drawPyramid(slide, data, workArea, settings, layout);
-        } else if (type.includes('triangle')) {
-            this.drawTriangle(slide, data, workArea, settings, layout);
-        } else if (type.includes('statscompare')) {
-            this.drawStatsCompare(slide, data, workArea, settings, layout);
-        } else if (type.includes('barcompare')) {
-            this.drawBarCompare(slide, data, workArea, settings, layout);
-        } else if (type.includes('compare') || type.includes('kaizen')) {
-            this.drawComparison(slide, data, workArea, settings, layout);
-        } else if (type.includes('stepup') || type.includes('stair')) {
-            this.drawStepUp(slide, data, workArea, settings, layout);
-        } else if (type.includes('flowchart')) {
-            this.drawFlowChart(slide, data, workArea, settings, layout);
-        } else if (type.includes('diagram')) { // Lane diagram
-            this.drawLanes(slide, data, workArea, settings, layout);
-        } else if (type.includes('cards') || type.includes('headercards')) {
-            this.drawCards(slide, data, workArea, settings, layout);
-        } else if (type.includes('kpi')) {
-            this.drawKPI(slide, data, workArea, settings, layout);
-        } else if (type.includes('table')) {
-            this.drawTable(slide, data, workArea, settings, layout);
-        } else if (type.includes('faq')) {
-            this.drawFAQ(slide, data, workArea, settings, layout);
-        } else if (type.includes('progress')) {
-            this.drawProgress(slide, data, workArea, settings, layout);
-        } else if (type.includes('quote')) {
-            this.drawQuote(slide, data, workArea, settings, layout);
-        } else if (type.includes('imagetext')) {
-            this.drawImageText(slide, data, workArea, settings, layout);
-        } else {
-            // Fallback
-            Logger.log('Diagram logic not implemented for type: ' + type);
+        // switch logic for diagram types - wrapped in try-catch for robustness
+        try {
+            if (type.includes('timeline')) {
+                this.drawTimeline(slide, data, workArea, settings, layout);
+            } else if (type.includes('process')) {
+                this.drawProcess(slide, data, workArea, settings, layout);
+            } else if (type.includes('cycle')) {
+                this.drawCycle(slide, data, workArea, settings, layout);
+            } else if (type.includes('pyramid')) {
+                this.drawPyramid(slide, data, workArea, settings, layout);
+            } else if (type.includes('triangle')) {
+                this.drawTriangle(slide, data, workArea, settings, layout);
+            } else if (type.includes('statscompare')) {
+                this.drawStatsCompare(slide, data, workArea, settings, layout);
+            } else if (type.includes('barcompare')) {
+                this.drawBarCompare(slide, data, workArea, settings, layout);
+            } else if (type.includes('compare') || type.includes('kaizen')) {
+                this.drawComparison(slide, data, workArea, settings, layout);
+            } else if (type.includes('stepup') || type.includes('stair')) {
+                this.drawStepUp(slide, data, workArea, settings, layout);
+            } else if (type.includes('flowchart')) {
+                this.drawFlowChart(slide, data, workArea, settings, layout);
+            } else if (type.includes('diagram')) { // Lane diagram
+                this.drawLanes(slide, data, workArea, settings, layout);
+            } else if (type.includes('cards') || type.includes('headercards')) {
+                this.drawCards(slide, data, workArea, settings, layout);
+            } else if (type.includes('kpi')) {
+                this.drawKPI(slide, data, workArea, settings, layout);
+            } else if (type.includes('table')) {
+                this.drawTable(slide, data, workArea, settings, layout);
+            } else if (type.includes('faq')) {
+                this.drawFAQ(slide, data, workArea, settings, layout);
+            } else if (type.includes('progress')) {
+                this.drawProgress(slide, data, workArea, settings, layout);
+            } else if (type.includes('quote')) {
+                this.drawQuote(slide, data, workArea, settings, layout);
+            } else if (type.includes('imagetext')) {
+                this.drawImageText(slide, data, workArea, settings, layout);
+            } else {
+                // Fallback
+                Logger.log('Diagram logic not implemented for type: ' + type);
+            }
+        } catch (e) {
+            Logger.log(`ERROR in drawing ${type}: ${e}`);
         }
 
         addCucFooter(slide, layout, pageNum, settings, this.creditImageBlob);
@@ -816,8 +822,18 @@ export class GasDiagramSlideGenerator implements ISlideGenerator {
             const x = area.left + c * (cardW + gap);
             const y = area.top + r * (cardH + gap);
 
-            const title = item.title || item.label || '';
-            const desc = item.desc || item.description || item.text || '';
+            // Handle both string items and object items
+            let title = '';
+            let desc = '';
+            if (typeof item === 'string') {
+                // Parse "Title\nDescription" or "Title: Description\nMore..." format
+                const lines = item.split('\n');
+                title = lines[0] || '';
+                desc = lines.slice(1).join('\n') || '';
+            } else {
+                title = item.title || item.label || '';
+                desc = item.desc || item.description || item.text || '';
+            }
 
             if (hasHeader) {
                 // Headered Card
@@ -937,11 +953,10 @@ export class GasDiagramSlideGenerator implements ISlideGenerator {
                 cell.getFill().setSolidFill(settings.primaryColor); // Header Color
                 cell.getText().setText(headers[c] || '');
                 const style = cell.getText().getTextStyle();
-                style.setBold(true).setFontSize(14).setForegroundColor('#FFFFFF');
-                cell.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
-
-                // Borders not easily customizable per cell in this GAS version context without complex handling.
-                // Relying on background colors for structure.
+                style.setBold(true);
+                style.setFontSize(14);
+                style.setForegroundColor('#FFFFFF');
+                try { cell.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
             }
             rowIndex++;
         }
@@ -955,10 +970,10 @@ export class GasDiagramSlideGenerator implements ISlideGenerator {
                 const cell = table.getCell(rowIndex, c);
                 cell.getFill().setSolidFill(rowColor);
                 cell.getText().setText(String(row[c] || ''));
-                cell.getText().getTextStyle().setFontSize(12).setForegroundColor(CONFIG.COLORS.text_primary);
-                cell.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
-
-                // Subtle gray borders not applied to avoid type errors
+                const rowStyle = cell.getText().getTextStyle();
+                rowStyle.setFontSize(12);
+                rowStyle.setForegroundColor(CONFIG.COLORS.text_primary);
+                try { cell.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE); } catch (e) { }
                 // const borderColor = CONFIG.COLORS.lane_border;
                 // cell.getBorderBottom().getLineFill().setSolidFill(borderColor);
                 // cell.getBorderTop().getLineFill().setSolidFill(borderColor);

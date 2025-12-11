@@ -71,7 +71,14 @@ const mockShape = {
 
 const mockTable = {
     getCell: jest.fn().mockReturnValue({
-        getText: jest.fn().mockReturnValue({ setText: jest.fn(), getTextStyle: jest.fn().mockReturnValue({ setBold: jest.fn().mockReturnThis(), setFontSize: jest.fn().mockReturnThis() }) }),
+        getText: jest.fn().mockReturnValue({
+            setText: jest.fn(),
+            getTextStyle: jest.fn().mockReturnValue({
+                setBold: jest.fn().mockReturnThis(),
+                setFontSize: jest.fn().mockReturnThis(),
+                setForegroundColor: jest.fn().mockReturnThis()
+            })
+        }),
         getFill: jest.fn().mockReturnValue({ setSolidFill: jest.fn() }),
         setContentAlignment: jest.fn()
     }),

@@ -333,6 +333,32 @@
                 showStatus('error', '先に Gem の URL を入力してください。');
             }
         }
+
+        function createTemplate() {
+            if (!confirm('新しいテンプレートスライドを作成しますか？\n(作成完了まで数秒かかります)')) {
+                return;
+            }
+
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = 'テンプレートを作成中...';
+            statusDiv.className = 'show';
+            statusDiv.style.backgroundColor = '#e8f0fe';
+            statusDiv.style.color = '#1a73e8';
+
+            google.script.run
+                .withSuccessHandler(function (result) {
+                    if (result && result.url) {
+                        document.getElementById('templateSlideId').value = result.url;
+                        showStatus('success', '✅ テンプレートを作成しました！\nURLが自動入力されました。');
+                    } else {
+                        showStatus('error', '⚠️ 作成されたようですが、情報の取得に失敗しました。');
+                    }
+                })
+                .withFailureHandler(function (error) {
+                    showStatus('error', '❌ エラー: ' + error.message);
+                })
+                .createTemplateSlide();
+        }
     </script>
 </body>
 

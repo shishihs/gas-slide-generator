@@ -6,8 +6,7 @@ import {
     insertImageFromUrlOrFileId,
     setStyledText,
     adjustShapeText_External,
-    addCucFooter,
-    // drawBottomBar removed
+    addFooter
 } from '../../../common/utils/SlideUtils';
 
 export class GasSectionSlideGenerator implements ISlideGenerator {
@@ -16,8 +15,7 @@ export class GasSectionSlideGenerator implements ISlideGenerator {
     constructor(private creditImageBlob: GoogleAppsScript.Base.BlobSource | null) { }
 
     generate(slide: GoogleAppsScript.Slides.Slide, data: any, layout: LayoutManager, pageNum: number, settings: any, imageUpdateOption: string = 'update') {
-        // Background modification logic removed
-        // setBackgroundImageFromUrl(slide, layout, imageUrl, fallbackColor, imageUpdateOption);
+
 
         // Handle Section Numbering (simplified for state)
         this.sectionCounter++;
@@ -97,6 +95,6 @@ export class GasSectionSlideGenerator implements ISlideGenerator {
             });
         }
 
-        addCucFooter(slide, layout, pageNum, settings, this.creditImageBlob);
+        addFooter(slide, layout, pageNum, settings, this.creditImageBlob);
     }
 }

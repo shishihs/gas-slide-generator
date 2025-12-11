@@ -4,7 +4,7 @@ import { CONFIG } from '../../../common/config/SlideConfig';
 import {
     setStyledText,
     offsetRect,
-    addCucFooter,
+    addFooter,
     drawArrowBetweenRects,
     setBoldTextSize,
     insertImageFromUrlOrFileId
@@ -155,7 +155,7 @@ export class GasDiagramSlideGenerator implements ISlideGenerator {
             generatedGroup.setTop(centerY);
         }
 
-        addCucFooter(slide, layout, pageNum, settings, this.creditImageBlob);
+        addFooter(slide, layout, pageNum, settings, this.creditImageBlob);
     }
 
     private drawTimeline(slide: GoogleAppsScript.Slides.Slide, data: any, area: any, settings: any, layout: LayoutManager) {

@@ -6,14 +6,13 @@ import {
     insertImageFromUrlOrFileId,
     setStyledText,
     adjustShapeText_External,
-    addCucFooter,
+    addFooter,
     offsetRect,
     drawStandardTitleHeader,
     drawSubheadIfAny,
     createContentCushion,
     setBulletsWithInlineStyles,
     renderImagesInArea,
-    // drawBottomBar removed
     normalizeImages,
     setBoldTextSize,
     adjustAreaForSubhead
@@ -23,8 +22,7 @@ export class GasContentSlideGenerator implements ISlideGenerator {
     constructor(private creditImageBlob: GoogleAppsScript.Base.BlobSource | null) { }
 
     generate(slide: GoogleAppsScript.Slides.Slide, data: any, layout: LayoutManager, pageNum: number, settings: any, imageUpdateOption: string = 'update') {
-        // NOTE: Commented out manual background setting to respect template.
-        // setBackgroundImageFromUrl removed
+
 
         // Title Placeholder
         const titlePlaceholder = slide.getPlaceholder(SlidesApp.PlaceholderType.TITLE) || slide.getPlaceholder(SlidesApp.PlaceholderType.CENTERED_TITLE);
@@ -168,7 +166,7 @@ export class GasContentSlideGenerator implements ISlideGenerator {
             renderImagesInArea(slide, layout, area, normalizeImages(data.images), imageUpdateOption);
         }
 
-        // drawBottomBar removed
-        addCucFooter(slide, layout, pageNum, settings, this.creditImageBlob);
+
+        addFooter(slide, layout, pageNum, settings, this.creditImageBlob);
     }
 }

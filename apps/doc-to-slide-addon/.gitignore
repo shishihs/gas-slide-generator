@@ -1,14 +1,6 @@
-# Dependencies
-node_modules/
-test-results/
-
-# Build & Test
-coverage/
-*.tsbuildinfo
-
-# Clasp / GAS
+# Clasp credentials (project-specific if not in root)
 .clasprc.json
 
-# Environment
+# Environment (if different from root)
 .env
 .env.local

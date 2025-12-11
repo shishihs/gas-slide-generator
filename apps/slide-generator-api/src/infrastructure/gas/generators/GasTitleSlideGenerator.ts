@@ -6,20 +6,14 @@ import {
     insertImageFromUrlOrFileId,
     setStyledText,
     adjustShapeText_External,
-    applyTextStyle,
-    // drawBottomBar removed
-    // drawCreditImage removed
+    applyTextStyle
 } from '../../../common/utils/SlideUtils';
 
 export class GasTitleSlideGenerator implements ISlideGenerator {
     constructor(private creditImageBlob: GoogleAppsScript.Base.BlobSource | null) { }
 
     generate(slide: GoogleAppsScript.Slides.Slide, data: any, layout: LayoutManager, pageNum: number, settings: any, imageUpdateOption: string = 'update') {
-        // NOTE: We do not set background image here if we want to respect the Master/Layout background.
-        // If the user wants to OVERRIDE the template background, we can keep it. 
-        // For now, let's assume if a template is used, we respect it. 
-        // But the previous code always set it. Let's comment it out or make it optional.
-        // setBackgroundImageFromUrl removed
+
 
         // Populate Title Placeholder
         const titlePlaceholder = slide.getPlaceholder(SlidesApp.PlaceholderType.TITLE) || slide.getPlaceholder(SlidesApp.PlaceholderType.CENTERED_TITLE);
@@ -60,12 +54,7 @@ export class GasTitleSlideGenerator implements ISlideGenerator {
             }
         }
 
-        // Handle Logo if it exists (previous code drew it manually).
-        // Logo logic removed
 
-        // Footer / Credit
-        // drawBottomBar removed
-        // drawCreditImage removed
 
     }
 }

@@ -6,7 +6,7 @@ import { CONFIG } from '../../../common/config/SlideConfig';
 jest.mock('../../../common/utils/SlideUtils', () => ({
     setStyledText: jest.fn(),
     offsetRect: jest.fn(),
-    addCucFooter: jest.fn(),
+    addFooter: jest.fn(),
     drawArrowBetweenRects: jest.fn(),
     setBoldTextSize: jest.fn()
 }));

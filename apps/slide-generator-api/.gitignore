@@ -1,19 +1,8 @@
-# Dependencies
-node_modules/
-
-# Build
+# Build artifacts (project-specific)
 dist/
-*.tsbuildinfo
 
-# Test
-coverage/
-test-results/
-
-# Clasp / GAS
+# Clasp credentials
 .clasprc.json
-
-# Agent
-.agent/
 
 # Environment
 .env

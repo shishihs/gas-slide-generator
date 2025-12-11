@@ -182,7 +182,7 @@ export function applyStyleRanges(textRange: GoogleAppsScript.Slides.TextRange, r
     });
 }
 
-// function setBackgroundImageFromUrl removed
+
 
 export function insertImageFromUrlOrFileId(urlOrFileId: string): GoogleAppsScript.Base.BlobSource | null {
     if (!urlOrFileId) return null;
@@ -474,13 +474,10 @@ export function adjustShapeText_External(shape: GoogleAppsScript.Slides.Shape, p
     return { isOverflow: false, details: 'Simplified implementation in cleanup.' };
 }
 
-// function drawBottomBar removed
-
-// function drawCreditImage removed
-
-export function addCucFooter(slide: GoogleAppsScript.Slides.Slide, layout: any, pageNum: number, settings: any, creditImageBlob: GoogleAppsScript.Base.BlobSource | null) {
-    const CREDIT_IMAGE_LINK = 'https://note.com/majin_108'; // Constant moved here or passed in
-
+/**
+ * Add footer to slide with optional page number
+ */
+export function addFooter(slide: GoogleAppsScript.Slides.Slide, layout: any, pageNum: number, settings: any, creditImageBlob: GoogleAppsScript.Base.BlobSource | null) {
     if (CONFIG.FOOTER_TEXT && CONFIG.FOOTER_TEXT.trim() !== '') {
         const leftRect = layout.getRect('footer.leftText');
         const leftShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, leftRect.left, leftRect.top, leftRect.width, leftRect.height);
@@ -494,7 +491,7 @@ export function addCucFooter(slide: GoogleAppsScript.Slides.Slide, layout: any, 
             leftShape.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
         } catch (e) { }
     }
-    // Credit image removed
+
     if (pageNum > 0 && settings && settings.showPageNumber) {
         const rightRect = layout.getRect('footer.rightPage');
         const rightShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, rightRect.left, rightRect.top, rightRect.width, rightRect.height);
@@ -545,7 +542,6 @@ export function estimateTextWidthPt(text: string, fontSize: number): number {
 }
 
 export function drawStandardTitleHeader(slide: GoogleAppsScript.Slides.Slide, layout: any, key: string, title: string, settings: any, preCalculatedWidthPt: number | null = null, imageUpdateOption: string = 'update') {
-    // Logo drawing removed
     const titleRect = safeGetRect(layout, `${key}.title`);
     if (!titleRect) {
         return;

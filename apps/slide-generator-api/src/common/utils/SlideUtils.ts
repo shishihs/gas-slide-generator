@@ -83,7 +83,7 @@ function checkSpacing(s: string, out: string, i: number, nextCharIndex: number) 
     return { prefix, suffix };
 }
 
-export function parseInlineStyles(s: string) {
+function parseInlineStyles(s: string) {
     const ranges = [];
     let out = '';
     let i = 0;
@@ -168,19 +168,7 @@ export function parseInlineStyles(s: string) {
     };
 }
 
-export function cleanSpeakerNotes(notesText: string) {
-    if (!notesText) return '';
-    let cleaned = notesText;
-    cleaned = cleaned.replace(/\*\*([^*]+)\*\*/g, '$1');
-    cleaned = cleaned.replace(/\[\[([^\]]+)\]\]/g, '$1');
-    cleaned = cleaned.replace(/\*([^*]+)\*/g, '$1');
-    cleaned = cleaned.replace(/_([^_]+)_/g, '$1');
-    cleaned = cleaned.replace(/~~([^~]+)~~/g, '$1');
-    cleaned = cleaned.replace(/`([^`]+)`/g, '$1');
-    return cleaned;
-}
-
-export function applyStyleRanges(textRange: GoogleAppsScript.Slides.TextRange, ranges: any[]) {
+function applyStyleRanges(textRange: GoogleAppsScript.Slides.TextRange, ranges: any[]) {
     ranges.forEach(r => {
         try {
             const sub = textRange.getRange(r.start, r.end);
@@ -252,64 +240,9 @@ export function insertImageFromUrlOrFileId(urlOrFileId: string): GoogleAppsScrip
 
         return null;
     }
-} // Re-implemented to return Blob or null. The original sometimes returned parsed URL string? 
-// Checking line 4190 of main.ts: "return urlOrFileId;". Ah, if it's not a file ID or data URI, it just returns the URL string.
-// Slide.insertImage() can take String (URL) or Blob.
-// I should adjust the return type to BlobSource | string.
-
-export function insertImageFromUrlOrFileId_Fixed(urlOrFileId: string): GoogleAppsScript.Base.BlobSource | string | null {
-    if (!urlOrFileId) return null;
-
-    // Internal helper extraction
-    const extractFileIdFromUrl = (url: string) => {
-        const patterns = [
-            /\/file\/d\/([a-zA-Z0-9_-]+)/,
-            /id=([a-zA-Z0-9_-]+).*file/,
-            /file\/([a-zA-Z0-9_-]+)/
-        ];
-        for (const pattern of patterns) {
-            const match = url.match(pattern);
-            if (match && match[1]) return match[1];
-        }
-        return null;
-    };
-
-    const fileIdPattern = /^[a-zA-Z0-9_-]{25,}$/;
-    const extractedFileId = extractFileIdFromUrl(urlOrFileId);
-
-    if (extractedFileId && fileIdPattern.test(extractedFileId)) {
-        try {
-            const file = DriveApp.getFileById(extractedFileId);
-            return file.getBlob();
-        } catch (e) {
-            return null;
-        }
-    } else if (fileIdPattern.test(urlOrFileId)) {
-        try {
-            const file = DriveApp.getFileById(urlOrFileId);
-            return file.getBlob();
-        } catch (e) {
-            return null;
-        }
-    } else if (urlOrFileId.startsWith('data:image/')) {
-        try {
-            const parts = urlOrFileId.split(',');
-            if (parts.length !== 2) throw new Error('Invalid Base64 format.');
-            const mimeMatch = parts[0].match(/:(.*?);/);
-            if (!mimeMatch) return null;
-            const mimeType = mimeMatch[1];
-            const base64Data = parts[1];
-            const decodedData = Utilities.base64Decode(base64Data);
-            return Utilities.newBlob(decodedData, mimeType);
-        } catch (e) {
-            return null;
-        }
-    } else {
-        return urlOrFileId;
-    }
 }
 
-export function createGradientRectangle(slide: GoogleAppsScript.Slides.Slide, x: number, y: number, width: number, height: number, colors: string[]) {
+function createGradientRectangle(slide: GoogleAppsScript.Slides.Slide, x: number, y: number, width: number, height: number, colors: string[]) {
     const numStrips = Math.max(20, Math.floor(width / 2));
     const stripWidth = width / numStrips;
     const startColor = hexToRgb(colors[0]),
@@ -335,17 +268,7 @@ export function createGradientRectangle(slide: GoogleAppsScript.Slides.Slide, x:
     return shapes[0] || null;
 }
 
-export function applyFill(slide: GoogleAppsScript.Slides.Slide, x: number, y: number, width: number, height: number, settings: any) {
-    if (settings.enableGradient) {
-        createGradientRectangle(slide, x, y, width, height, [settings.gradientStart, settings.gradientEnd]);
-    } else {
-        const shape = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, x, y, width, height);
-        shape.getFill().setSolidFill(settings.primaryColor);
-        shape.getBorder().setTransparent();
-    }
-}
-
-export function createPillShapeUnderline(slide: GoogleAppsScript.Slides.Slide, x: number, y: number, width: number, height: number, settings: any) {
+function createPillShapeUnderline(slide: GoogleAppsScript.Slides.Slide, x: number, y: number, width: number, height: number, settings: any) {
     const shapes = [];
     const diameter = height;
     const radius = height / 2;
@@ -521,7 +444,7 @@ export function addFooter(slide: GoogleAppsScript.Slides.Slide, layout: any, pag
     }
 }
 
-export function safeGetRect(layout: any, path: string) {
+function safeGetRect(layout: any, path: string) {
     try {
         const rect = layout.getRect(path);
         if (rect &&
@@ -540,7 +463,7 @@ export function safeGetRect(layout: any, path: string) {
     }
 }
 
-export function estimateTextWidthPt(text: string, fontSize: number): number {
+function estimateTextWidthPt(text: string, fontSize: number): number {
     let count = 0;
     if (!text) return 0;
     for (let i = 0; i < text.length; i++) {

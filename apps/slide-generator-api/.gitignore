@@ -14,6 +14,7 @@ preview.html
 # Test Artifacts
 test-results/
 playwright-report/
+tests/visual-results/
 coverage/
 junit.xml
 
@@ -21,3 +22,6 @@ junit.xml
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# System
+.DS_Store

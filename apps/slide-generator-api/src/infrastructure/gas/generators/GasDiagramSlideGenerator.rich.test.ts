@@ -1,27 +1,27 @@
-
+import { vi, describe, it, expect, beforeEach, Mock } from 'vitest';
 import { GasDiagramSlideGenerator } from './GasDiagramSlideGenerator';
 import { DiagramRendererFactory } from './diagrams/DiagramRendererFactory';
 import { LayoutManager } from '../../../common/utils/LayoutManager';
 
 // Mock Dependencies
-jest.mock('../../../common/utils/SlideUtils', () => ({
-    setStyledText: jest.fn(),
-    offsetRect: jest.fn(),
-    addFooter: jest.fn(),
-    drawArrowBetweenRects: jest.fn(),
-    setBoldTextSize: jest.fn(),
-    insertImageFromUrlOrFileId: jest.fn()
+vi.mock('../../../common/utils/SlideUtils', () => ({
+    setStyledText: vi.fn(),
+    offsetRect: vi.fn(),
+    addFooter: vi.fn(),
+    drawArrowBetweenRects: vi.fn(),
+    setBoldTextSize: vi.fn(),
+    insertImageFromUrlOrFileId: vi.fn()
 }));
 
-jest.mock('../../../common/utils/ColorUtils', () => ({
-    generateProcessColors: jest.fn(),
-    generateTimelineCardColors: jest.fn(),
-    generatePyramidColors: jest.fn(),
-    generateCompareColors: jest.fn(),
-    generateTintedGray: jest.fn()
+vi.mock('../../../common/utils/ColorUtils', () => ({
+    generateProcessColors: vi.fn(),
+    generateTimelineCardColors: vi.fn(),
+    generatePyramidColors: vi.fn(),
+    generateCompareColors: vi.fn(),
+    generateTintedGray: vi.fn()
 }));
 
-jest.mock('./diagrams/DiagramRendererFactory');
+vi.mock('./diagrams/DiagramRendererFactory');
 
 describe('GasDiagramSlideGenerator', () => {
     let mockRenderer;
@@ -29,7 +29,7 @@ describe('GasDiagramSlideGenerator', () => {
     let mockLayout;
 
     beforeEach(() => {
-        jest.clearAllMocks();
+        vi.clearAllMocks();
 
         // Mock global GAS objects
         (global as any).SlidesApp = {
@@ -38,24 +38,24 @@ describe('GasDiagramSlideGenerator', () => {
             ParagraphAlignment: { START: 'START' } as any,
             ContentAlignment: { MIDDLE: 'MIDDLE' } as any
         } as any;
-        (global as any).Logger = { log: jest.fn() } as any;
+        (global as any).Logger = { log: vi.fn() } as any;
 
         // Setup Factory Mock
-        mockRenderer = { render: jest.fn() };
-        (DiagramRendererFactory.getRenderer as jest.Mock).mockReturnValue(mockRenderer);
+        mockRenderer = { render: vi.fn() };
+        (DiagramRendererFactory.getRenderer as Mock).mockReturnValue(mockRenderer);
 
         // Setup Slide Mock
         mockSlide = {
-            getPlaceholder: jest.fn().mockReturnValue(null),
-            getPlaceholders: jest.fn().mockReturnValue([]),
-            getPageElements: jest.fn().mockReturnValue([]),
-            group: jest.fn(),
-            insertShape: jest.fn()
+            getPlaceholder: vi.fn().mockReturnValue(null),
+            getPlaceholders: vi.fn().mockReturnValue([]),
+            getPageElements: vi.fn().mockReturnValue([]),
+            group: vi.fn(),
+            insertShape: vi.fn()
         };
 
         // Setup Layout Mock
         mockLayout = {
-            getRect: jest.fn().mockReturnValue({ left: 0, top: 0, width: 100, height: 100 })
+            getRect: vi.fn().mockReturnValue({ left: 0, top: 0, width: 100, height: 100 })
         };
     });
 
@@ -82,8 +82,8 @@ describe('GasDiagramSlideGenerator', () => {
     });
 
     it('should set title if placeholder exists', () => {
-        const mockTitleShape = { getText: jest.fn().mockReturnValue({ setText: jest.fn() }) };
-        const mockTitlePlaceholder = { asShape: jest.fn().mockReturnValue(mockTitleShape) };
+        const mockTitleShape = { getText: vi.fn().mockReturnValue({ setText: vi.fn() }) };
+        const mockTitlePlaceholder = { asShape: vi.fn().mockReturnValue(mockTitleShape) };
         mockSlide.getPlaceholder.mockReturnValue(mockTitlePlaceholder);
 
         const generator = new GasDiagramSlideGenerator(null);

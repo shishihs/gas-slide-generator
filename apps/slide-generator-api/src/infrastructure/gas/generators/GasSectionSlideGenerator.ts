@@ -69,6 +69,7 @@ export class GasSectionSlideGenerator implements ISlideGenerator {
             try {
                 ghost.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
             } catch (e) { }
+            ghost.sendToBack();
         }
 
         // Title Placeholder

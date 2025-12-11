@@ -79,6 +79,21 @@ export class GasContentSlideGenerator implements ISlideGenerator {
             return false;
         });
 
+        // Dynamic Adjustment: Shift Body Placeholders down if Subhead was inserted
+        if (dy > 0) {
+            bodies.forEach(p => {
+                try {
+                    const s = p.asShape();
+                    // Only shift if it looks like it might overlap (e.g. top is high)
+                    // But safest is to always shift if we injected a subhead that wasn't part of the original layout
+                    s.setTop(s.getTop() + dy);
+                    s.setHeight(s.getHeight() - dy);
+                } catch (e) {
+                    Logger.log('Could not adjust body placeholder: ' + e);
+                }
+            });
+        }
+
         if (isTwo && bodies.length >= 2) {
             // If we have at least 2 body placeholders, use them!
             let L = [], R = [];

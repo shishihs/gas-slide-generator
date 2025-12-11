@@ -1,14 +1,15 @@
+import { vi, describe, it, expect, beforeEach, Mock } from 'vitest';
 import { PresentationApplicationService } from './PresentationApplicationService';
 import { ISlideRepository } from '../domain/repositories/ISlideRepository';
 import { Presentation } from '../domain/model/Presentation';
 
 describe('PresentationApplicationService', () => {
-    let mockRepo: jest.Mocked<ISlideRepository>;
     let service: PresentationApplicationService;
+    let mockRepo: any;
 
     beforeEach(() => {
         mockRepo = {
-            createPresentation: jest.fn().mockReturnValue('https://mock-url.com'),
+            createPresentation: vi.fn().mockReturnValue('https://mock-url.com')
         };
         service = new PresentationApplicationService(mockRepo);
     });

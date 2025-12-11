@@ -1,146 +1,146 @@
+import { vi, describe, it, expect } from 'vitest';
 import { PresentationApplicationService } from '../src/application/PresentationApplicationService';
 import { GasSlideRepository } from '../src/infrastructure/gas/GasSlideRepository';
-import { Presentation } from '../src/domain/model/Presentation';
 
 const mockSlidesApp = {
-    create: jest.fn().mockImplementation((title) => ({
-        getUrl: jest.fn().mockReturnValue('https://mock-slide.com'),
-        getPageWidth: jest.fn().mockReturnValue(960),
-        getPageHeight: jest.fn().mockReturnValue(540),
-        getSlides: jest.fn().mockReturnValue([]),
-        getMasters: jest.fn().mockReturnValue([]),
-        getLayouts: jest.fn().mockReturnValue([
-            { getLayoutName: jest.fn().mockReturnValue('TITLE') },
-            { getLayoutName: jest.fn().mockReturnValue('SECTION_HEADER') },
-            { getLayoutName: jest.fn().mockReturnValue('TITLE_AND_BODY') }
+    create: vi.fn().mockImplementation((title) => ({
+        getUrl: vi.fn().mockReturnValue('https://mock-slide.com'),
+        getPageWidth: vi.fn().mockReturnValue(960),
+        getPageHeight: vi.fn().mockReturnValue(540),
+        getSlides: vi.fn().mockReturnValue([]),
+        getMasters: vi.fn().mockReturnValue([]),
+        getLayouts: vi.fn().mockReturnValue([
+            { getLayoutName: vi.fn().mockReturnValue('TITLE') },
+            { getLayoutName: vi.fn().mockReturnValue('SECTION_HEADER') },
+            { getLayoutName: vi.fn().mockReturnValue('TITLE_AND_BODY') }
         ]),
-        appendSlide: jest.fn().mockImplementation(() => ({
-            getBackground: jest.fn().mockReturnValue({
-                setSolidFill: jest.fn()
+        appendSlide: vi.fn().mockImplementation(() => ({
+            getBackground: vi.fn().mockReturnValue({
+                setSolidFill: vi.fn()
             }),
-            insertShape: jest.fn().mockReturnValue({
-                getText: jest.fn().mockReturnValue({
-                    setText: jest.fn(),
-                    getTextStyle: jest.fn().mockReturnValue({
-                        setFontFamily: jest.fn().mockReturnThis(),
-                        setFontSize: jest.fn().mockReturnThis(),
-                        setBold: jest.fn().mockReturnThis(),
-                        setForegroundColor: jest.fn().mockReturnThis()
+            insertShape: vi.fn().mockReturnValue({
+                getText: vi.fn().mockReturnValue({
+                    setText: vi.fn(),
+                    getTextStyle: vi.fn().mockReturnValue({
+                        setFontFamily: vi.fn().mockReturnThis(),
+                        setFontSize: vi.fn().mockReturnThis(),
+                        setBold: vi.fn().mockReturnThis(),
+                        setForegroundColor: vi.fn().mockReturnThis()
                     }),
-                    getParagraphs: jest.fn().mockReturnValue([])
+                    getParagraphs: vi.fn().mockReturnValue([])
                 }),
-                getBorder: jest.fn().mockReturnValue({
-                    setTransparent: jest.fn()
+                getBorder: vi.fn().mockReturnValue({
+                    setTransparent: vi.fn()
                 }),
-                getFill: jest.fn().mockReturnValue({
-                    setSolidFill: jest.fn()
+                getFill: vi.fn().mockReturnValue({
+                    setSolidFill: vi.fn()
                 }),
-                setContentAlignment: jest.fn()
+                setContentAlignment: vi.fn()
             }),
-            getPlaceholder: jest.fn().mockReturnValue({
-                asShape: jest.fn().mockReturnValue({
-                    getText: jest.fn().mockReturnValue({
-                        setText: jest.fn(),
-                        getParagraphs: jest.fn().mockReturnValue([]),
-                        getTextStyle: jest.fn().mockReturnValue({
-                            setFontFamily: jest.fn().mockReturnThis(),
-                            setFontSize: jest.fn().mockReturnThis(),
-                            setBold: jest.fn().mockReturnThis(),
-                            setForegroundColor: jest.fn().mockReturnThis()
+            getPlaceholder: vi.fn().mockReturnValue({
+                asShape: vi.fn().mockReturnValue({
+                    getText: vi.fn().mockReturnValue({
+                        setText: vi.fn(),
+                        getParagraphs: vi.fn().mockReturnValue([]),
+                        getTextStyle: vi.fn().mockReturnValue({
+                            setFontFamily: vi.fn().mockReturnThis(),
+                            setFontSize: vi.fn().mockReturnThis(),
+                            setBold: vi.fn().mockReturnThis(),
+                            setForegroundColor: vi.fn().mockReturnThis()
                         })
                     })
                 })
             }),
-            getPlaceholders: jest.fn().mockReturnValue([{
-                getPlaceholderType: jest.fn().mockReturnValue('BODY'),
-                asShape: jest.fn().mockReturnValue({
-                    getText: jest.fn().mockReturnValue({
-                        setText: jest.fn(),
-                        getParagraphs: jest.fn().mockReturnValue([]),
-                        getTextStyle: jest.fn().mockReturnValue({
-                            setFontFamily: jest.fn().mockReturnThis(),
-                            setFontSize: jest.fn().mockReturnThis(),
-                            setBold: jest.fn().mockReturnThis(),
-                            setForegroundColor: jest.fn().mockReturnThis()
+            getPlaceholders: vi.fn().mockReturnValue([{
+                getPlaceholderType: vi.fn().mockReturnValue('BODY'),
+                asShape: vi.fn().mockReturnValue({
+                    getText: vi.fn().mockReturnValue({
+                        setText: vi.fn(),
+                        getParagraphs: vi.fn().mockReturnValue([]),
+                        getTextStyle: vi.fn().mockReturnValue({
+                            setFontFamily: vi.fn().mockReturnThis(),
+                            setFontSize: vi.fn().mockReturnThis(),
+                            setBold: vi.fn().mockReturnThis(),
+                            setForegroundColor: vi.fn().mockReturnThis()
                         })
                     }),
-                    getLeft: jest.fn().mockReturnValue(100)
+                    getLeft: vi.fn().mockReturnValue(100)
                 })
             }]),
-            getNotesPage: jest.fn().mockReturnValue({
-                getSpeakerNotesShape: jest.fn().mockReturnValue({
-                    getText: jest.fn().mockReturnValue({ setText: jest.fn() })
+            getNotesPage: vi.fn().mockReturnValue({
+                getSpeakerNotesShape: vi.fn().mockReturnValue({
+                    getText: vi.fn().mockReturnValue({ setText: vi.fn() })
                 })
             })
         }))
     })),
-    openById: jest.fn().mockImplementation(() => ({
-        getUrl: jest.fn().mockReturnValue('https://template-copy.com'),
-        getPageWidth: jest.fn().mockReturnValue(960),
-        getPageHeight: jest.fn().mockReturnValue(540),
-        getSlides: jest.fn().mockReturnValue([{ remove: jest.fn() }, { remove: jest.fn() }]),
-        getMasters: jest.fn().mockReturnValue([]),
-        getLayouts: jest.fn().mockReturnValue([
-            { getLayoutName: jest.fn().mockReturnValue('TITLE') },
-            { getLayoutName: jest.fn().mockReturnValue('SECTION_HEADER') },
-            { getLayoutName: jest.fn().mockReturnValue('TITLE_AND_BODY') }
+    openById: vi.fn().mockImplementation(() => ({
+        getUrl: vi.fn().mockReturnValue('https://template-copy.com'),
+        getPageWidth: vi.fn().mockReturnValue(960),
+        getPageHeight: vi.fn().mockReturnValue(540),
+        getSlides: vi.fn().mockReturnValue([{ remove: vi.fn() }, { remove: vi.fn() }]),
+        getMasters: vi.fn().mockReturnValue([]),
+        getLayouts: vi.fn().mockReturnValue([
+            { getLayoutName: vi.fn().mockReturnValue('TITLE') },
+            { getLayoutName: vi.fn().mockReturnValue('SECTION_HEADER') },
+            { getLayoutName: vi.fn().mockReturnValue('TITLE_AND_BODY') }
         ]),
-        appendSlide: jest.fn().mockImplementation(() => ({
-            getBackground: jest.fn().mockReturnValue({
-                setSolidFill: jest.fn()
+        appendSlide: vi.fn().mockImplementation(() => ({
+            getBackground: vi.fn().mockReturnValue({
+                setSolidFill: vi.fn()
             }),
-            insertShape: jest.fn().mockReturnValue({
-                getText: jest.fn().mockReturnValue({
-                    setText: jest.fn(),
-                    getTextStyle: jest.fn().mockReturnValue({
-                        setFontFamily: jest.fn().mockReturnThis(),
-                        setFontSize: jest.fn().mockReturnThis(),
-                        setBold: jest.fn().mockReturnThis(),
-                        setForegroundColor: jest.fn().mockReturnThis()
+            insertShape: vi.fn().mockReturnValue({
+                getText: vi.fn().mockReturnValue({
+                    setText: vi.fn(),
+                    getTextStyle: vi.fn().mockReturnValue({
+                        setFontFamily: vi.fn().mockReturnThis(),
+                        setFontSize: vi.fn().mockReturnThis(),
+                        setBold: vi.fn().mockReturnThis(),
+                        setForegroundColor: vi.fn().mockReturnThis()
                     }),
-                    getParagraphs: jest.fn().mockReturnValue([])
+                    getParagraphs: vi.fn().mockReturnValue([])
                 }),
-                getBorder: jest.fn().mockReturnValue({
-                    setTransparent: jest.fn()
+                getBorder: vi.fn().mockReturnValue({
+                    setTransparent: vi.fn()
                 }),
-                getFill: jest.fn().mockReturnValue({
-                    setSolidFill: jest.fn()
+                getFill: vi.fn().mockReturnValue({
+                    setSolidFill: vi.fn()
                 }),
-                setContentAlignment: jest.fn()
+                setContentAlignment: vi.fn()
             }),
-            getPlaceholder: jest.fn().mockReturnValue({
-                asShape: jest.fn().mockReturnValue({
-                    getText: jest.fn().mockReturnValue({
-                        setText: jest.fn(),
-                        getParagraphs: jest.fn().mockReturnValue([]),
-                        getTextStyle: jest.fn().mockReturnValue({
-                            setFontFamily: jest.fn().mockReturnThis(),
-                            setFontSize: jest.fn().mockReturnThis(),
-                            setBold: jest.fn().mockReturnThis(),
-                            setForegroundColor: jest.fn().mockReturnThis()
+            getPlaceholder: vi.fn().mockReturnValue({
+                asShape: vi.fn().mockReturnValue({
+                    getText: vi.fn().mockReturnValue({
+                        setText: vi.fn(),
+                        getParagraphs: vi.fn().mockReturnValue([]),
+                        getTextStyle: vi.fn().mockReturnValue({
+                            setFontFamily: vi.fn().mockReturnThis(),
+                            setFontSize: vi.fn().mockReturnThis(),
+                            setBold: vi.fn().mockReturnThis(),
+                            setForegroundColor: vi.fn().mockReturnThis()
                         })
                     })
                 })
             }),
-            getPlaceholders: jest.fn().mockReturnValue([{
-                getPlaceholderType: jest.fn().mockReturnValue('BODY'),
-                asShape: jest.fn().mockReturnValue({
-                    getText: jest.fn().mockReturnValue({
-                        setText: jest.fn(),
-                        getParagraphs: jest.fn().mockReturnValue([]),
-                        getTextStyle: jest.fn().mockReturnValue({
-                            setFontFamily: jest.fn().mockReturnThis(),
-                            setFontSize: jest.fn().mockReturnThis(),
-                            setBold: jest.fn().mockReturnThis(),
-                            setForegroundColor: jest.fn().mockReturnThis()
+            getPlaceholders: vi.fn().mockReturnValue([{
+                getPlaceholderType: vi.fn().mockReturnValue('BODY'),
+                asShape: vi.fn().mockReturnValue({
+                    getText: vi.fn().mockReturnValue({
+                        setText: vi.fn(),
+                        getParagraphs: vi.fn().mockReturnValue([]),
+                        getTextStyle: vi.fn().mockReturnValue({
+                            setFontFamily: vi.fn().mockReturnThis(),
+                            setFontSize: vi.fn().mockReturnThis(),
+                            setBold: vi.fn().mockReturnThis(),
+                            setForegroundColor: vi.fn().mockReturnThis()
                         })
                     }),
-                    getLeft: jest.fn().mockReturnValue(100)
+                    getLeft: vi.fn().mockReturnValue(100)
                 })
             }]),
-            getNotesPage: jest.fn().mockReturnValue({
-                getSpeakerNotesShape: jest.fn().mockReturnValue({
-                    getText: jest.fn().mockReturnValue({ setText: jest.fn() })
+            getNotesPage: vi.fn().mockReturnValue({
+                getSpeakerNotesShape: vi.fn().mockReturnValue({
+                    getText: vi.fn().mockReturnValue({ setText: vi.fn() })
                 })
             })
         }))
@@ -149,7 +149,7 @@ const mockSlidesApp = {
         TITLE_AND_BODY: 'TITLE_AND_BODY',
         TITLE: 'TITLE',
         SECTION_HEADER: 'SECTION_HEADER',
-        BLANK: 'BLANK' // Added BLANK
+        BLANK: 'BLANK'
     },
     PlaceholderType: {
         TITLE: 'TITLE',
@@ -184,15 +184,15 @@ const mockSlidesApp = {
 (global as any).SlidesApp = mockSlidesApp;
 
 (global as any).Logger = {
-    log: jest.fn()
+    log: vi.fn()
 };
 
 (global as any).DriveApp = {
-    getFileById: jest.fn().mockReturnValue({
-        makeCopy: jest.fn().mockReturnValue({
-            getId: jest.fn().mockReturnValue('new-copy-id')
+    getFileById: vi.fn().mockReturnValue({
+        makeCopy: vi.fn().mockReturnValue({
+            getId: vi.fn().mockReturnValue('new-copy-id')
         }),
-        getBlob: jest.fn()
+        getBlob: vi.fn()
     })
 };
 

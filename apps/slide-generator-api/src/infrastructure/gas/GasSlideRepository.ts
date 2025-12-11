@@ -45,16 +45,45 @@ export class GasSlideRepository implements ISlideRepository {
         const layoutManager = new LayoutManager(pageWidth, pageHeight, selectedTheme);
         const settings = { primaryColor: selectedTheme.colors.primary, ...settingsOverride }; // Simplified
 
-        // 3. Generators
+        // 3. Map Display Names to Layout IDs (Fix for custom layout names)
+        const layoutIdMap = new Map<string, string>();
+        try {
+            // @ts-ignore: Advanced Service
+            const presData = Slides.Presentations.get(presId);
+            if (presData.layouts) {
+                presData.layouts.forEach((layout: any) => {
+                    const props = layout.layoutProperties;
+                    if (props) {
+                        if (props.displayName) {
+                            layoutIdMap.set(props.displayName.toUpperCase(), layout.objectId);
+                        }
+                        if (props.name) {
+                            layoutIdMap.set(props.name.toUpperCase(), layout.objectId);
+                        }
+                    }
+                });
+            }
+        } catch (e) {
+            Logger.log('Warning: Failed to fetch presentation details via Advanced API. Layout mapping may be limited. ' + e);
+        }
+
+        // Debug: Log mapped layouts
+        Logger.log(`Mapped Layouts (Display Name -> ID): ${Array.from(layoutIdMap.keys()).join(', ')}`);
+
+        // 4. Generators
         const titleGenerator = new GasTitleSlideGenerator(null);
         const sectionGenerator = new GasSectionSlideGenerator(null); // Refactored to Batch
         const contentGenerator = new GasContentSlideGenerator(null);
         const diagramGenerator = new GasDiagramSlideGenerator(null);
 
-        // 4. Batch Request Collection
+        // 5. Batch Request Collection
         let allRequests: GoogleAppsScript.Slides.Schema.Request[] = [];
 
-        // 5. Generate Slide Creation Requests + Content Requests
+        // Debug: Log all available layouts in the presentation
+        // const availableLayouts = pres.getLayouts().map(l => l.getLayoutName());
+        // Logger.log(`Available Layouts in Presentation: ${availableLayouts.join(', ')}`);
+
+        // 6. Generate Slide Creation Requests + Content Requests
         // Note: Mix of API and App usage. 
         // Best Practice: Use API for creating slides too to map IDs easily.
         // BUT templates use `slideLayoutReference`.
@@ -70,16 +99,53 @@ export class GasSlideRepository implements ISlideRepository {
             const layoutType = (slideModel.layout || 'content').toUpperCase();
             const rawType = (slideModel.rawData?.type || '').toLowerCase(); // Original JSON type
 
+            Logger.log(`[Slide ${index + 1}] Processing - Requested Layout: '${slideModel.layout}', Normalized: '${layoutType}', RawType: '${rawType}'`);
+
             // Step A: Create Slide Object (Synchronously via App to get ID and Layout easily)
             // Ideally we'd do this via API too, but getting Layout IDs is tricky without reading.
             // So we stick to `pres.appendSlide` to get the Object and ID.
             // This is "Hybrid Mode": App for Structure, API for Content.
 
-            let slideLayout: GoogleAppsScript.Slides.Layout;
+            let slideLayout: GoogleAppsScript.Slides.Layout | undefined;
             const layouts = pres.getLayouts();
-            // Force BLANK layout to allow full control via Batch API
-            // This avoids dependency on Placeholder IDs which are unpredictable.
-            slideLayout = layouts.find(l => l.getLayoutName().toUpperCase() === 'BLANK') || layouts[layouts.length - 1];
+
+            // Attempt 1: Match by mapped Display Name or Internal Name
+            const targetLayoutId = layoutIdMap.get(layoutType);
+            if (targetLayoutId) {
+                slideLayout = layouts.find(l => l.getObjectId() === targetLayoutId);
+            }
+
+            // Attempt 2: Fallback to simple matching if map failed or missed
+            if (!slideLayout) {
+                slideLayout = layouts.find(l => l.getLayoutName().toUpperCase() === layoutType);
+            }
+
+            // Attempt 3: Smart Fallback for Diagrams etc. -> use 'CONTENT' if available
+            // This is useful if user only has basic layouts (AGENDA, CONTENT, ETC) but requests 'TIMELINE'.
+            if (!slideLayout && layoutType !== 'TITLE' && layoutType !== 'SECTION') {
+                // Try mapping 'TIMELINE', 'PROCESS' etc to 'CONTENT'
+                const fallbackId = layoutIdMap.get('CONTENT');
+                if (fallbackId) {
+                    slideLayout = layouts.find(l => l.getObjectId() === fallbackId);
+                    if (slideLayout) {
+                        Logger.log(`[Slide ${index + 1}] Layout '${layoutType}' not found. Falling back to 'CONTENT'.`);
+                    }
+                }
+                // Try standard internal name if custom name map failed
+                if (!slideLayout) {
+                    slideLayout = layouts.find(l => l.getLayoutName().toUpperCase() === 'CONTENT' || l.getLayoutName().toUpperCase() === 'TITLE_AND_BODY');
+                }
+            }
+
+            // Attempt 4: Final Fallback (BLANK or Last)
+            if (!slideLayout) {
+                // Force BLANK layout to allow full control via Batch API if specific layout not found
+                // This avoids dependency on Placeholder IDs which are unpredictable.
+                slideLayout = layouts.find(l => l.getLayoutName().toUpperCase() === 'BLANK') || layouts[layouts.length - 1];
+                Logger.log(`[Slide ${index + 1}] Layout '${layoutType}' not found. Falling back to '${slideLayout.getLayoutName()}'`);
+            } else {
+                Logger.log(`[Slide ${index + 1}] Found Layout: '${slideLayout.getLayoutName()}' (ID: ${slideLayout.getObjectId()})`);
+            }
 
             const slide = pres.appendSlide(slideLayout);
             const slideId = slide.getObjectId();
@@ -109,6 +175,8 @@ export class GasSlideRepository implements ISlideRepository {
             } else {
                 reqs = contentGenerator.generate(slideId, commonData, layoutManager, index + 1, settings);
             }
+
+            Logger.log(`[Slide ${index + 1}] Generator Used for layoutType '${layoutType}': ${reqs.length} requests generated.`);
 
             allRequests.push(...reqs);
         });

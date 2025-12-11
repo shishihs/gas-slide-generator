@@ -7,13 +7,17 @@
 
 システムは、生成するスライドの種類（Type）に応じて、以下の優先順位でレイアウトを検索・適用します。
 
-| スライド種類 (Type) | 検索されるレイアウト名 (優先順) | 推奨構成 |
+| スライド種類 (Type) | 対応するレイアウト表示名 (推奨) | 代替レイアウト (自動フォールバック) |
 | :--- | :--- | :--- |
-| **Title** (表紙) | `TITLE` | タイトル + サブタイトル |
-| **Section** (章区切り) | `SECTION_HEADER`<br>`SECTION ONLY`<br>`SECTION TITLE_AND_DESCRIPTION` | タイトルのみ or タイトル + テキスト |
-| **Content** (箇条書き) | `TITLE_AND_BODY`<br>`TITLE_AND_TWO_COLUMNS` | タイトル + 本文 (Body) |
-| **Agenda** (目次) | `TITLE_AND_BODY`<br>`TITLE_AND_TWO_COLUMNS` | タイトル + 本文 (Body) |
-| **Diagram** (図解全般)* | `TITLE_AND_BODY`<br>`TITLE_ONLY` | タイトル + **図解用エリア** (後述) |
+| **Title** (表紙) | `TITLE` | なし (必須) |
+| **Section** (章区切り) | `SECTION`<br>`SECTION_HEADER` | `SECTION ONLY` 等 |
+| **Content** (箇条書き) | `CONTENT`<br>`TITLE_AND_BODY` | - |
+| **Agenda** (目次) | `AGENDA` | `CONTENT` or `TITLE_AND_BODY` |
+| **Conclusion** (まとめ) | `CONCLUSION` | `CONTENT` or `TITLE_AND_BODY` |
+| **Diagram** (図解全般)* | `TIMELINE`, `PROCESS` 等 (あれば) | **`CONTENT`**<br>(特定のレイアウトが無い場合、自動的に `CONTENT` が使用されます) |
+
+※ `AGENDA` や `CONTENT` などの名前は、マスタースライドの「名前の変更」で設定された**表示名 (Display Name)** と一致している必要があります。
+※ 図解用レイアウト（TIMELINE等）を個別に用意しない場合でも、`CONTENT` レイアウトがあればヘッダー・フッター付きのスライドとして生成されます。
 
 > (*) **Diagram** には以下のタイプが含まれます:
 > `timeline`, `process`, `cycle`, `pyramid`, `triangle`, `compare`, `statsCompare`, `barCompare`, `cards`, `headerCards`, `kpi`, `table`, `faq`, `progress`, `quote`, `imageText`, `stepUp`, `flowchart`, `diagram`

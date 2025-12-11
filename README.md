@@ -26,75 +26,138 @@ Google ドキュメントの内容を Vertex AI で解析し、Google Slides を
 
 **Cloud Functions 不要！** GAS Library 連携でシンプルなアーキテクチャを実現。
 
-## セットアップ (Setup)
+## セットアップ & デプロイ (Setup & Deploy)
 
-本アドオンを動作させるために必要な、詳細な環境構築手順です。
-Google Docs に紐付いた GAS プロジェクトとしてセットアップすることを想定しています。
+本システムは **2つの GAS プロジェクト** (ライブラリ用、アドオン用) と **1つの GCP プロジェクト** で構成されています。
+以下の手順通りに作業を進めてください。
 
-### 0. 前提条件 (Prerequisites)
-- **Google Workspace アカウント**（推奨）または個人の Gmail アカウント
-- **Google Cloud Platform (GCP)** (自動生成の場合)
-    - ※ 完全自動モード(自動生成)には GCP プロジェクトと課金設定が必要です。
-    - ※ **手動モード (Gem 連携)** では GCP 設定は不要です。
+### 0. 開発環境の準備 (Prerequisites)
 
-### モード選択 (Choose your mode)
-本アドオンには2つのモードがあります。
+ローカル環境でコードをビルド・デプロイするために必要です。
 
-- **Mode A: 自動生成モード (Vertex AI)**
-    - GCP Project の設定が必要（中級者〜向け）
-    - ボタン一つでドキュメント解析から JSON 生成まで完了します。
-
-- **Mode B: 手動生成モード (Manual JSON / Gem)**
-    - GCP 設定不要（初心者向け）
-    - カスタム Gem（チャットボット）にドキュメントを読ませ、生成された JSON を手動で貼り付ける方式です。
+1. **Node.js**: v18以上をインストール
+2. **依存関係のインストール**:
+   ```bash
+   npm install
+   ```
+3. **Clasp (GAS CLI) へのログイン**:
+   ```bash
+   npx clasp login
+   ```
+   ※ ブラウザが開くので、Google アカウントで許可してください。
 
 ---
 
-## セットアップ手順 (自動生成モード)
+### 1. Slide Generator API (ライブラリ) のデプロイ
 
-### 1. GCP プロジェクトの作成
-GAS 標準のデフォルトプロジェクトではなく、機能制限のない **Standard GCP Project** を作成します。
+スライド生成のコアロジックを担当する GAS ライブラリをデプロイします。
 
+1. **ディレクトリ移動**:
+   ```bash
+   cd apps/slide-generator-api
+   ```
+
+2. **GAS プロジェクトの作成**:
+   ```bash
+   npx clasp create --type standalone --title "Slide Generator API" --rootDir dist
+   ```
+
+3. **ビルド & デプロイ**:
+   ```bash
+   npm run deploy
+   ```
+
+4. **[重要] ライブラリ ID の取得**:
+   - `npx clasp open` で GAS エディタを開きます。
+   - 右上の「**デプロイ**」ボタン > 「**新しいデプロイ**」を選択。
+   - 種類の選択で「**ライブラリ**」を選び、説明を入力して「デプロイ」。
+   - デプロイの画面（またはプロジェクトの設定 ⚙️）から **スクリプト ID** (Script ID) をコピーして控えてください。
+
+---
+
+### 2. Doc to Slide Add-on (アドオン) のデプロイ
+
+Google ドキュメント上で動くアドオン本体をデプロイします。
+
+1. **ディレクトリ移動**:
+   ```bash
+   cd ../doc-to-slide-addon
+   ```
+
+2. **依存ライブラリの設定更新**:
+   `src/appsscript.json` を開き、`dependencies.libraries` 内の `libraryId` を、**手順 1-4 で取得したスクリプト ID** に書き換えてください。
+   ```json
+   "libraries": [{
+     "userSymbol": "SlideGeneratorApi",
+     "libraryId": "YOUR_SCRIPT_ID_HERE",
+     "version": "1", // デプロイしたバージョン
+     "developmentMode": true // 開発中は true
+   }]
+   ```
+
+3. **GAS プロジェクトの作成**:
+   ```bash
+   npx clasp create --type docs --title "Doc to Slide Add-on" --rootDir src
+   ```
+   ※ コマンド完了後に表示される URL が、アドオンが紐付いた Google ドキュメントになります。
+
+4. **コードのプッシュ**:
+   ```bash
+   npx clasp push
+   ```
+
+---
+
+### 3. GCP プロジェクトの作成と設定
+
+Vertex AI による自動生成機能を使うために必須です。
+
+#### 3.1 GCP プロジェクトの作成
 1. [Google Cloud Console](https://console.cloud.google.com/) にアクセス。
-2. 「**プロジェクトの作成**」から新規プロジェクトを作成（例: `slide-generator`）。
-3. **重要**: 作成したプロジェクトに **課金アカウント** を紐付けます。
+2. 「**プロジェクトの作成**」をクリックし、任意のプロジェクト名（例: `slide-generator`）で作成。
+3. **重要**: 作成したプロジェクトに **課金アカウント** を紐付けます（Vertex AI の利用に必要）。
 
-### 2. 必要な API の有効化
-作成した GCP プロジェクトで、以下の API を有効化してください。「**API とサービス > ライブラリ**」から検索できます。
+#### 3.2 API の有効化
+作成したプロジェクトで「**API とサービス > 有効な API とサービス > API の有効化**」へ移動し、以下を検索して有効にします。
 
-| API 名 | 用途 |
-|--------|------|
-| **Vertex AI API** | AI によるスライド構成案（JSON）の生成 |
-| **Google Slides API** | スライドの作成、レイアウト操作 |
-| **Google Drive API** | テンプレートファイルのコピー、スライドの保存 |
+- **Vertex AI API**
+- **Google Slides API**
+- **Google Drive API**
 
-### 3. OAuth 同意画面の構成
-「**API とサービス > OAuth 同意画面**」を設定します。
+#### 3.3 OAuth 同意画面の設定
+「**API とサービス > OAuth 同意画面**」から設定します。
 
-1. **User Type**:
-    - 組織内のみで使う場合: `内部 (Internal)`
-    - 個人の場合: `外部 (External)`
-2. アプリ情報（名前、メールアドレス）を入力して保存。
-3. （External の場合のみ）**テストユーザー** に自分のメールアドレスを追加。
+1. **User Type**: `外部 (External)` を選択（組織内のみなら Internal でも可）。
+2. アプリ情報（名前: `Slide Generator` 等、メアド）を入力して保存。
+3. **テストユーザー**: 自分の Google アカウント（メールアドレス）を追加します。
 
-### 4. GAS プロジェクトへの紐付け
-Google Docs に紐付く GAS プロジェクトに対し、上記 GCP プロジェクトを設定します。
+---
 
-1. 本リポジトリの `apps/doc-to-slide-addon` を、Google Docs の Apps Script としてデプロイ（または `clasp push`）します。
-2. GAS エディタを開き、左側メニューの「**プロジェクトの設定** (⚙️)」を開きます。
-3. 「**Google Cloud Platform (GCP) プロジェクト**」セクションの「**プロジェクトを変更**」をクリック。
-4. GCP コンソールで確認できる **プロジェクト番号 (Project Number)** を入力して設定します。
-   - ※ プロジェクト ID (文字列) ではなく、**数字の番号** です。
+### 4. GAS プロジェクトと GCP の紐付け
 
-### 5. 環境変数の設定 (Script Properties)
-GAS エディタの「**プロジェクトの設定** > **スクリプト プロパティ**」またはアドオンの `Settings` メニューから設定します。
+最後に、GAS (アドオン側) が GCP のリソースを使えるようにリンクします。
 
-| プロパティ | モード | 説明 |
-|------------|--------|------|
-| `GCP_PROJECT_ID` | 自動 | GCP プロジェクトの **ID** (文字列) |
-| `VERTEX_AI_LOCATION` | 自動 | Vertex AI のリージョン（例: `asia-northeast1`） |
-| `VERTEX_AI_MODEL` | 自動 | 使用するモデル（例: `gemini-2.5-flash`） |
-| `GEM_URL` | **手動** | JSON作成用に使用する Gem の URL |
+1. **プロジェクト番号の確認**:
+   - GCP コンソールのトップ（ダッシュボード）で **プロジェクト番号 (Project Number)**（例: `123456789012`）を確認します。（※ プロジェクト ID ではありません）
+
+2. **GAS 設定の変更**:
+   - `apps/doc-to-slide-addon` ディレクトリで `npx clasp open` を実行し、アドオンの GAS エディタを開きます。
+   - 左側メニューの「**プロジェクトの設定 (⚙️)**」をクリック。
+   - 「**Google Cloud Platform (GCP) プロジェクト**」欄の「プロジェクトを変更」をクリック。
+   - 先ほどの **プロジェクト番号** を入力して設定します。
+
+### 5. スクリプトプロパティの設定
+
+GAS エディタの「プロジェクトの設定」最下部にある「**スクリプト プロパティ**」を追加します。
+
+| プロパティ | 設定値 |
+|------------|--------|
+| `GCP_PROJECT_ID` | 作成した GCP プロジェクトの **ID** (文字列) |
+| `VERTEX_AI_LOCATION` | `asia-northeast1` (または任意のリージョン) |
+| `VERTEX_AI_MODEL` | `gemini-2.0-flash-exp` (または `gemini-1.5-pro` 等) |
+| `GEM_URL` | (手動モード用) Gem の URL |
+
+---
 
 
 

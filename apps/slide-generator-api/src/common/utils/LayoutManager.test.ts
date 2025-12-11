@@ -62,9 +62,9 @@ describe('LayoutManager', () => {
             const rect = layout.getRect('titleSlide.title');
 
             expect(rect).toBeDefined();
-            // Verify scaling: original is 50px left at 960px base
-            // At 720pt page with 0.75 ratio: 50 * 0.75 = 37.5
-            expect(rect.left).toBeCloseTo(37.5, 1);
+            // Verify scaling: original is 60px left at 960px base
+            // At 720pt page with 0.75 ratio: 60 * 0.75 = 45
+            expect(rect.left).toBeCloseTo(45, 1);
         });
 
         it('should handle positions with right property', () => {

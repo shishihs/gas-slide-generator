@@ -101,242 +101,262 @@ var global = this;
   });
 
   // src/common/config/DefaultTheme.ts
-  var DEFAULT_POSITIONS, DEFAULT_THEME;
+  var DEFAULT_THEME;
   var init_DefaultTheme = __esm({
     "src/common/config/DefaultTheme.ts"() {
-      DEFAULT_POSITIONS = {
-        titleSlide: {
-          logo: { left: 55, top: 60, width: 135 },
-          title: { left: 50, top: 200, width: 830, height: 90 },
-          date: { left: 50, top: 450, width: 250, height: 40 }
-        },
-        contentSlide: {
-          headerLogo: { right: 20, top: 20, width: 75 },
-          title: { left: 25, top: 20, width: 830, height: 65 },
-          titleUnderline: { left: 25, top: 80, width: 260, height: 4 },
-          subhead: { left: 25, top: 90, width: 910, height: 40 },
-          body: { left: 25, top: 132, width: 910, height: 330 },
-          twoColLeft: { left: 25, top: 132, width: 440, height: 330 },
-          twoColRight: { left: 495, top: 132, width: 440, height: 330 }
-        },
-        compareSlide: {
-          headerLogo: { right: 20, top: 20, width: 75 },
-          title: { left: 25, top: 20, width: 830, height: 65 },
-          titleUnderline: { left: 25, top: 80, width: 260, height: 4 },
-          subhead: { left: 25, top: 90, width: 910, height: 40 },
-          leftBox: { left: 25, top: 112, width: 445, height: 350 },
-          rightBox: { left: 490, top: 112, width: 445, height: 350 }
-        },
-        processSlide: {
-          headerLogo: { right: 20, top: 20, width: 75 },
-          title: { left: 25, top: 20, width: 830, height: 65 },
-          titleUnderline: { left: 25, top: 80, width: 260, height: 4 },
-          subhead: { left: 25, top: 90, width: 910, height: 40 },
-          area: { left: 25, top: 132, width: 910, height: 330 }
-        },
-        timelineSlide: {
-          headerLogo: { right: 20, top: 20, width: 75 },
-          title: { left: 25, top: 20, width: 830, height: 65 },
-          titleUnderline: { left: 25, top: 80, width: 260, height: 4 },
-          subhead: { left: 25, top: 90, width: 910, height: 40 },
-          area: { left: 25, top: 132, width: 910, height: 330 }
-        },
-        diagramSlide: {
-          headerLogo: { right: 20, top: 20, width: 75 },
-          title: { left: 25, top: 20, width: 830, height: 65 },
-          titleUnderline: { left: 25, top: 80, width: 260, height: 4 },
-          subhead: { left: 25, top: 90, width: 910, height: 40 },
-          lanesArea: { left: 25, top: 132, width: 910, height: 330 }
-        },
-        cardsSlide: {
-          headerLogo: { right: 20, top: 20, width: 75 },
-          title: { left: 25, top: 20, width: 830, height: 65 },
-          titleUnderline: { left: 25, top: 80, width: 260, height: 4 },
-          subhead: { left: 25, top: 90, width: 910, height: 40 },
-          gridArea: { left: 25, top: 120, width: 910, height: 340 }
-        },
-        tableSlide: {
-          headerLogo: { right: 20, top: 20, width: 75 },
-          title: { left: 25, top: 20, width: 830, height: 65 },
-          titleUnderline: { left: 25, top: 80, width: 260, height: 4 },
-          subhead: { left: 25, top: 90, width: 910, height: 40 },
-          area: { left: 25, top: 130, width: 910, height: 330 }
-        },
-        progressSlide: {
-          headerLogo: { right: 20, top: 20, width: 75 },
-          title: { left: 25, top: 20, width: 830, height: 65 },
-          titleUnderline: { left: 25, top: 80, width: 260, height: 4 },
-          subhead: { left: 25, top: 90, width: 910, height: 40 },
-          area: { left: 25, top: 132, width: 910, height: 330 }
-        },
-        kpiSlide: {
-          headerLogo: { right: 20, top: 20, width: 75 },
-          title: { left: 25, top: 20, width: 830, height: 65 },
-          titleUnderline: { left: 25, top: 80, width: 260, height: 4 },
-          subhead: { left: 25, top: 90, width: 910, height: 40 },
-          area: { left: 25, top: 130, width: 910, height: 330 }
-        },
-        agendaSlide: {
-          headerLogo: { right: 20, top: 20, width: 75 },
-          title: { left: 25, top: 20, width: 830, height: 65 },
-          titleUnderline: { left: 25, top: 80, width: 260, height: 4 },
-          subhead: { left: 25, top: 90, width: 910, height: 40 },
-          body: { left: 25, top: 130, width: 910, height: 350 }
-        },
-        sectionSlide: {
-          ghostNum: { left: 600, top: 100, width: 350, height: 350 },
-          title: { left: 40, top: 220, width: 880, height: 100 }
-        },
-        closingSlide: {
-          logo: { left: 380, top: 150, width: 200 },
-          message: { left: 40, top: 350, width: 880, height: 80 }
-        },
-        quoteSlide: {
-          headerLogo: { right: 20, top: 20, width: 75 },
-          title: { left: 25, top: 20, width: 830, height: 65 },
-          titleUnderline: { left: 25, top: 80, width: 260, height: 4 },
-          subhead: { left: 25, top: 90, width: 910, height: 40 },
-          quoteBox: { left: 50, top: 140, width: 860, height: 280 },
-          authorBox: { left: 550, top: 430, width: 360, height: 40 }
-        },
-        faqSlide: {
-          headerLogo: { right: 20, top: 20, width: 75 },
-          title: { left: 25, top: 20, width: 830, height: 65 },
-          titleUnderline: { left: 25, top: 80, width: 260, height: 4 },
-          subhead: { left: 25, top: 90, width: 910, height: 40 },
-          area: { left: 25, top: 130, width: 910, height: 350 }
-        },
-        imageTextSlide: {
-          headerLogo: { right: 20, top: 20, width: 75 },
-          title: { left: 25, top: 20, width: 830, height: 65 },
-          titleUnderline: { left: 25, top: 80, width: 260, height: 4 },
-          subhead: { left: 25, top: 90, width: 910, height: 40 },
-          imageArea: { left: 25, top: 130, width: 440, height: 340 },
-          textArea: { left: 485, top: 130, width: 450, height: 340 }
-        },
-        cycleSlide: {
-          headerLogo: { right: 20, top: 20, width: 75 },
-          title: { left: 25, top: 20, width: 830, height: 65 },
-          titleUnderline: { left: 25, top: 80, width: 260, height: 4 },
-          subhead: { left: 25, top: 90, width: 910, height: 40 },
-          area: { left: 25, top: 132, width: 910, height: 330 }
-        },
-        triangleSlide: {
-          headerLogo: { right: 20, top: 20, width: 75 },
-          title: { left: 25, top: 20, width: 830, height: 65 },
-          titleUnderline: { left: 25, top: 80, width: 260, height: 4 },
-          subhead: { left: 25, top: 90, width: 910, height: 40 },
-          area: { left: 25, top: 132, width: 910, height: 330 }
-        },
-        pyramidSlide: {
-          headerLogo: { right: 20, top: 20, width: 75 },
-          title: { left: 25, top: 20, width: 830, height: 65 },
-          titleUnderline: { left: 25, top: 80, width: 260, height: 4 },
-          subhead: { left: 25, top: 90, width: 910, height: 40 },
-          area: { left: 25, top: 132, width: 910, height: 330 }
-        },
-        stepUpSlide: {
-          headerLogo: { right: 20, top: 20, width: 75 },
-          title: { left: 25, top: 20, width: 830, height: 65 },
-          titleUnderline: { left: 25, top: 80, width: 260, height: 4 },
-          subhead: { left: 25, top: 90, width: 910, height: 40 },
-          area: { left: 25, top: 132, width: 910, height: 330 }
-        },
-        flowChartSlide: {
-          headerLogo: { right: 20, top: 20, width: 75 },
-          title: { left: 25, top: 20, width: 830, height: 65 },
-          titleUnderline: { left: 25, top: 80, width: 260, height: 4 },
-          subhead: { left: 25, top: 90, width: 910, height: 40 },
-          area: { left: 25, top: 132, width: 910, height: 330 }
-        },
-        headerCardsSlide: {
-          headerLogo: { right: 20, top: 20, width: 75 },
-          title: { left: 25, top: 20, width: 830, height: 65 },
-          titleUnderline: { left: 25, top: 80, width: 260, height: 4 },
-          subhead: { left: 25, top: 90, width: 910, height: 40 },
-          gridArea: { left: 25, top: 120, width: 910, height: 340 }
-        },
-        statsCompareSlide: {
-          headerLogo: { right: 20, top: 20, width: 75 },
-          title: { left: 25, top: 20, width: 830, height: 65 },
-          titleUnderline: { left: 25, top: 80, width: 260, height: 4 },
-          subhead: { left: 25, top: 90, width: 910, height: 40 },
-          leftHeader: { left: 25, top: 132, width: 440, height: 35 },
-          rightHeader: { left: 495, top: 132, width: 440, height: 35 },
-          leftBox: { left: 25, top: 172, width: 440, height: 290 },
-          rightBox: { left: 495, top: 172, width: 440, height: 290 }
-        },
-        barCompareSlide: {
-          headerLogo: { right: 20, top: 20, width: 75 },
-          title: { left: 25, top: 20, width: 830, height: 65 },
-          titleUnderline: { left: 25, top: 80, width: 260, height: 4 },
-          subhead: { left: 25, top: 90, width: 910, height: 40 },
-          area: { left: 25, top: 132, width: 910, height: 330 }
-        },
-        footer: {
-          leftText: { left: 15, top: 511, width: 500, height: 20 },
-          creditImage: { left: 430, top: 514, width: 100, height: 16 },
-          rightPage: { right: 15, top: 511, width: 50, height: 20 }
-        },
-        bottomBar: {
-          bar: { left: 0, top: 534, width: 960, height: 6 }
-        }
-      };
       DEFAULT_THEME = {
         basePx: {
           width: 960,
           height: 540
         },
         fonts: {
+          // Noto Sans JP is good, but let's assume we can use different weights via styles
           family: "Noto Sans JP",
           sizes: {
-            title: 41,
-            date: 16,
-            sectionTitle: 38,
-            contentTitle: 24,
-            subhead: 16,
-            body: 14,
-            footer: 9,
-            chip: 11,
-            laneTitle: 13,
-            small: 10,
-            processStep: 14,
+            title: 48,
+            // Larger title
+            date: 14,
+            sectionTitle: 52,
+            // Very large section title
+            contentTitle: 28,
+            // Clear hierarchy
+            subhead: 18,
+            body: 16,
+            // Readable body text
+            footer: 10,
+            chip: 12,
+            laneTitle: 14,
+            small: 11,
+            processStep: 16,
             axis: 12,
-            ghostNum: 180
+            ghostNum: 250
+            // Massive background number
           }
         },
         colors: {
-          primary: "#8FB130",
-          deepPrimary: "#526717",
-          textPrimary: "#333333",
-          textSmallFont: "#1F2937",
+          primary: "#4A6C42",
+          // Deep Olive - Sophisticated, trustworthy, organic
+          deepPrimary: "#2E3A45",
+          // Slate Charcoal - For strong contrast
+          textPrimary: "#212121",
+          // Almost black
+          textSmallFont: "#424242",
           backgroundWhite: "#FFFFFF",
-          cardBg: "#f6e9f0",
-          backgroundGray: "#F1F3F4",
-          faintGray: "#FAFAFA",
+          cardBg: "#FFFFFF",
+          // Clean white cards
+          backgroundGray: "#F8F9FA",
+          // Very subtle gray
+          faintGray: "#F8F9FA",
           ghostGray: "#E0E0E0",
-          tableHeaderBg: "#E8EAED",
-          laneBorder: "#DADCE0",
-          cardBorder: "#DADCE0",
-          neutralGray: "#9AA0A6",
-          processArrow: "#8FB130"
+          // For subtle background elements
+          tableHeaderBg: "#E0E0E0",
+          // Neutral header
+          laneBorder: "#EEEEEE",
+          cardBorder: "#E0E0E0",
+          neutralGray: "#9E9E9E",
+          processArrow: "#4A6C42"
         },
         diagram: {
-          laneGapPx: 24,
-          lanePadPx: 10,
-          laneTitleHeightPx: 30,
-          cardGapPx: 12,
-          cardMinHeightPx: 48,
-          cardMaxHeightPx: 70,
-          arrowHeightPx: 10,
-          arrowGapPx: 8
+          laneGapPx: 30,
+          // Wider gaps
+          lanePadPx: 20,
+          // More padding
+          laneTitleHeightPx: 40,
+          cardGapPx: 20,
+          // Airy layout
+          cardMinHeightPx: 60,
+          cardMaxHeightPx: 90,
+          arrowHeightPx: 8,
+          // Thinner, elegant arrows
+          arrowGapPx: 12
         },
         logos: {
           header: "",
           closing: ""
         },
         footerText: "",
-        positions: DEFAULT_POSITIONS,
+        positions: {
+          // Updated positions for "Editorial" look - wider margins (60px side margins)
+          titleSlide: {
+            logo: { left: 60, top: 60, width: 150 },
+            title: { left: 60, top: 200, width: 840, height: 120 },
+            date: { left: 60, top: 480, width: 300, height: 40 }
+          },
+          contentSlide: {
+            headerLogo: { right: 30, top: 30, width: 80 },
+            title: { left: 60, top: 30, width: 840, height: 70 },
+            titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+            // Short elegant underline
+            subhead: { left: 60, top: 110, width: 840, height: 30 },
+            body: { left: 60, top: 160, width: 840, height: 320 },
+            twoColLeft: { left: 60, top: 160, width: 400, height: 320 },
+            // 40px gap
+            twoColRight: { left: 500, top: 160, width: 400, height: 320 }
+          },
+          compareSlide: {
+            headerLogo: { right: 30, top: 30, width: 80 },
+            title: { left: 60, top: 30, width: 840, height: 70 },
+            titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+            subhead: { left: 60, top: 110, width: 840, height: 30 },
+            leftBox: { left: 60, top: 160, width: 400, height: 320 },
+            rightBox: { left: 500, top: 160, width: 400, height: 320 }
+          },
+          processSlide: {
+            headerLogo: { right: 30, top: 30, width: 80 },
+            title: { left: 60, top: 30, width: 840, height: 70 },
+            titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+            subhead: { left: 60, top: 110, width: 840, height: 30 },
+            area: { left: 60, top: 160, width: 840, height: 320 }
+          },
+          timelineSlide: {
+            headerLogo: { right: 30, top: 30, width: 80 },
+            title: { left: 60, top: 30, width: 840, height: 70 },
+            titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+            subhead: { left: 60, top: 110, width: 840, height: 30 },
+            area: { left: 60, top: 160, width: 840, height: 320 }
+          },
+          diagramSlide: {
+            headerLogo: { right: 30, top: 30, width: 80 },
+            title: { left: 60, top: 30, width: 840, height: 70 },
+            titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+            subhead: { left: 60, top: 110, width: 840, height: 30 },
+            lanesArea: { left: 60, top: 160, width: 840, height: 320 }
+          },
+          cardsSlide: {
+            headerLogo: { right: 30, top: 30, width: 80 },
+            title: { left: 60, top: 30, width: 840, height: 70 },
+            titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+            subhead: { left: 60, top: 110, width: 840, height: 30 },
+            gridArea: { left: 60, top: 160, width: 840, height: 320 }
+          },
+          tableSlide: {
+            headerLogo: { right: 30, top: 30, width: 80 },
+            title: { left: 60, top: 30, width: 840, height: 70 },
+            titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+            subhead: { left: 60, top: 110, width: 840, height: 30 },
+            area: { left: 60, top: 160, width: 840, height: 320 }
+          },
+          progressSlide: {
+            headerLogo: { right: 30, top: 30, width: 80 },
+            title: { left: 60, top: 30, width: 840, height: 70 },
+            titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+            subhead: { left: 60, top: 110, width: 840, height: 30 },
+            area: { left: 60, top: 160, width: 840, height: 320 }
+          },
+          kpiSlide: {
+            headerLogo: { right: 30, top: 30, width: 80 },
+            title: { left: 60, top: 30, width: 840, height: 70 },
+            titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+            subhead: { left: 60, top: 110, width: 840, height: 30 },
+            area: { left: 60, top: 160, width: 840, height: 320 }
+          },
+          agendaSlide: {
+            headerLogo: { right: 30, top: 30, width: 80 },
+            title: { left: 60, top: 30, width: 840, height: 70 },
+            titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+            subhead: { left: 60, top: 110, width: 840, height: 30 },
+            body: { left: 60, top: 160, width: 840, height: 320 }
+          },
+          sectionSlide: {
+            ghostNum: { left: 650, top: 290, width: 300, height: 250 },
+            // Adjusted
+            title: { left: 60, top: 180, width: 700, height: 140 }
+          },
+          closingSlide: {
+            logo: { left: 380, top: 150, width: 200 },
+            message: { left: 60, top: 350, width: 840, height: 80 }
+          },
+          quoteSlide: {
+            headerLogo: { right: 30, top: 30, width: 80 },
+            title: { left: 60, top: 30, width: 840, height: 70 },
+            titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+            subhead: { left: 60, top: 110, width: 840, height: 30 },
+            quoteBox: { left: 100, top: 160, width: 760, height: 260 },
+            authorBox: { left: 500, top: 440, width: 400, height: 40 }
+          },
+          faqSlide: {
+            headerLogo: { right: 30, top: 30, width: 80 },
+            title: { left: 60, top: 30, width: 840, height: 70 },
+            titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+            subhead: { left: 60, top: 110, width: 840, height: 30 },
+            area: { left: 60, top: 160, width: 840, height: 320 }
+          },
+          imageTextSlide: {
+            headerLogo: { right: 30, top: 30, width: 80 },
+            title: { left: 60, top: 30, width: 840, height: 70 },
+            titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+            subhead: { left: 60, top: 110, width: 840, height: 30 },
+            imageArea: { left: 60, top: 160, width: 400, height: 320 },
+            textArea: { left: 500, top: 160, width: 400, height: 320 }
+          },
+          cycleSlide: {
+            headerLogo: { right: 30, top: 30, width: 80 },
+            title: { left: 60, top: 30, width: 840, height: 70 },
+            titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+            subhead: { left: 60, top: 110, width: 840, height: 30 },
+            area: { left: 60, top: 160, width: 840, height: 320 }
+          },
+          triangleSlide: {
+            headerLogo: { right: 30, top: 30, width: 80 },
+            title: { left: 60, top: 30, width: 840, height: 70 },
+            titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+            subhead: { left: 60, top: 110, width: 840, height: 30 },
+            area: { left: 60, top: 160, width: 840, height: 320 }
+          },
+          pyramidSlide: {
+            headerLogo: { right: 30, top: 30, width: 80 },
+            title: { left: 60, top: 30, width: 840, height: 70 },
+            titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+            subhead: { left: 60, top: 110, width: 840, height: 30 },
+            area: { left: 60, top: 160, width: 840, height: 320 }
+          },
+          stepUpSlide: {
+            headerLogo: { right: 30, top: 30, width: 80 },
+            title: { left: 60, top: 30, width: 840, height: 70 },
+            titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+            subhead: { left: 60, top: 110, width: 840, height: 30 },
+            area: { left: 60, top: 160, width: 840, height: 320 }
+          },
+          flowChartSlide: {
+            headerLogo: { right: 30, top: 30, width: 80 },
+            title: { left: 60, top: 30, width: 840, height: 70 },
+            titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+            subhead: { left: 60, top: 110, width: 840, height: 30 },
+            area: { left: 60, top: 160, width: 840, height: 320 }
+          },
+          headerCardsSlide: {
+            headerLogo: { right: 30, top: 30, width: 80 },
+            title: { left: 60, top: 30, width: 840, height: 70 },
+            titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+            subhead: { left: 60, top: 110, width: 840, height: 30 },
+            gridArea: { left: 60, top: 160, width: 840, height: 320 }
+          },
+          statsCompareSlide: {
+            headerLogo: { right: 30, top: 30, width: 80 },
+            title: { left: 60, top: 30, width: 840, height: 70 },
+            titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+            subhead: { left: 60, top: 110, width: 840, height: 30 },
+            leftHeader: { left: 60, top: 160, width: 400, height: 35 },
+            rightHeader: { left: 500, top: 160, width: 400, height: 35 },
+            leftBox: { left: 60, top: 200, width: 400, height: 280 },
+            rightBox: { left: 500, top: 200, width: 400, height: 280 }
+          },
+          barCompareSlide: {
+            headerLogo: { right: 30, top: 30, width: 80 },
+            title: { left: 60, top: 30, width: 840, height: 70 },
+            titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+            subhead: { left: 60, top: 110, width: 840, height: 30 },
+            area: { left: 60, top: 160, width: 840, height: 320 }
+          },
+          footer: {
+            leftText: { left: 60, top: 510, width: 400, height: 20 },
+            creditImage: { left: 430, top: 512, width: 100, height: 16 },
+            rightPage: { right: 60, top: 510, width: 50, height: 20 }
+          },
+          bottomBar: {
+            bar: { left: 0, top: 536, width: 960, height: 4 }
+          }
+        },
         backgroundImages: {
           title: "",
           closing: "",
@@ -1102,7 +1122,20 @@ var global = this;
             return null;
           };
           const targetPlaceholder = placeholders.find((p) => getPlaceholderTypeSafe(p) === SlidesApp.PlaceholderType.BODY) || placeholders.find((p) => getPlaceholderTypeSafe(p) === SlidesApp.PlaceholderType.OBJECT) || placeholders.find((p) => getPlaceholderTypeSafe(p) === SlidesApp.PlaceholderType.PICTURE);
-          const workArea = targetPlaceholder ? { left: targetPlaceholder.getLeft(), top: targetPlaceholder.getTop(), width: targetPlaceholder.getWidth(), height: targetPlaceholder.getHeight() } : layout.getRect("contentSlide.body");
+          let workArea;
+          if (targetPlaceholder) {
+            workArea = {
+              left: targetPlaceholder.getLeft(),
+              top: targetPlaceholder.getTop(),
+              width: targetPlaceholder.getWidth(),
+              height: targetPlaceholder.getHeight()
+            };
+          } else {
+            const typeKey = `${type}Slide`;
+            const areaRect = layout.getRect(`${typeKey}.area`) || layout.getRect("contentSlide.body");
+            workArea = areaRect;
+          }
+          Logger.log(`WorkArea for ${type}: left=${workArea.left}, top=${workArea.top}, width=${workArea.width}, height=${workArea.height}`);
           if (targetPlaceholder) {
             try {
               targetPlaceholder.remove();
@@ -1476,34 +1509,61 @@ ${labelText}`, { size: fontSize, bold: true, color: DEFAULT_THEME.colors.backgro
           const rightTitle = data.rightTitle || "\u30D7\u30E9\u30F3B";
           const leftItems = data.leftItems || [];
           const rightItems = data.rightItems || [];
-          const gap = 20;
+          const gap = layout.pxToPt(25);
           const colWidth = (area.width - gap) / 2;
           const compareColors = generateCompareColors(settings.primaryColor);
-          const headerH = layout.pxToPt(40);
-          const leftHeader = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, area.left, area.top, colWidth, headerH);
-          leftHeader.getFill().setSolidFill(compareColors.left);
-          leftHeader.getBorder().setTransparent();
-          setStyledText(leftHeader, leftTitle, { size: 14, bold: true, color: DEFAULT_THEME.colors.backgroundGray, align: SlidesApp.ParagraphAlignment.CENTER });
-          try {
-            leftHeader.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
-          } catch (e) {
-          }
-          const leftBox = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, area.left, area.top + headerH, colWidth, area.height - headerH);
-          leftBox.getFill().setSolidFill(DEFAULT_THEME.colors.backgroundGray);
-          leftBox.getBorder().getLineFill().setSolidFill(DEFAULT_THEME.colors.cardBorder);
-          setStyledText(leftBox, leftItems.join("\n\n"), { size: DEFAULT_THEME.fonts.sizes.body });
-          const rightHeader = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, area.left + colWidth + gap, area.top, colWidth, headerH);
-          rightHeader.getFill().setSolidFill(compareColors.right);
-          rightHeader.getBorder().setTransparent();
-          setStyledText(rightHeader, rightTitle, { size: 14, bold: true, color: DEFAULT_THEME.colors.backgroundGray, align: SlidesApp.ParagraphAlignment.CENTER });
-          try {
-            rightHeader.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
-          } catch (e) {
-          }
-          const rightBox = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, area.left + colWidth + gap, area.top + headerH, colWidth, area.height - headerH);
-          rightBox.getFill().setSolidFill(DEFAULT_THEME.colors.backgroundGray);
-          rightBox.getBorder().getLineFill().setSolidFill(DEFAULT_THEME.colors.cardBorder);
-          setStyledText(rightBox, rightItems.join("\n\n"), { size: DEFAULT_THEME.fonts.sizes.body });
+          const headerH = layout.pxToPt(45);
+          const contentPadding = layout.pxToPt(20);
+          const itemSpacing = layout.pxToPt(12);
+          const drawColumn = (x, title, items, headerColor) => {
+            const header = slide.insertShape(SlidesApp.ShapeType.ROUND_RECTANGLE, x, area.top, colWidth, headerH);
+            header.getFill().setSolidFill(headerColor);
+            header.getBorder().setTransparent();
+            setStyledText(header, title, {
+              size: 16,
+              bold: true,
+              color: "#FFFFFF",
+              align: SlidesApp.ParagraphAlignment.CENTER
+            });
+            try {
+              header.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
+            } catch (e) {
+            }
+            const boxTop = area.top + headerH - layout.pxToPt(5);
+            const boxHeight = area.height - headerH + layout.pxToPt(5);
+            const contentBox = slide.insertShape(SlidesApp.ShapeType.ROUND_RECTANGLE, x, boxTop, colWidth, boxHeight);
+            contentBox.getFill().setSolidFill("#FFFFFF");
+            contentBox.getBorder().getLineFill().setSolidFill(DEFAULT_THEME.colors.cardBorder);
+            contentBox.getBorder().setWeight(1);
+            let currentY = boxTop + contentPadding;
+            const itemWidth = colWidth - contentPadding * 2;
+            items.forEach((itemText, idx) => {
+              const bulletSize = layout.pxToPt(8);
+              const bulletShape = slide.insertShape(
+                SlidesApp.ShapeType.ELLIPSE,
+                x + contentPadding,
+                currentY + layout.pxToPt(5),
+                bulletSize,
+                bulletSize
+              );
+              bulletShape.getFill().setSolidFill(headerColor);
+              bulletShape.getBorder().setTransparent();
+              const textBox = slide.insertShape(
+                SlidesApp.ShapeType.TEXT_BOX,
+                x + contentPadding + bulletSize + layout.pxToPt(10),
+                currentY,
+                itemWidth - bulletSize - layout.pxToPt(10),
+                layout.pxToPt(24)
+              );
+              setStyledText(textBox, itemText, {
+                size: DEFAULT_THEME.fonts.sizes.body,
+                color: DEFAULT_THEME.colors.textPrimary
+              });
+              currentY += layout.pxToPt(28) + itemSpacing;
+            });
+          };
+          drawColumn(area.left, leftTitle, leftItems, compareColors.left);
+          drawColumn(area.left + colWidth + gap, rightTitle, rightItems, compareColors.right);
         }
         drawStatsCompare(slide, data, area, settings, layout) {
           const leftTitle = data.leftTitle || "\u5C0E\u5165\u524D";
@@ -1701,17 +1761,63 @@ ${desc}`, {
           const items = data.items || [];
           if (!items.length) return;
           const count = items.length;
-          const stepWidth = area.width / count;
-          const stepHeight = area.height / count;
+          const gap = layout.pxToPt(15);
+          const stepWidth = (area.width - gap * (count - 1)) / count;
+          const maxStepHeight = area.height * 0.85;
+          const minStepHeight = area.height * 0.35;
+          const heightIncrement = (maxStepHeight - minStepHeight) / Math.max(1, count - 1);
           items.forEach((item, i) => {
-            const h = (i + 1) * stepHeight;
-            const x = area.left + i * stepWidth;
-            const y = area.top + (area.height - h);
-            const shape = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, x, y, stepWidth - layout.pxToPt(5), h);
-            shape.getFill().setSolidFill(settings.primaryColor, 0.5 + i * 0.1);
+            const stepH = minStepHeight + i * heightIncrement;
+            const x = area.left + i * (stepWidth + gap);
+            const y = area.top + (area.height - stepH);
+            const shape = slide.insertShape(SlidesApp.ShapeType.ROUND_RECTANGLE, x, y, stepWidth, stepH);
+            const alpha = 0.6 + i * 0.12;
+            shape.getFill().setSolidFill(settings.primaryColor, Math.min(1, alpha));
             shape.getBorder().setTransparent();
-            const textBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x, y, stepWidth - layout.pxToPt(5), layout.pxToPt(50));
-            setStyledText(textBox, item.title || "", { color: "#FFFFFF", bold: true, align: SlidesApp.ParagraphAlignment.CENTER });
+            const badgeSize = layout.pxToPt(28);
+            const badge = slide.insertShape(SlidesApp.ShapeType.ELLIPSE, x + layout.pxToPt(10), y + layout.pxToPt(10), badgeSize, badgeSize);
+            badge.getFill().setSolidFill("#FFFFFF");
+            badge.getBorder().setTransparent();
+            setStyledText(badge, String(i + 1), {
+              size: 14,
+              bold: true,
+              color: settings.primaryColor,
+              align: SlidesApp.ParagraphAlignment.CENTER
+            });
+            try {
+              badge.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
+            } catch (e) {
+            }
+            const titleH = layout.pxToPt(35);
+            const contentPadding = layout.pxToPt(15);
+            const titleBox = slide.insertShape(
+              SlidesApp.ShapeType.TEXT_BOX,
+              x + contentPadding,
+              y + layout.pxToPt(45),
+              stepWidth - contentPadding * 2,
+              titleH
+            );
+            setStyledText(titleBox, item.title || "", {
+              size: 16,
+              color: "#FFFFFF",
+              bold: true,
+              align: SlidesApp.ParagraphAlignment.CENTER
+            });
+            const desc = item.desc || item.description || "";
+            if (desc && stepH > layout.pxToPt(100)) {
+              const descBox = slide.insertShape(
+                SlidesApp.ShapeType.TEXT_BOX,
+                x + contentPadding,
+                y + layout.pxToPt(80),
+                stepWidth - contentPadding * 2,
+                stepH - layout.pxToPt(100)
+              );
+              setStyledText(descBox, desc, {
+                size: 11,
+                color: "rgba(255,255,255,0.9)",
+                align: SlidesApp.ParagraphAlignment.CENTER
+              });
+            }
           });
         }
         drawLanes(slide, data, area, settings, layout) {
@@ -1806,9 +1912,9 @@ ${desc}`, {
           if (!items.length) return;
           const type = (data.type || "").toLowerCase();
           const hasHeader = type.includes("headercards");
-          const cols = data.columns || 3;
+          const cols = data.columns || Math.min(items.length, 3);
           const rows = Math.ceil(items.length / cols);
-          const gap = layout.pxToPt(20);
+          const gap = layout.pxToPt(30);
           const cardW = (area.width - gap * (cols - 1)) / cols;
           const cardH = (area.height - gap * (rows - 1)) / rows;
           items.forEach((item, i) => {
@@ -1827,36 +1933,70 @@ ${desc}`, {
               desc = item.desc || item.description || item.text || "";
             }
             if (hasHeader) {
-              const headerH = layout.pxToPt(36);
-              const header = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, x, y, cardW, headerH);
-              header.getFill().setSolidFill(settings.primaryColor);
-              header.getBorder().setTransparent();
-              setStyledText(header, title, { size: 14, bold: true, color: "#FFFFFF", align: SlidesApp.ParagraphAlignment.CENTER });
+              const barH = layout.pxToPt(4);
+              const bar = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, x, y, cardW, barH);
+              bar.getFill().setSolidFill(settings.primaryColor);
+              bar.getBorder().setTransparent();
+              const numStr = String(i + 1).padStart(2, "0");
+              const numBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x, y + layout.pxToPt(10), cardW, layout.pxToPt(20));
+              setStyledText(numBox, numStr, {
+                size: 14,
+                bold: true,
+                color: DEFAULT_THEME.colors.neutralGray,
+                // Subtle gray
+                align: SlidesApp.ParagraphAlignment.END
+              });
+              const titleTop = y + layout.pxToPt(10);
+              const titleH = layout.pxToPt(40);
+              const titleBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x, titleTop, cardW, titleH);
+              setStyledText(titleBox, title, {
+                size: 18,
+                bold: true,
+                color: DEFAULT_THEME.colors.textPrimary,
+                align: SlidesApp.ParagraphAlignment.START
+              });
               try {
-                header.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
+                titleBox.setContentAlignment(SlidesApp.ContentAlignment.TOP);
               } catch (e) {
               }
-              const body = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, x, y + headerH, cardW, cardH - headerH);
-              body.getFill().setSolidFill("#FFFFFF");
-              body.getBorder().getLineFill().setSolidFill(DEFAULT_THEME.colors.cardBorder);
-              const textArea = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x + layout.pxToPt(10), y + headerH + layout.pxToPt(10), cardW - layout.pxToPt(20), cardH - headerH - layout.pxToPt(20));
-              setStyledText(textArea, desc, { size: 12, align: SlidesApp.ParagraphAlignment.START, color: DEFAULT_THEME.colors.textSmallFont });
+              const descTop = titleTop + titleH + layout.pxToPt(5);
+              const descH = cardH - (descTop - y);
+              if (descH > 20) {
+                const descBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x, descTop, cardW, descH);
+                setStyledText(descBox, desc, {
+                  size: 13,
+                  color: typeof DEFAULT_THEME.colors.textSmallFont === "string" ? DEFAULT_THEME.colors.textSmallFont : "#424242",
+                  align: SlidesApp.ParagraphAlignment.START
+                });
+                try {
+                  descBox.setContentAlignment(SlidesApp.ContentAlignment.TOP);
+                } catch (e) {
+                }
+              }
             } else {
-              const card = slide.insertShape(SlidesApp.ShapeType.ROUND_RECTANGLE, x, y, cardW, cardH);
-              card.getFill().setSolidFill("#FFFFFF");
-              card.getBorder().getLineFill().setSolidFill(DEFAULT_THEME.colors.cardBorder);
-              const strip = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, x, y + cardH * 0.1, layout.pxToPt(6), cardH * 0.8);
-              strip.getFill().setSolidFill(settings.primaryColor);
-              strip.getBorder().setTransparent();
-              const contentX = x + layout.pxToPt(20);
-              const contentW = cardW - layout.pxToPt(30);
-              const titleBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, contentX, y + layout.pxToPt(10), contentW, layout.pxToPt(30));
-              setStyledText(titleBox, title, { size: 16, bold: true, color: DEFAULT_THEME.colors.textPrimary });
-              const descBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, contentX, y + layout.pxToPt(40), contentW, cardH - layout.pxToPt(50));
-              setStyledText(descBox, desc, { size: 12, color: DEFAULT_THEME.colors.textSmallFont });
-              try {
-                descBox.setContentAlignment(SlidesApp.ContentAlignment.TOP);
-              } catch (e) {
+              const dotSize = layout.pxToPt(6);
+              const dot = slide.insertShape(SlidesApp.ShapeType.ELLIPSE, x, y + layout.pxToPt(9), dotSize, dotSize);
+              dot.getFill().setSolidFill(settings.primaryColor);
+              dot.getBorder().setTransparent();
+              const contentX = x + dotSize + layout.pxToPt(12);
+              const contentW = cardW - (dotSize + layout.pxToPt(12));
+              const titleH = layout.pxToPt(30);
+              const titleBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, contentX, y, contentW, titleH);
+              setStyledText(titleBox, title, {
+                size: 16,
+                bold: true,
+                color: DEFAULT_THEME.colors.textPrimary,
+                align: SlidesApp.ParagraphAlignment.START
+              });
+              const descTop = y + titleH;
+              const descH = cardH - titleH;
+              if (descH > 20) {
+                const descBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, contentX, descTop, contentW, descH);
+                setStyledText(descBox, desc, {
+                  size: 13,
+                  color: typeof DEFAULT_THEME.colors.textSmallFont === "string" ? DEFAULT_THEME.colors.textSmallFont : "#424242",
+                  align: SlidesApp.ParagraphAlignment.START
+                });
               }
             }
           });
@@ -1906,13 +2046,19 @@ ${desc}`, {
         drawTable(slide, data, area, settings, layout) {
           const headers = data.headers || [];
           const rows = data.rows || [];
+          const numCols = Math.max(
+            headers.length,
+            rows.length > 0 && Array.isArray(rows[0]) ? rows[0].length : 0
+          );
           const numRows = rows.length + (headers.length ? 1 : 0);
-          const numCols = headers.length || (rows[0] ? rows[0].length : 1);
+          Logger.log(`Table: ${numRows} rows x ${numCols} cols, headers: ${JSON.stringify(headers)}`);
+          Logger.log(`Table area: left=${area.left}, top=${area.top}, width=${area.width}, height=${area.height}`);
           if (numRows === 0 || numCols === 0) return;
           const table = slide.insertTable(numRows, numCols);
           table.setLeft(area.left);
           table.setTop(area.top);
           table.setWidth(area.width);
+          const theme = layout.getTheme();
           let rowIndex = 0;
           if (headers.length) {
             for (let c = 0; c < numCols; c++) {
@@ -1920,8 +2066,9 @@ ${desc}`, {
               cell.getFill().setSolidFill(settings.primaryColor);
               cell.getText().setText(headers[c] || "");
               const style = cell.getText().getTextStyle();
+              style.setFontFamily(theme.fonts.family);
               style.setBold(true);
-              style.setFontSize(14);
+              style.setFontSize(13);
               style.setForegroundColor("#FFFFFF");
               try {
                 cell.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
@@ -1932,14 +2079,15 @@ ${desc}`, {
           }
           rows.forEach((row, rIdx) => {
             const isAlt = rIdx % 2 !== 0;
-            const rowColor = isAlt ? DEFAULT_THEME.colors.faintGray : "#FFFFFF";
+            const rowColor = isAlt ? theme.colors.faintGray : "#FFFFFF";
             for (let c = 0; c < numCols; c++) {
               const cell = table.getCell(rowIndex, c);
               cell.getFill().setSolidFill(rowColor);
-              cell.getText().setText(String(row[c] || ""));
+              cell.getText().setText(String(row[c] ?? ""));
               const rowStyle = cell.getText().getTextStyle();
-              rowStyle.setFontSize(12);
-              rowStyle.setForegroundColor(DEFAULT_THEME.colors.textPrimary);
+              rowStyle.setFontFamily(theme.fonts.family);
+              rowStyle.setFontSize(11);
+              rowStyle.setForegroundColor(theme.colors.textPrimary);
               try {
                 cell.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
               } catch (e) {

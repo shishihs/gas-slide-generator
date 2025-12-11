@@ -10,14 +10,14 @@ describe('SlideTheme', () => {
 
             expect(DEFAULT_THEME.fonts).toBeDefined();
             expect(DEFAULT_THEME.fonts.family).toBe('Noto Sans JP');
-            expect(DEFAULT_THEME.fonts.sizes.body).toBe(14);
+            expect(DEFAULT_THEME.fonts.sizes.body).toBe(16);
 
             expect(DEFAULT_THEME.colors).toBeDefined();
-            expect(DEFAULT_THEME.colors.primary).toBe('#8FB130');
-            expect(DEFAULT_THEME.colors.textPrimary).toBe('#333333');
+            expect(DEFAULT_THEME.colors.primary).toBe('#4A6C42');
+            expect(DEFAULT_THEME.colors.textPrimary).toBe('#212121');
 
             expect(DEFAULT_THEME.diagram).toBeDefined();
-            expect(DEFAULT_THEME.diagram.laneGapPx).toBe(24);
+            expect(DEFAULT_THEME.diagram.laneGapPx).toBe(30);
 
             expect(DEFAULT_THEME.positions).toBeDefined();
             expect(DEFAULT_THEME.positions.contentSlide).toBeDefined();

@@ -702,9 +702,22 @@ function callVertexAI(documentContent) {
     const location = getVertexAiLocation();
     const model = getVertexAiModel();
 
+    Logger.log(`[callVertexAI] Config: ProjectId=${projectId}, Location=${location}, Model=${model}, UseMock=${useMock}`);
+
+    if (useMock) {
+        Logger.log('[callVertexAI] Mock mode enabled. Returning mock data.');
+        try {
+            const data = getMockData();
+            Logger.log('[callVertexAI] Mock data retrieved successfully.');
+            return data;
+        } catch (e) {
+            Logger.log('[callVertexAI] Error retrieving mock data: ' + e.toString());
+            throw new Error('Failed to retrieve mock data: ' + e.toString());
+        }
+    }
+
     if (!projectId || projectId === 'YOUR_GCP_PROJECT_ID') {
-        // This check is arguably redundant now if convertDocumentToJson handles it, 
-        // but kept for safety if called from elsewhere.
+        Logger.log('[callVertexAI] GCP Project ID missing.');
         throw new Error('GCP Project ID not configured.');
     }
 

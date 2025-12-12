@@ -60,7 +60,189 @@ var global = this;
       return this.slideRepository.createPresentation(presentation, request.templateId, request.destinationId, request.settings);
     }
   }
-  const DEFAULT_THEME = {
+  const BASE_POSITIONS = {
+    // Updated positions for "Editorial" look - wider margins (60px side margins)
+    titleSlide: {
+      logo: { left: 60, top: 60, width: 150 },
+      title: { left: 60, top: 200, width: 840, height: 120 },
+      date: { left: 60, top: 480, width: 300, height: 40 }
+    },
+    contentSlide: {
+      headerLogo: { right: 30, top: 30, width: 80 },
+      title: { left: 60, top: 30, width: 840, height: 70 },
+      titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+      // Short elegant underline
+      subhead: { left: 60, top: 110, width: 840, height: 30 },
+      body: { left: 60, top: 160, width: 840, height: 320 },
+      twoColLeft: { left: 60, top: 160, width: 400, height: 320 },
+      // 40px gap
+      twoColRight: { left: 500, top: 160, width: 400, height: 320 }
+    },
+    compareSlide: {
+      headerLogo: { right: 30, top: 30, width: 80 },
+      title: { left: 60, top: 30, width: 840, height: 70 },
+      titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+      subhead: { left: 60, top: 110, width: 840, height: 30 },
+      leftBox: { left: 60, top: 160, width: 400, height: 320 },
+      rightBox: { left: 500, top: 160, width: 400, height: 320 }
+    },
+    processSlide: {
+      headerLogo: { right: 30, top: 30, width: 80 },
+      title: { left: 60, top: 30, width: 840, height: 70 },
+      titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+      subhead: { left: 60, top: 110, width: 840, height: 30 },
+      area: { left: 60, top: 160, width: 840, height: 320 }
+    },
+    timelineSlide: {
+      headerLogo: { right: 30, top: 30, width: 80 },
+      title: { left: 60, top: 30, width: 840, height: 70 },
+      titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+      subhead: { left: 60, top: 110, width: 840, height: 30 },
+      area: { left: 60, top: 160, width: 840, height: 320 }
+    },
+    diagramSlide: {
+      headerLogo: { right: 30, top: 30, width: 80 },
+      title: { left: 60, top: 30, width: 840, height: 70 },
+      titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+      subhead: { left: 60, top: 110, width: 840, height: 30 },
+      lanesArea: { left: 60, top: 160, width: 840, height: 320 }
+    },
+    cardsSlide: {
+      headerLogo: { right: 30, top: 30, width: 80 },
+      title: { left: 60, top: 30, width: 840, height: 70 },
+      titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+      subhead: { left: 60, top: 110, width: 840, height: 30 },
+      gridArea: { left: 60, top: 160, width: 840, height: 320 }
+    },
+    tableSlide: {
+      headerLogo: { right: 30, top: 30, width: 80 },
+      title: { left: 60, top: 30, width: 840, height: 70 },
+      titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+      subhead: { left: 60, top: 110, width: 840, height: 30 },
+      area: { left: 60, top: 160, width: 840, height: 320 }
+    },
+    progressSlide: {
+      headerLogo: { right: 30, top: 30, width: 80 },
+      title: { left: 60, top: 30, width: 840, height: 70 },
+      titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+      subhead: { left: 60, top: 110, width: 840, height: 30 },
+      area: { left: 60, top: 160, width: 840, height: 320 }
+    },
+    kpiSlide: {
+      headerLogo: { right: 30, top: 30, width: 80 },
+      title: { left: 60, top: 30, width: 840, height: 70 },
+      titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+      subhead: { left: 60, top: 110, width: 840, height: 30 },
+      area: { left: 60, top: 160, width: 840, height: 320 }
+    },
+    agendaSlide: {
+      headerLogo: { right: 30, top: 30, width: 80 },
+      title: { left: 60, top: 30, width: 840, height: 70 },
+      titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+      subhead: { left: 60, top: 110, width: 840, height: 30 },
+      body: { left: 60, top: 160, width: 840, height: 320 }
+    },
+    sectionSlide: {
+      ghostNum: { left: 400, top: 100, width: 550, height: 350 },
+      // Adjusted
+      title: { left: 60, top: 180, width: 700, height: 140 }
+    },
+    closingSlide: {
+      logo: { left: 380, top: 150, width: 200 },
+      message: { left: 60, top: 350, width: 840, height: 80 }
+    },
+    quoteSlide: {
+      headerLogo: { right: 30, top: 30, width: 80 },
+      title: { left: 60, top: 30, width: 840, height: 70 },
+      titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+      subhead: { left: 60, top: 110, width: 840, height: 30 },
+      quoteBox: { left: 100, top: 160, width: 760, height: 260 },
+      authorBox: { left: 500, top: 440, width: 400, height: 40 }
+    },
+    faqSlide: {
+      headerLogo: { right: 30, top: 30, width: 80 },
+      title: { left: 60, top: 30, width: 840, height: 70 },
+      titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+      subhead: { left: 60, top: 110, width: 840, height: 30 },
+      area: { left: 60, top: 160, width: 840, height: 320 }
+    },
+    imageTextSlide: {
+      headerLogo: { right: 30, top: 30, width: 80 },
+      title: { left: 60, top: 30, width: 840, height: 70 },
+      titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+      subhead: { left: 60, top: 110, width: 840, height: 30 },
+      imageArea: { left: 60, top: 160, width: 400, height: 320 },
+      textArea: { left: 500, top: 160, width: 400, height: 320 }
+    },
+    cycleSlide: {
+      headerLogo: { right: 30, top: 30, width: 80 },
+      title: { left: 60, top: 30, width: 840, height: 70 },
+      titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+      subhead: { left: 60, top: 110, width: 840, height: 30 },
+      area: { left: 60, top: 160, width: 840, height: 320 }
+    },
+    triangleSlide: {
+      headerLogo: { right: 30, top: 30, width: 80 },
+      title: { left: 60, top: 30, width: 840, height: 70 },
+      titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+      subhead: { left: 60, top: 110, width: 840, height: 30 },
+      area: { left: 60, top: 160, width: 840, height: 320 }
+    },
+    pyramidSlide: {
+      headerLogo: { right: 30, top: 30, width: 80 },
+      title: { left: 60, top: 30, width: 840, height: 70 },
+      titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+      subhead: { left: 60, top: 110, width: 840, height: 30 },
+      area: { left: 60, top: 160, width: 840, height: 320 }
+    },
+    stepUpSlide: {
+      headerLogo: { right: 30, top: 30, width: 80 },
+      title: { left: 60, top: 30, width: 840, height: 70 },
+      titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+      subhead: { left: 60, top: 110, width: 840, height: 30 },
+      area: { left: 60, top: 160, width: 840, height: 320 }
+    },
+    flowChartSlide: {
+      headerLogo: { right: 30, top: 30, width: 80 },
+      title: { left: 60, top: 30, width: 840, height: 70 },
+      titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+      subhead: { left: 60, top: 110, width: 840, height: 30 },
+      area: { left: 60, top: 160, width: 840, height: 320 }
+    },
+    headerCardsSlide: {
+      headerLogo: { right: 30, top: 30, width: 80 },
+      title: { left: 60, top: 30, width: 840, height: 70 },
+      titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+      subhead: { left: 60, top: 110, width: 840, height: 30 },
+      gridArea: { left: 60, top: 160, width: 840, height: 320 }
+    },
+    statsCompareSlide: {
+      headerLogo: { right: 30, top: 30, width: 80 },
+      title: { left: 60, top: 30, width: 840, height: 70 },
+      titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+      subhead: { left: 60, top: 110, width: 840, height: 30 },
+      leftHeader: { left: 60, top: 160, width: 400, height: 35 },
+      rightHeader: { left: 500, top: 160, width: 400, height: 35 },
+      leftBox: { left: 60, top: 200, width: 400, height: 280 },
+      rightBox: { left: 500, top: 200, width: 400, height: 280 }
+    },
+    barCompareSlide: {
+      headerLogo: { right: 30, top: 30, width: 80 },
+      title: { left: 60, top: 30, width: 840, height: 70 },
+      titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
+      subhead: { left: 60, top: 110, width: 840, height: 30 },
+      area: { left: 60, top: 160, width: 840, height: 320 }
+    },
+    footer: {
+      leftText: { left: 60, top: 510, width: 400, height: 20 },
+      creditImage: { left: 430, top: 512, width: 100, height: 16 },
+      rightPage: { right: 60, top: 510, width: 50, height: 20 }
+    },
+    bottomBar: {
+      bar: { left: 0, top: 536, width: 960, height: 4 }
+    }
+  };
+  const BASE_THEME_OPTS = {
     basePx: {
       width: 960,
       height: 540
@@ -86,6 +268,35 @@ var global = this;
         ghostNum: 250
       }
     },
+    diagram: {
+      laneGapPx: 30,
+      // Wider gaps
+      lanePadPx: 20,
+      // More padding
+      laneTitleHeightPx: 40,
+      cardGapPx: 20,
+      // Airy layout
+      cardMinHeightPx: 60,
+      cardMaxHeightPx: 90,
+      arrowHeightPx: 8,
+      // Thinner, elegant arrows
+      arrowGapPx: 12
+    },
+    logos: {
+      header: "",
+      closing: ""
+    },
+    footerText: "",
+    positions: BASE_POSITIONS,
+    backgroundImages: {
+      title: "",
+      closing: "",
+      section: "",
+      main: ""
+    }
+  };
+  const THEME_GREEN = {
+    ...BASE_THEME_OPTS,
     colors: {
       primary: "#8FB130",
       // Brand Main (Vibrant Leaf Green)
@@ -109,214 +320,75 @@ var global = this;
       neutralGray: "#9E9E9E",
       processArrow: "#526717"
       // Use Deep color for contrast
-    },
-    diagram: {
-      laneGapPx: 30,
-      // Wider gaps
-      lanePadPx: 20,
-      // More padding
-      laneTitleHeightPx: 40,
-      cardGapPx: 20,
-      // Airy layout
-      cardMinHeightPx: 60,
-      cardMaxHeightPx: 90,
-      arrowHeightPx: 8,
-      // Thinner, elegant arrows
-      arrowGapPx: 12
-    },
-    logos: {
-      header: "",
-      closing: ""
-    },
-    footerText: "",
-    positions: {
-      // Updated positions for "Editorial" look - wider margins (60px side margins)
-      titleSlide: {
-        logo: { left: 60, top: 60, width: 150 },
-        title: { left: 60, top: 200, width: 840, height: 120 },
-        date: { left: 60, top: 480, width: 300, height: 40 }
-      },
-      contentSlide: {
-        headerLogo: { right: 30, top: 30, width: 80 },
-        title: { left: 60, top: 30, width: 840, height: 70 },
-        titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
-        // Short elegant underline
-        subhead: { left: 60, top: 110, width: 840, height: 30 },
-        body: { left: 60, top: 160, width: 840, height: 320 },
-        twoColLeft: { left: 60, top: 160, width: 400, height: 320 },
-        // 40px gap
-        twoColRight: { left: 500, top: 160, width: 400, height: 320 }
-      },
-      compareSlide: {
-        headerLogo: { right: 30, top: 30, width: 80 },
-        title: { left: 60, top: 30, width: 840, height: 70 },
-        titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
-        subhead: { left: 60, top: 110, width: 840, height: 30 },
-        leftBox: { left: 60, top: 160, width: 400, height: 320 },
-        rightBox: { left: 500, top: 160, width: 400, height: 320 }
-      },
-      processSlide: {
-        headerLogo: { right: 30, top: 30, width: 80 },
-        title: { left: 60, top: 30, width: 840, height: 70 },
-        titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
-        subhead: { left: 60, top: 110, width: 840, height: 30 },
-        area: { left: 60, top: 160, width: 840, height: 320 }
-      },
-      timelineSlide: {
-        headerLogo: { right: 30, top: 30, width: 80 },
-        title: { left: 60, top: 30, width: 840, height: 70 },
-        titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
-        subhead: { left: 60, top: 110, width: 840, height: 30 },
-        area: { left: 60, top: 160, width: 840, height: 320 }
-      },
-      diagramSlide: {
-        headerLogo: { right: 30, top: 30, width: 80 },
-        title: { left: 60, top: 30, width: 840, height: 70 },
-        titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
-        subhead: { left: 60, top: 110, width: 840, height: 30 },
-        lanesArea: { left: 60, top: 160, width: 840, height: 320 }
-      },
-      cardsSlide: {
-        headerLogo: { right: 30, top: 30, width: 80 },
-        title: { left: 60, top: 30, width: 840, height: 70 },
-        titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
-        subhead: { left: 60, top: 110, width: 840, height: 30 },
-        gridArea: { left: 60, top: 160, width: 840, height: 320 }
-      },
-      tableSlide: {
-        headerLogo: { right: 30, top: 30, width: 80 },
-        title: { left: 60, top: 30, width: 840, height: 70 },
-        titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
-        subhead: { left: 60, top: 110, width: 840, height: 30 },
-        area: { left: 60, top: 160, width: 840, height: 320 }
-      },
-      progressSlide: {
-        headerLogo: { right: 30, top: 30, width: 80 },
-        title: { left: 60, top: 30, width: 840, height: 70 },
-        titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
-        subhead: { left: 60, top: 110, width: 840, height: 30 },
-        area: { left: 60, top: 160, width: 840, height: 320 }
-      },
-      kpiSlide: {
-        headerLogo: { right: 30, top: 30, width: 80 },
-        title: { left: 60, top: 30, width: 840, height: 70 },
-        titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
-        subhead: { left: 60, top: 110, width: 840, height: 30 },
-        area: { left: 60, top: 160, width: 840, height: 320 }
-      },
-      agendaSlide: {
-        headerLogo: { right: 30, top: 30, width: 80 },
-        title: { left: 60, top: 30, width: 840, height: 70 },
-        titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
-        subhead: { left: 60, top: 110, width: 840, height: 30 },
-        body: { left: 60, top: 160, width: 840, height: 320 }
-      },
-      sectionSlide: {
-        ghostNum: { left: 400, top: 100, width: 550, height: 350 },
-        // Adjusted
-        title: { left: 60, top: 180, width: 700, height: 140 }
-      },
-      closingSlide: {
-        logo: { left: 380, top: 150, width: 200 },
-        message: { left: 60, top: 350, width: 840, height: 80 }
-      },
-      quoteSlide: {
-        headerLogo: { right: 30, top: 30, width: 80 },
-        title: { left: 60, top: 30, width: 840, height: 70 },
-        titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
-        subhead: { left: 60, top: 110, width: 840, height: 30 },
-        quoteBox: { left: 100, top: 160, width: 760, height: 260 },
-        authorBox: { left: 500, top: 440, width: 400, height: 40 }
-      },
-      faqSlide: {
-        headerLogo: { right: 30, top: 30, width: 80 },
-        title: { left: 60, top: 30, width: 840, height: 70 },
-        titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
-        subhead: { left: 60, top: 110, width: 840, height: 30 },
-        area: { left: 60, top: 160, width: 840, height: 320 }
-      },
-      imageTextSlide: {
-        headerLogo: { right: 30, top: 30, width: 80 },
-        title: { left: 60, top: 30, width: 840, height: 70 },
-        titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
-        subhead: { left: 60, top: 110, width: 840, height: 30 },
-        imageArea: { left: 60, top: 160, width: 400, height: 320 },
-        textArea: { left: 500, top: 160, width: 400, height: 320 }
-      },
-      cycleSlide: {
-        headerLogo: { right: 30, top: 30, width: 80 },
-        title: { left: 60, top: 30, width: 840, height: 70 },
-        titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
-        subhead: { left: 60, top: 110, width: 840, height: 30 },
-        area: { left: 60, top: 160, width: 840, height: 320 }
-      },
-      triangleSlide: {
-        headerLogo: { right: 30, top: 30, width: 80 },
-        title: { left: 60, top: 30, width: 840, height: 70 },
-        titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
-        subhead: { left: 60, top: 110, width: 840, height: 30 },
-        area: { left: 60, top: 160, width: 840, height: 320 }
-      },
-      pyramidSlide: {
-        headerLogo: { right: 30, top: 30, width: 80 },
-        title: { left: 60, top: 30, width: 840, height: 70 },
-        titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
-        subhead: { left: 60, top: 110, width: 840, height: 30 },
-        area: { left: 60, top: 160, width: 840, height: 320 }
-      },
-      stepUpSlide: {
-        headerLogo: { right: 30, top: 30, width: 80 },
-        title: { left: 60, top: 30, width: 840, height: 70 },
-        titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
-        subhead: { left: 60, top: 110, width: 840, height: 30 },
-        area: { left: 60, top: 160, width: 840, height: 320 }
-      },
-      flowChartSlide: {
-        headerLogo: { right: 30, top: 30, width: 80 },
-        title: { left: 60, top: 30, width: 840, height: 70 },
-        titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
-        subhead: { left: 60, top: 110, width: 840, height: 30 },
-        area: { left: 60, top: 160, width: 840, height: 320 }
-      },
-      headerCardsSlide: {
-        headerLogo: { right: 30, top: 30, width: 80 },
-        title: { left: 60, top: 30, width: 840, height: 70 },
-        titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
-        subhead: { left: 60, top: 110, width: 840, height: 30 },
-        gridArea: { left: 60, top: 160, width: 840, height: 320 }
-      },
-      statsCompareSlide: {
-        headerLogo: { right: 30, top: 30, width: 80 },
-        title: { left: 60, top: 30, width: 840, height: 70 },
-        titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
-        subhead: { left: 60, top: 110, width: 840, height: 30 },
-        leftHeader: { left: 60, top: 160, width: 400, height: 35 },
-        rightHeader: { left: 500, top: 160, width: 400, height: 35 },
-        leftBox: { left: 60, top: 200, width: 400, height: 280 },
-        rightBox: { left: 500, top: 200, width: 400, height: 280 }
-      },
-      barCompareSlide: {
-        headerLogo: { right: 30, top: 30, width: 80 },
-        title: { left: 60, top: 30, width: 840, height: 70 },
-        titleUnderline: { left: 60, top: 100, width: 80, height: 3 },
-        subhead: { left: 60, top: 110, width: 840, height: 30 },
-        area: { left: 60, top: 160, width: 840, height: 320 }
-      },
-      footer: {
-        leftText: { left: 60, top: 510, width: 400, height: 20 },
-        creditImage: { left: 430, top: 512, width: 100, height: 16 },
-        rightPage: { right: 60, top: 510, width: 50, height: 20 }
-      },
-      bottomBar: {
-        bar: { left: 0, top: 536, width: 960, height: 4 }
-      }
-    },
-    backgroundImages: {
-      title: "",
-      closing: "",
-      section: "",
-      main: ""
     }
+  };
+  const THEME_BLUE = {
+    ...BASE_THEME_OPTS,
+    colors: {
+      primary: "#3498DB",
+      // Standard Blue
+      deepPrimary: "#2C3E50",
+      // Dark Blue
+      textPrimary: "#333333",
+      textSmallFont: "#555555",
+      backgroundWhite: "#FFFFFF",
+      cardBg: "#FFFFFF",
+      backgroundGray: "#F4F6F7",
+      faintGray: "#ECF0F1",
+      ghostGray: "#BDC3C7",
+      tableHeaderBg: "#ECF0F1",
+      laneBorder: "#BDC3C7",
+      cardBorder: "#E0E0E0",
+      neutralGray: "#95A5A6",
+      processArrow: "#2C3E50"
+    }
+  };
+  const THEME_RED = {
+    ...BASE_THEME_OPTS,
+    colors: {
+      primary: "#E74C3C",
+      // Red
+      deepPrimary: "#C0392B",
+      // Dark Red
+      textPrimary: "#333333",
+      textSmallFont: "#555555",
+      backgroundWhite: "#FFFFFF",
+      cardBg: "#FFFFFF",
+      backgroundGray: "#F4F6F7",
+      faintGray: "#ECF0F1",
+      ghostGray: "#BDC3C7",
+      tableHeaderBg: "#ECF0F1",
+      laneBorder: "#BDC3C7",
+      cardBorder: "#E0E0E0",
+      neutralGray: "#95A5A6",
+      processArrow: "#C0392B"
+    }
+  };
+  const THEME_GRAYSCALE = {
+    ...BASE_THEME_OPTS,
+    colors: {
+      primary: "#666666",
+      deepPrimary: "#333333",
+      textPrimary: "#000000",
+      textSmallFont: "#666666",
+      backgroundWhite: "#FFFFFF",
+      cardBg: "#FFFFFF",
+      backgroundGray: "#EEEEEE",
+      faintGray: "#EEEEEE",
+      ghostGray: "#CCCCCC",
+      tableHeaderBg: "#DDDDDD",
+      laneBorder: "#BBBBBB",
+      cardBorder: "#CCCCCC",
+      neutralGray: "#999999",
+      processArrow: "#333333"
+    }
+  };
+  const DEFAULT_THEME = THEME_GREEN;
+  const AVAILABLE_THEMES = {
+    "Green": THEME_GREEN,
+    "Blue": THEME_BLUE,
+    "Red": THEME_RED,
+    "Grayscale": THEME_GRAYSCALE
   };
   class LayoutManager {
     /**
@@ -378,736 +450,521 @@ var global = this;
       return this.theme;
     }
   }
+  class RequestFactory {
+    static createSlide(pageId, layoutId = "TITLE_AND_BODY", isPredefined = true) {
+      return {
+        createSlide: {
+          objectId: pageId,
+          slideLayoutReference: isPredefined ? { predefinedLayout: layoutId } : { layoutId }
+        }
+      };
+    }
+    static createTextBox(pageId, objectId, text, leftOpt, topOpt, widthOpt, heightOpt) {
+      const requests = [];
+      requests.push({
+        createShape: {
+          objectId,
+          shapeType: "TEXT_BOX",
+          elementProperties: {
+            pageObjectId: pageId,
+            size: {
+              width: { magnitude: widthOpt, unit: "PT" },
+              height: { magnitude: heightOpt, unit: "PT" }
+            },
+            transform: {
+              scaleX: 1,
+              scaleY: 1,
+              translateX: leftOpt,
+              translateY: topOpt,
+              unit: "PT"
+            }
+          }
+        }
+      });
+      if (text) {
+        requests.push({
+          insertText: {
+            objectId,
+            text
+          }
+        });
+      }
+      return requests;
+    }
+    static updateTextStyle(objectId, style, selectionStart, selectionEnd, rowIndex, colIndex) {
+      const fields = [];
+      const textStyle = {};
+      if (style.bold !== void 0) {
+        textStyle.bold = style.bold;
+        fields.push("bold");
+      }
+      if (style.fontSize !== void 0) {
+        textStyle.fontSize = { magnitude: style.fontSize, unit: "PT" };
+        fields.push("fontSize");
+      }
+      if (style.color !== void 0) {
+        textStyle.foregroundColor = {
+          opaqueColor: { themeColor: style.color.startsWith("#") ? "DARK1" : style.color }
+        };
+        const rgb = RequestFactory.toRgbColor(style.color);
+        if (rgb) {
+          textStyle.foregroundColor = {
+            opaqueColor: { rgbColor: rgb }
+          };
+        }
+        fields.push("foregroundColor");
+      }
+      if (style.fontFamily !== void 0) {
+        textStyle.fontFamily = style.fontFamily;
+        fields.push("fontFamily");
+      }
+      const request = {
+        updateTextStyle: {
+          objectId,
+          style: textStyle,
+          fields: fields.join(",")
+        }
+      };
+      if (selectionStart !== void 0 && selectionEnd !== void 0) {
+        request.updateTextStyle.textRange = {
+          type: "FIXED_RANGE",
+          startIndex: selectionStart,
+          endIndex: selectionStart + selectionEnd
+        };
+      }
+      if (rowIndex !== void 0 && colIndex !== void 0) {
+        request.updateTextStyle.cellLocation = {
+          rowIndex,
+          columnIndex: colIndex
+        };
+      }
+      return request;
+    }
+    static createShape(pageId, objectId, shapeType, left, top, width, height) {
+      return {
+        createShape: {
+          objectId,
+          shapeType,
+          elementProperties: {
+            pageObjectId: pageId,
+            size: {
+              width: { magnitude: width, unit: "PT" },
+              height: { magnitude: height, unit: "PT" }
+            },
+            transform: {
+              scaleX: 1,
+              scaleY: 1,
+              translateX: left,
+              translateY: top,
+              unit: "PT"
+            }
+          }
+        }
+      };
+    }
+    static createLine(pageId, objectId, x1, y1, x2, y2) {
+      const width = Math.abs(x2 - x1) || 1;
+      const height = Math.abs(y2 - y1) || 1;
+      const left = Math.min(x1, x2);
+      const top = Math.min(y1, y2);
+      return {
+        createLine: {
+          objectId,
+          lineCategory: "STRAIGHT",
+          elementProperties: {
+            pageObjectId: pageId,
+            size: {
+              width: { magnitude: width, unit: "PT" },
+              height: { magnitude: height, unit: "PT" }
+            },
+            transform: {
+              scaleX: 1,
+              scaleY: 1,
+              translateX: left,
+              translateY: top,
+              unit: "PT"
+            }
+          }
+        }
+      };
+    }
+    static updateShapeProperties(objectId, fillHex, borderHex, borderWeightPt, contentAlignment) {
+      const fields = [];
+      const shapeProperties = {};
+      if (fillHex !== void 0 && fillHex !== null) {
+        if (fillHex === "TRANSPARENT") {
+          shapeProperties.shapeBackgroundFill = { propertyState: "NOT_RENDERED" };
+        } else {
+          const rgb = RequestFactory.toRgbColor(fillHex);
+          if (rgb) {
+            shapeProperties.shapeBackgroundFill = {
+              solidFill: { color: { rgbColor: rgb } }
+            };
+          }
+        }
+        fields.push("shapeBackgroundFill");
+      }
+      if (borderHex !== void 0 || borderWeightPt !== void 0) {
+        const outline = {};
+        if (borderHex === "TRANSPARENT") {
+          outline.propertyState = "NOT_RENDERED";
+        } else {
+          const rgb = RequestFactory.toRgbColor(borderHex);
+          if (rgb) {
+            outline.outlineFill = { solidFill: { color: { rgbColor: rgb } } };
+          }
+        }
+        if (borderWeightPt !== void 0) {
+          outline.weight = { magnitude: borderWeightPt, unit: "PT" };
+        }
+        shapeProperties.outline = outline;
+        fields.push("outline");
+      }
+      if (contentAlignment) {
+        shapeProperties.contentAlignment = contentAlignment;
+        fields.push("contentAlignment");
+      }
+      return {
+        updateShapeProperties: {
+          objectId,
+          shapeProperties,
+          fields: fields.join(",")
+        }
+      };
+    }
+    static updateParagraphStyle(objectId, alignment, rowIndex, colIndex) {
+      const req = {
+        updateParagraphStyle: {
+          objectId,
+          style: {
+            alignment
+          },
+          fields: "alignment"
+        }
+      };
+      if (rowIndex !== void 0 && colIndex !== void 0) {
+        req.updateParagraphStyle.cellLocation = {
+          rowIndex,
+          columnIndex: colIndex
+        };
+      }
+      return req;
+    }
+    static createTable(pageId, objectId, rows, cols, left, top, width, height) {
+      return {
+        createTable: {
+          objectId,
+          rows,
+          columns: cols,
+          elementProperties: {
+            pageObjectId: pageId,
+            size: {
+              width: { magnitude: width, unit: "PT" },
+              height: { magnitude: height, unit: "PT" }
+            },
+            transform: {
+              scaleX: 1,
+              scaleY: 1,
+              translateX: left,
+              translateY: top,
+              unit: "PT"
+            }
+          }
+        }
+      };
+    }
+    static insertText(objectId, text, rowIndex, colIndex) {
+      const req = {
+        insertText: {
+          objectId,
+          text
+        }
+      };
+      if (rowIndex !== void 0 && colIndex !== void 0) {
+        req.insertText.cellLocation = {
+          rowIndex,
+          columnIndex: colIndex
+        };
+      }
+      return req;
+    }
+    static createImage(pageId, objectId, url, left, top, width, height) {
+      return {
+        createImage: {
+          objectId,
+          url,
+          elementProperties: {
+            pageObjectId: pageId,
+            size: {
+              width: { magnitude: width, unit: "PT" },
+              height: { magnitude: height, unit: "PT" }
+            },
+            transform: {
+              scaleX: 1,
+              scaleY: 1,
+              translateX: left,
+              translateY: top,
+              unit: "PT"
+            }
+          }
+        }
+      };
+    }
+    static toRgbColor(hex) {
+      if (!hex || typeof hex !== "string" || !hex.startsWith("#") || hex.length < 7) {
+        return void 0;
+      }
+      const r = parseInt(hex.substring(1, 3), 16) / 255;
+      const g = parseInt(hex.substring(3, 5), 16) / 255;
+      const b = parseInt(hex.substring(5, 7), 16) / 255;
+      return { red: r, green: g, blue: b };
+    }
+    static groupObjects(pageId, groupObjectId, childrenObjectIds) {
+      return {
+        groupObjects: {
+          groupObjectId,
+          childrenObjectIds
+        }
+      };
+    }
+  }
   class GasTitleSlideGenerator {
     constructor(creditImageBlob) {
       this.creditImageBlob = creditImageBlob;
     }
-    generate(slide, data, layout, pageNum, settings, imageUpdateOption = "update") {
-      const titlePlaceholder = slide.getPlaceholder(SlidesApp.PlaceholderType.TITLE) || slide.getPlaceholder(SlidesApp.PlaceholderType.CENTERED_TITLE);
-      if (titlePlaceholder) {
-        if (data.title) {
-          try {
-            const textRange = titlePlaceholder.asShape().getText();
-            textRange.setText(data.title);
-            textRange.getTextStyle().setBold(true);
-          } catch (e) {
-            Logger.log(`Warning: Title placeholder found but text could not be set. ${e}`);
-          }
-        } else {
-          titlePlaceholder.remove();
-        }
-      } else {
-        Logger.log("Title Slide: WARNING - No Title Placeholder found on this layout.");
+    // API Version
+    generate(slideId, data, layout, pageNum, settings) {
+      const requests = [];
+      const theme = layout.getTheme();
+      if (data.title) {
+        const titleId = slideId + "_TITLE";
+        const titleRect = layout.getRect("titleSlide.title") || { left: 50, top: 200, width: 860, height: 100 };
+        requests.push(RequestFactory.createShape(
+          slideId,
+          titleId,
+          "TEXT_BOX",
+          titleRect.left,
+          titleRect.top,
+          titleRect.width,
+          titleRect.height
+        ));
+        requests.push({ insertText: { objectId: titleId, text: data.title } });
+        requests.push(RequestFactory.updateTextStyle(titleId, {
+          fontSize: 48,
+          bold: true,
+          color: settings.primaryColor || "#000000",
+          fontFamily: theme.fonts.family
+          // Use theme font if available
+        }));
+        requests.push({ updateParagraphStyle: { objectId: titleId, style: { alignment: "CENTER" }, fields: "alignment" } });
+        requests.push({ updateShapeProperties: { objectId: titleId, shapeProperties: { contentAlignment: "BOTTOM" }, fields: "contentAlignment" } });
       }
-      const subtitlePlaceholder = slide.getPlaceholder(SlidesApp.PlaceholderType.SUBTITLE);
-      if (subtitlePlaceholder) {
-        if (data.date) {
-          try {
-            subtitlePlaceholder.asShape().getText().setText(data.date);
-          } catch (e) {
-          }
-        } else {
-          try {
-            subtitlePlaceholder.asShape().getText().setText("");
-          } catch (e) {
-          }
-        }
-      } else {
-        const bodyPlaceholder = slide.getPlaceholder(SlidesApp.PlaceholderType.BODY);
-        if (bodyPlaceholder && data.date) {
-          try {
-            bodyPlaceholder.asShape().getText().setText(data.date);
-          } catch (e) {
-          }
-        }
+      const text = data.subtitle || data.date;
+      if (text) {
+        const subId = slideId + "_SUBTITLE";
+        const subRect = layout.getRect("titleSlide.subtitle") || { left: 50, top: 320, width: 860, height: 50 };
+        requests.push(RequestFactory.createShape(
+          slideId,
+          subId,
+          "TEXT_BOX",
+          subRect.left,
+          subRect.top,
+          subRect.width,
+          subRect.height
+        ));
+        requests.push({ insertText: { objectId: subId, text } });
+        requests.push(RequestFactory.updateTextStyle(subId, {
+          fontSize: 24,
+          color: theme.colors.neutralGray || "#666666",
+          fontFamily: theme.fonts.family
+        }));
+        requests.push({ updateParagraphStyle: { objectId: subId, style: { alignment: "CENTER" }, fields: "alignment" } });
+        requests.push({ updateShapeProperties: { objectId: subId, shapeProperties: { contentAlignment: "TOP" }, fields: "contentAlignment" } });
       }
+      return requests;
     }
-  }
-  function hexToRgb(hex) {
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? {
-      r: parseInt(result[1], 16),
-      g: parseInt(result[2], 16),
-      b: parseInt(result[3], 16)
-    } : null;
-  }
-  function rgbToHsl(r, g, b) {
-    r /= 255;
-    g /= 255;
-    b /= 255;
-    const max = Math.max(r, g, b), min = Math.min(r, g, b);
-    let h = 0, s, l = (max + min) / 2;
-    if (max === min) {
-      h = s = 0;
-    } else {
-      const d = max - min;
-      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-      switch (max) {
-        case r:
-          h = (g - b) / d + (g < b ? 6 : 0);
-          break;
-        case g:
-          h = (b - r) / d + 2;
-          break;
-        case b:
-          h = (r - g) / d + 4;
-          break;
-      }
-      h /= 6;
-    }
-    return {
-      h: h * 360,
-      s: s * 100,
-      l: l * 100
-    };
-  }
-  function hslToHex(h, s, l) {
-    s /= 100;
-    l /= 100;
-    const c = (1 - Math.abs(2 * l - 1)) * s, x = c * (1 - Math.abs(h / 60 % 2 - 1)), m = l - c / 2;
-    let r = 0, g = 0, b = 0;
-    if (0 <= h && h < 60) {
-      r = c;
-      g = x;
-      b = 0;
-    } else if (60 <= h && h < 120) {
-      r = x;
-      g = c;
-      b = 0;
-    } else if (120 <= h && h < 180) {
-      r = 0;
-      g = c;
-      b = x;
-    } else if (180 <= h && h < 240) {
-      r = 0;
-      g = x;
-      b = c;
-    } else if (240 <= h && h < 300) {
-      r = x;
-      g = 0;
-      b = c;
-    } else if (300 <= h && h < 360) {
-      r = c;
-      g = 0;
-      b = x;
-    }
-    r = Math.round((r + m) * 255);
-    g = Math.round((g + m) * 255);
-    b = Math.round((b + m) * 255);
-    return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
-  }
-  function generateTintedGray(tintColorHex, saturation, lightness) {
-    const rgb = hexToRgb(tintColorHex);
-    if (!rgb) return "#F8F9FA";
-    const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
-    return hslToHex(hsl.h, saturation, lightness);
-  }
-  function lightenColor(color, amount) {
-    const rgb = hexToRgb(color);
-    if (!rgb) return color;
-    const lighten = (c) => Math.min(255, Math.round(c + (255 - c) * amount));
-    const newR = lighten(rgb.r);
-    const newG = lighten(rgb.g);
-    const newB = lighten(rgb.b);
-    return `#${newR.toString(16).padStart(2, "0")}${newG.toString(16).padStart(2, "0")}${newB.toString(16).padStart(2, "0")}`;
-  }
-  function darkenColor(color, amount) {
-    const rgb = hexToRgb(color);
-    if (!rgb) return color;
-    const darken = (c) => Math.max(0, Math.round(c * (1 - amount)));
-    const newR = darken(rgb.r);
-    const newG = darken(rgb.g);
-    const newB = darken(rgb.b);
-    return `#${newR.toString(16).padStart(2, "0")}${newG.toString(16).padStart(2, "0")}${newB.toString(16).padStart(2, "0")}`;
-  }
-  function generatePyramidColors(baseColor, levels) {
-    const colors = [];
-    for (let i = 0; i < levels; i++) {
-      const lightenAmount = i / Math.max(1, levels - 1) * 0.6;
-      colors.push(lightenColor(baseColor, lightenAmount));
-    }
-    return colors;
-  }
-  function generateStepUpColors(baseColor, steps) {
-    const colors = [];
-    for (let i = 0; i < steps; i++) {
-      const lightenAmount = 0.6 * (1 - i / Math.max(1, steps - 1));
-      colors.push(lightenColor(baseColor, lightenAmount));
-    }
-    return colors;
-  }
-  function generateProcessColors(baseColor, steps) {
-    const colors = [];
-    for (let i = 0; i < steps; i++) {
-      const lightenAmount = 0.5 * (1 - i / Math.max(1, steps - 1));
-      colors.push(lightenColor(baseColor, lightenAmount));
-    }
-    return colors;
-  }
-  function generateTimelineCardColors(baseColor, milestones) {
-    const colors = [];
-    for (let i = 0; i < milestones; i++) {
-      const lightenAmount = 0.4 * (1 - i / Math.max(1, milestones - 1));
-      colors.push(lightenColor(baseColor, lightenAmount));
-    }
-    return colors;
-  }
-  function generateCompareColors(baseColor) {
-    return {
-      left: darkenColor(baseColor, 0.3),
-      right: baseColor
-    };
-  }
-  const ColorUtils = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
-    __proto__: null,
-    darkenColor,
-    generateCompareColors,
-    generateProcessColors,
-    generatePyramidColors,
-    generateStepUpColors,
-    generateTimelineCardColors,
-    generateTintedGray,
-    hexToRgb,
-    hslToHex,
-    lightenColor,
-    rgbToHsl
-  }, Symbol.toStringTag, { value: "Module" }));
-  function getThemeFromLayout(layout) {
-    if (layout && typeof layout.getTheme === "function") {
-      return layout.getTheme();
-    }
-    return DEFAULT_THEME;
-  }
-  function applyTextStyle(textRange, opt, theme = DEFAULT_THEME) {
-    const style = textRange.getTextStyle();
-    let defaultColor;
-    if (opt.fontType === "large") {
-      defaultColor = theme.colors.textPrimary;
-    } else {
-      defaultColor = theme.colors.textSmallFont;
-    }
-    style.setFontFamily(theme.fonts.family).setForegroundColor(opt.color || defaultColor).setFontSize(opt.size || theme.fonts.sizes.body).setBold(opt.bold || false);
-    if (opt.align) {
-      try {
-        textRange.getParagraphs().forEach((p) => {
-          p.getRange().getParagraphStyle().setParagraphAlignment(opt.align);
-        });
-      } catch (e) {
-      }
-    }
-  }
-  function setStyledText(shapeOrCell, rawText, baseOpt) {
-    const parsed = parseInlineStyles(rawText || "");
-    const tr = shapeOrCell.getText();
-    tr.setText(parsed.output);
-    applyTextStyle(tr, baseOpt || {});
-    applyStyleRanges(tr, parsed.ranges);
-  }
-  function setBulletsWithInlineStyles(shape, points, theme = DEFAULT_THEME) {
-    const joiner = "\n\n";
-    let combined = "";
-    const ranges = [];
-    (points || []).forEach((pt, idx) => {
-      const parsed = parseInlineStyles(String(pt || ""));
-      const bullet = parsed.output;
-      if (idx > 0) combined += joiner;
-      const start = combined.length;
-      combined += bullet;
-      parsed.ranges.forEach((r) => ranges.push({
-        start: start + r.start,
-        end: start + r.end,
-        bold: r.bold,
-        color: r.color
-      }));
-    });
-    const tr = shape.getText();
-    tr.setText(combined || "—");
-    applyTextStyle(tr, {
-      size: theme.fonts.sizes.body
-    }, theme);
-    try {
-      tr.getParagraphs().forEach((p) => {
-        p.getRange().getParagraphStyle().setLineSpacing(130).setSpaceBelow(12);
-      });
-    } catch (e) {
-    }
-    applyStyleRanges(tr, ranges);
-  }
-  function checkSpacing(s, out, i, nextCharIndex) {
-    let prefix = "";
-    let suffix = "";
-    if (out.length > 0 && !/\s$/.test(out)) {
-      prefix = " ";
-    }
-    if (nextCharIndex < s.length && !/^\s/.test(s[nextCharIndex])) {
-      suffix = " ";
-    }
-    return { prefix, suffix };
-  }
-  function parseInlineStyles(s) {
-    const ranges = [];
-    let out = "";
-    let i = 0;
-    while (i < s.length) {
-      if (s[i] === "*" && s[i + 1] === "*" && s[i + 2] === "[" && s[i + 3] === "[") {
-        const contentStart = i + 4;
-        const close = s.indexOf("]]**", contentStart);
-        if (close !== -1) {
-          let content = s.substring(contentStart, close);
-          const nextCharIndex = close + 4;
-          const { prefix, suffix } = checkSpacing(s, out, i, nextCharIndex);
-          out += prefix;
-          const start = out.length;
-          content += suffix;
-          out += content;
-          const end = out.length - suffix.length;
-          const rangeObj = {
-            start,
-            end,
-            bold: true,
-            color: DEFAULT_THEME.colors.primary
-          };
-          ranges.push(rangeObj);
-          i = nextCharIndex;
-          continue;
-        }
-      }
-      if (s[i] === "[" && s[i + 1] === "[") {
-        const close = s.indexOf("]]", i + 2);
-        if (close !== -1) {
-          let content = s.substring(i + 2, close);
-          const nextCharIndex = close + 2;
-          const { prefix, suffix } = checkSpacing(s, out, i, nextCharIndex);
-          out += prefix;
-          const start = out.length;
-          content += suffix;
-          out += content;
-          const end = out.length - suffix.length;
-          const rangeObj = {
-            start,
-            end,
-            bold: true,
-            color: DEFAULT_THEME.colors.primary
-          };
-          ranges.push(rangeObj);
-          i = nextCharIndex;
-          continue;
-        }
-      }
-      if (s[i] === "*" && s[i + 1] === "*") {
-        const close = s.indexOf("**", i + 2);
-        if (close !== -1) {
-          let content = s.substring(i + 2, close);
-          if (content.indexOf("[[") === -1) {
-            const nextCharIndex = close + 2;
-            const { prefix, suffix } = checkSpacing(s, out, i, nextCharIndex);
-            out += prefix;
-            const start = out.length;
-            content += suffix;
-            out += content;
-            const end = out.length - suffix.length;
-            ranges.push({
-              start,
-              end,
-              bold: true
-            });
-            i = nextCharIndex;
-            continue;
-          } else {
-            i += 2;
-            continue;
-          }
-        }
-      }
-      out += s[i];
-      i++;
-    }
-    return {
-      output: out,
-      ranges
-    };
-  }
-  function applyStyleRanges(textRange, ranges) {
-    ranges.forEach((r) => {
-      try {
-        const sub = textRange.getRange(r.start, r.end);
-        if (sub.isEmpty()) return;
-        const st = sub.getTextStyle();
-        if (r.bold) st.setBold(true);
-        if (r.color) st.setForegroundColor(r.color);
-        if (r.size) st.setFontSize(r.size);
-      } catch (e) {
-      }
-    });
-  }
-  function insertImageFromUrlOrFileId(urlOrFileId) {
-    if (!urlOrFileId || typeof urlOrFileId !== "string") return null;
-    function extractFileIdFromUrl(url) {
-      if (!url || typeof url !== "string") return null;
-      const patterns = [
-        /\/file\/d\/([a-zA-Z0-9_-]+)/,
-        /id=([a-zA-Z0-9_-]+).*file/,
-        /file\/([a-zA-Z0-9_-]+)/
-      ];
-      for (const pattern of patterns) {
-        const match = url.match(pattern);
-        if (match && match[1]) return match[1];
-      }
-      return null;
-    }
-    const fileIdPattern = /^[a-zA-Z0-9_-]{25,}$/;
-    const extractedFileId = extractFileIdFromUrl(urlOrFileId);
-    if (extractedFileId && fileIdPattern.test(extractedFileId)) {
-      try {
-        const file = DriveApp.getFileById(extractedFileId);
-        return file.getBlob();
-      } catch (e) {
-        return null;
-      }
-    } else if (fileIdPattern.test(urlOrFileId)) {
-      try {
-        const file = DriveApp.getFileById(urlOrFileId);
-        return file.getBlob();
-      } catch (e) {
-        return null;
-      }
-    } else if (urlOrFileId.startsWith("data:image/")) {
-      try {
-        const parts = urlOrFileId.split(",");
-        if (parts.length !== 2) throw new Error("Invalid Base64 format.");
-        const mimeMatch = parts[0].match(/:(.*?);/);
-        if (!mimeMatch) return null;
-        const mimeType = mimeMatch[1];
-        const base64Data = parts[1];
-        const decodedData = Utilities.base64Decode(base64Data);
-        return Utilities.newBlob(decodedData, mimeType);
-      } catch (e) {
-        return null;
-      }
-    } else {
-      try {
-        if (urlOrFileId.startsWith("http")) {
-          const response = UrlFetchApp.fetch(urlOrFileId);
-          return response.getBlob();
-        }
-      } catch (e) {
-      }
-      return null;
-    }
-  }
-  function normalizeImages(arr) {
-    return (arr || []).map((v) => typeof v === "string" ? {
-      url: v
-    } : v && v.url ? v : null).filter(Boolean).slice(0, 6);
-  }
-  function renderImagesInArea(slide, layout, area, images, imageUpdateOption = "update") {
-    if (!images || !images.length) return;
-    if (imageUpdateOption !== "update") {
-      return;
-    }
-    const n = Math.min(6, images.length);
-    let cols = n === 1 ? 1 : n <= 4 ? 2 : 3;
-    const rows = Math.ceil(n / cols);
-    const gap = layout.pxToPt(10);
-    const cellW = (area.width - gap * (cols - 1)) / cols, cellH = (area.height - gap * (rows - 1)) / rows;
-    for (let i = 0; i < n; i++) {
-      const r = Math.floor(i / cols), c = i % cols;
-      try {
-        const img = slide.insertImage(images[i].url);
-        const scale = Math.min(cellW / img.getWidth(), cellH / img.getHeight());
-        const w = img.getWidth() * scale, h = img.getHeight() * scale;
-        img.setWidth(w).setHeight(h).setLeft(area.left + c * (cellW + gap) + (cellW - w) / 2).setTop(area.top + r * (cellH + gap) + (cellH - h) / 2);
-      } catch (e) {
-      }
-    }
-  }
-  function drawArrowBetweenRects(slide, a, b, arrowH, arrowGap, settings) {
-    const fromX = a.left + a.width;
-    const fromY = a.top + a.height / 2;
-    const toX = b.left;
-    const toY = b.top + b.height / 2;
-    if (toX - fromX <= 0) return;
-    const line = slide.insertLine(SlidesApp.LineCategory.STRAIGHT, fromX, fromY, toX, toY);
-    line.getLineFill().setSolidFill(settings.primaryColor);
-    line.setWeight(1.5);
-    line.setEndArrow(SlidesApp.ArrowStyle.FILL_ARROW);
-  }
-  function addFooter(slide, layout, pageNum, settings, creditImageBlob) {
-    const theme = getThemeFromLayout(layout);
-    if (theme.footerText && theme.footerText.trim() !== "") {
-      const leftRect = layout.getRect("footer.leftText");
-      const leftShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, leftRect.left, leftRect.top, leftRect.width, leftRect.height);
-      const tr = leftShape.getText();
-      tr.setText(theme.footerText);
-      applyTextStyle(tr, {
-        size: theme.fonts.sizes.footer,
-        fontType: "large"
-      });
-      try {
-        leftShape.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
-      } catch (e) {
-      }
-    }
-    if (pageNum > 0 && settings && settings.showPageNumber) {
-      const rightRect = layout.getRect("footer.rightPage");
-      const rightShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, rightRect.left, rightRect.top, rightRect.width, rightRect.height);
-      const tr = rightShape.getText();
-      tr.setText(String(pageNum));
-      applyTextStyle(tr, {
-        size: theme.fonts.sizes.footer,
-        color: theme.colors.primary,
-        align: SlidesApp.ParagraphAlignment.END
-      });
-      try {
-        rightShape.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
-      } catch (e) {
-      }
-    }
-  }
-  function safeGetRect(layout, path) {
-    try {
-      const rect = layout.getRect(path);
-      if (rect && (typeof rect.left === "number" || rect.left === void 0) && typeof rect.top === "number" && typeof rect.width === "number" && typeof rect.height === "number") {
-        if (rect.left === void 0) {
-          return null;
-        }
-        return rect;
-      }
-      return null;
-    } catch (e) {
-      return null;
-    }
-  }
-  function drawSubheadIfAny(slide, layout, key, subhead, preCalculatedWidthPt = null) {
-    if (!subhead) return 0;
-    const theme = getThemeFromLayout(layout);
-    const rect = safeGetRect(layout, `${key}.subhead`);
-    if (!rect) {
-      return 0;
-    }
-    const box = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, rect.left, rect.top, rect.width, rect.height);
-    setStyledText(box, subhead, {
-      size: theme.fonts.sizes.subhead,
-      fontType: "large"
-    });
-    return layout.pxToPt(36);
-  }
-  function createContentCushion(slide, area, settings, layout) {
-    const theme = getThemeFromLayout(layout);
-    const cushion = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, area.left, area.top, area.width, area.height);
-    cushion.getFill().setSolidFill(theme.colors.cardBg);
-    try {
-      const border = cushion.getBorder();
-      border.setTransparent();
-    } catch (e) {
-    }
-  }
-  function offsetRect(rect, dx, dy) {
-    return {
-      left: rect.left + dx,
-      top: rect.top + dy,
-      width: rect.width,
-      height: rect.height
-    };
-  }
-  function adjustAreaForSubhead(area, subhead, layout) {
-    return area;
   }
   class GasSectionSlideGenerator {
     constructor(creditImageBlob) {
       this.creditImageBlob = creditImageBlob;
       this.sectionCounter = 0;
     }
-    generate(slide, data, layout, pageNum, settings, imageUpdateOption = "update") {
+    // API Version
+    generate(slideId, data, layout, pageNum, settings) {
+      const requests = [];
       const theme = layout.getTheme();
       this.sectionCounter++;
       const parsedNum = (() => {
-        if (Number.isFinite(data.sectionNo)) {
-          return Number(data.sectionNo);
-        }
+        if (Number.isFinite(data.sectionNo)) return Number(data.sectionNo);
         const m = String(data.title || "").match(/^\s*(\d+)[\.．]/);
         return m ? Number(m[1]) : this.sectionCounter;
       })();
       const num = String(parsedNum).padStart(2, "0");
-      const ghostRect = layout.getRect("sectionSlide.ghostNum");
-      let ghostImageInserted = false;
-      if (imageUpdateOption === "update") {
-        if (data.ghostImageBase64 && ghostRect) {
-          try {
-            const imageData = insertImageFromUrlOrFileId(data.ghostImageBase64);
-            if (imageData && typeof imageData !== "string") {
-              const ghostImage = slide.insertImage(imageData);
-              const imgWidth = ghostImage.getWidth();
-              const imgHeight = ghostImage.getHeight();
-              const scale = Math.min(ghostRect.width / imgWidth, ghostRect.height / imgHeight);
-              const w = imgWidth * scale;
-              const h = imgHeight * scale;
-              ghostImage.setWidth(w).setHeight(h).setLeft(ghostRect.left + (ghostRect.width - w) / 2).setTop(ghostRect.top + (ghostRect.height - h) / 2);
-              ghostImageInserted = true;
-            }
-          } catch (e) {
-          }
-        }
-      }
-      if (!ghostImageInserted && ghostRect && imageUpdateOption === "update") {
-        const ghost = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, ghostRect.left, ghostRect.top, ghostRect.width, ghostRect.height);
-        ghost.getText().setText(num);
-        const ghostTextStyle = ghost.getText().getTextStyle();
-        ghostTextStyle.setFontFamily(theme.fonts.family).setFontSize(theme.fonts.sizes.ghostNum).setBold(true);
-        try {
-          ghostTextStyle.setForegroundColor(theme.colors.ghostGray);
-        } catch (e) {
-          ghostTextStyle.setForegroundColor(theme.colors.ghostGray);
-        }
-        try {
-          ghost.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
-        } catch (e) {
-        }
-        ghost.sendToBack();
-      }
-      const titlePlaceholder = slide.getPlaceholder(SlidesApp.PlaceholderType.TITLE) || slide.getPlaceholder(SlidesApp.PlaceholderType.CENTERED_TITLE);
-      if (titlePlaceholder) {
-        try {
-          const textRange = titlePlaceholder.asShape().getText();
-          textRange.setText(data.title || "");
-          textRange.getTextStyle().setBold(true);
-        } catch (e) {
-          Logger.log(`Warning: Section Title placeholder found but text could not be set. ${e}`);
-        }
-      } else {
-        const titleRect = layout.getRect("sectionSlide.title");
-        const titleShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, titleRect.left, titleRect.top, titleRect.width, titleRect.height);
-        titleShape.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
-        setStyledText(titleShape, data.title, {
-          size: theme.fonts.sizes.sectionTitle,
+      const ghostRect = layout.getRect("sectionSlide.ghostNum") || { left: 680, top: 320, width: 280, height: 200 };
+      const ghostId = slideId + "_GHOST";
+      requests.push(RequestFactory.createShape(
+        slideId,
+        ghostId,
+        "TEXT_BOX",
+        ghostRect.left,
+        ghostRect.top,
+        ghostRect.width,
+        ghostRect.height
+      ));
+      requests.push({ insertText: { objectId: ghostId, text: num } });
+      requests.push(RequestFactory.updateTextStyle(ghostId, {
+        bold: true,
+        fontSize: theme.fonts.sizes.ghostNum || 250,
+        color: theme.colors.ghostGray,
+        fontFamily: theme.fonts.family
+      }));
+      requests.push({ updateParagraphStyle: { objectId: ghostId, style: { alignment: "CENTER" }, fields: "alignment" } });
+      const titleId = slideId + "_TITLE";
+      if (data.title) {
+        const titleRect = layout.getRect("sectionSlide.title") || { left: 40, top: 200, width: 700, height: 100 };
+        requests.push(RequestFactory.createShape(
+          slideId,
+          titleId,
+          "TEXT_BOX",
+          titleRect.left,
+          titleRect.top,
+          titleRect.width,
+          titleRect.height
+        ));
+        requests.push({ insertText: { objectId: titleId, text: data.title } });
+        requests.push(RequestFactory.updateTextStyle(titleId, {
           bold: true,
-          align: SlidesApp.ParagraphAlignment.CENTER,
-          fontType: "large"
-        });
+          fontSize: theme.fonts.sizes.sectionTitle || 52,
+          color: theme.colors.primary,
+          fontFamily: theme.fonts.family
+        }));
+        requests.push({ updateParagraphStyle: { objectId: titleId, style: { alignment: "START" }, fields: "alignment" } });
+        requests.push({ updateShapeProperties: { objectId: titleId, shapeProperties: { contentAlignment: "BOTTOM" }, fields: "contentAlignment" } });
       }
-      addFooter(slide, layout, pageNum, settings, this.creditImageBlob);
+      return requests;
     }
   }
   class GasContentSlideGenerator {
     constructor(creditImageBlob) {
       this.creditImageBlob = creditImageBlob;
     }
-    generate(slide, data, layout, pageNum, settings, imageUpdateOption = "update") {
-      const titlePlaceholder = slide.getPlaceholder(SlidesApp.PlaceholderType.TITLE) || slide.getPlaceholder(SlidesApp.PlaceholderType.CENTERED_TITLE);
-      if (titlePlaceholder) {
-        if (data.title) {
-          try {
-            const textRange = titlePlaceholder.asShape().getText();
-            textRange.setText(data.title);
-            textRange.getTextStyle().setBold(true);
-          } catch (e) {
-            Logger.log(`Warning: Content Title placeholder found but text could not be set. ${e}`);
-          }
-        } else {
-          titlePlaceholder.remove();
-        }
+    generate(slideId, data, layout, pageNum, settings) {
+      const requests = [];
+      const theme = layout.getTheme();
+      if (data.title) {
+        const titleId = slideId + "_TITLE";
+        const titleRect = layout.getRect("contentSlide.title") || { left: 30, top: 20, width: 900, height: 60 };
+        requests.push(RequestFactory.createShape(slideId, titleId, "TEXT_BOX", titleRect.left, titleRect.top, titleRect.width, titleRect.height));
+        requests.push({ insertText: { objectId: titleId, text: data.title } });
+        requests.push(RequestFactory.updateTextStyle(titleId, {
+          fontSize: 32,
+          bold: true,
+          color: settings.primaryColor,
+          fontFamily: theme.fonts.family
+        }));
+        requests.push({ updateParagraphStyle: { objectId: titleId, style: { alignment: "START" }, fields: "alignment" } });
+        requests.push({ updateShapeProperties: { objectId: titleId, shapeProperties: { contentAlignment: "BOTTOM" }, fields: "contentAlignment" } });
       }
-      const subheadWidthPt = data && typeof data._subhead_widthPt === "number" ? data._subhead_widthPt : null;
-      const dy = drawSubheadIfAny(slide, layout, "contentSlide", data.subhead, subheadWidthPt);
-      let points = Array.isArray(data.points) ? data.points.slice(0) : [];
-      const isAgenda = /(agenda|アジェンダ|目次|本日お伝えすること)/i.test(String(data.title || ""));
-      if (isAgenda) {
-        slide.getBackground().setSolidFill("#FFFFFF");
-        if (points.length === 0) {
-          points = ["本日の目的", "進め方", "次のアクション"];
-        }
+      if (data.subhead) {
+        const subId = slideId + "_SUBHEAD";
+        const subRect = layout.getRect("contentSlide.subhead") || { left: 30, top: 90, width: 900, height: 30 };
+        requests.push(RequestFactory.createShape(slideId, subId, "TEXT_BOX", subRect.left, subRect.top, subRect.width, subRect.height));
+        requests.push({ insertText: { objectId: subId, text: data.subhead } });
+        requests.push(RequestFactory.updateTextStyle(subId, {
+          fontSize: 18,
+          bold: true,
+          color: theme.colors.neutralGray,
+          fontFamily: theme.fonts.family
+        }));
+        subRect.height;
       }
-      const hasImages = Array.isArray(data.images) && data.images.length > 0;
-      const isTwo = !!(data.twoColumn || data.columns);
-      const bodies = slide.getPlaceholders().filter((p) => {
-        if (typeof p.getPlaceholderType === "function") {
-          return p.getPlaceholderType() === SlidesApp.PlaceholderType.BODY;
-        }
-        try {
-          const s = p.asShape();
-          if (typeof s.getPlaceholderType === "function") {
-            return s.getPlaceholderType() === SlidesApp.PlaceholderType.BODY;
-          }
-        } catch (e) {
-        }
-        return false;
-      });
-      if (dy > 0) {
-        bodies.forEach((p) => {
-          try {
-            const s = p.asShape();
-            s.setTop(s.getTop() + dy);
-            s.setHeight(s.getHeight() - dy);
-          } catch (e) {
-            Logger.log("Could not adjust body placeholder: " + e);
-          }
-        });
-      }
-      if (isTwo && bodies.length >= 2) {
-        let L = [], R = [];
-        if (Array.isArray(data.columns) && data.columns.length === 2) {
-          L = data.columns[0] || [];
-          R = data.columns[1] || [];
-        } else {
-          const mid = Math.ceil(points.length / 2);
-          L = points.slice(0, mid);
-          R = points.slice(mid);
-        }
-        const sortedBodies = bodies.map((p) => p.asShape()).sort((a, b) => a.getLeft() - b.getLeft());
-        setBulletsWithInlineStyles(sortedBodies[0], L);
-        setBulletsWithInlineStyles(sortedBodies[1], R);
-      } else if (isTwo) {
-        if (Array.isArray(data.columns) && data.columns.length === 2) ;
-        let L = [], R = [];
-        if (Array.isArray(data.columns) && data.columns.length === 2) {
-          L = data.columns[0] || [];
-          R = data.columns[1] || [];
-        } else {
-          const mid = Math.ceil(points.length / 2);
-          L = points.slice(0, mid);
-          R = points.slice(mid);
-        }
-        const baseLeftRect = layout.getRect("contentSlide.twoColLeft");
-        const baseRightRect = layout.getRect("contentSlide.twoColRight");
-        const adjustedLeftRect = adjustAreaForSubhead(baseLeftRect, data.subhead);
-        const adjustedRightRect = adjustAreaForSubhead(baseRightRect, data.subhead);
-        const leftRect = offsetRect(adjustedLeftRect, 0, dy);
-        const rightRect = offsetRect(adjustedRightRect, 0, dy);
-        const padding = layout.pxToPt(20);
-        const leftTextRect = { left: leftRect.left + padding, top: leftRect.top + padding, width: leftRect.width - padding * 2, height: leftRect.height - padding * 2 };
-        const rightTextRect = { left: rightRect.left + padding, top: rightRect.top + padding, width: rightRect.width - padding * 2, height: rightRect.height - padding * 2 };
-        const leftShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, leftTextRect.left, leftTextRect.top, leftTextRect.width, leftTextRect.height);
-        const rightShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, rightTextRect.left, rightTextRect.top, rightTextRect.width, rightTextRect.height);
-        setBulletsWithInlineStyles(leftShape, L);
-        setBulletsWithInlineStyles(rightShape, R);
+      const points = Array.isArray(data.points) ? data.points : [];
+      const columns = data.columns || [];
+      const isTwoColumn = columns.length === 2 || data.twoColumn;
+      const bodyRect = layout.getRect("contentSlide.body") || { left: 30, top: 130, width: 900, height: 380 };
+      const topY = bodyRect.top + (data.subhead ? 10 : 0);
+      if (isTwoColumn) {
+        const gap = 30;
+        const colW = (bodyRect.width - gap) / 2;
+        const leftPoints = columns[0] || points.slice(0, Math.ceil(points.length / 2));
+        const rightPoints = columns[1] || points.slice(Math.ceil(points.length / 2));
+        requests.push(...this.createBulletRequests(slideId, slideId + "_BODY_0", leftPoints, bodyRect.left, topY, colW, bodyRect.height, theme));
+        requests.push(...this.createBulletRequests(slideId, slideId + "_BODY_1", rightPoints, bodyRect.left + colW + gap, topY, colW, bodyRect.height, theme));
       } else {
-        if (bodies.length > 0) {
-          const bodyShape = bodies[0].asShape();
-          setBulletsWithInlineStyles(bodyShape, points);
-        } else {
-          const baseBodyRect = layout.getRect("contentSlide.body");
-          const adjustedBodyRect = adjustAreaForSubhead(baseBodyRect, data.subhead);
-          const bodyRect = offsetRect(adjustedBodyRect, 0, dy);
-          const padding = layout.pxToPt(20);
-          const textRect = { left: bodyRect.left + padding, top: bodyRect.top + padding, width: bodyRect.width - padding * 2, height: bodyRect.height - padding * 2 };
-          const bodyShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, textRect.left, textRect.top, textRect.width, textRect.height);
-          setBulletsWithInlineStyles(bodyShape, points);
+        requests.push(...this.createBulletRequests(slideId, slideId + "_BODY", points, bodyRect.left, topY, bodyRect.width, bodyRect.height, theme));
+      }
+      return requests;
+    }
+    createBulletRequests(slideId, objectId, points, x, y, w, h, theme) {
+      const reqs = [];
+      if (!points || points.length === 0) return reqs;
+      reqs.push(RequestFactory.createShape(slideId, objectId, "TEXT_BOX", x, y, w, h));
+      const fullText = points.join("\n");
+      reqs.push({ insertText: { objectId, text: fullText } });
+      reqs.push(RequestFactory.updateTextStyle(objectId, {
+        fontSize: 18,
+        color: theme.colors.textPrimary,
+        fontFamily: theme.fonts.family
+      }));
+      reqs.push({
+        createParagraphBullets: {
+          objectId,
+          textRange: { type: "ALL" },
+          bulletPreset: "BULLET_DISC_CIRCLE_SQUARE"
         }
+      });
+      reqs.push({ updateParagraphStyle: { objectId, style: { alignment: "START" }, fields: "alignment" } });
+      reqs.push({ updateShapeProperties: { objectId, shapeProperties: { contentAlignment: "TOP" }, fields: "contentAlignment" } });
+      return reqs;
+    }
+  }
+  class BatchTextStyleUtils {
+    /**
+     * Replicates the behavior of setStyledText but triggers Requests.
+     * Supports basic Markdown '**bold**' parsing.
+     */
+    static setText(slideId, objectId, text, baseStyle, theme) {
+      const requests = [];
+      const parts = (text || "").split("**");
+      let cleanText = "";
+      const boldRanges = [];
+      let isBold = false;
+      parts.forEach((part) => {
+        if (isBold && part.length > 0) {
+          boldRanges.push({ start: cleanText.length, length: part.length });
+        }
+        cleanText += part;
+        isBold = !isBold;
+      });
+      requests.push(RequestFactory.insertText(objectId, cleanText));
+      const styleReq = {
+        bold: baseStyle.bold || false,
+        fontSize: baseStyle.size || baseStyle.fontSize || theme.fonts.sizes.body,
+        color: baseStyle.color || theme.colors.textPrimary,
+        // Default color
+        fontFamily: theme.fonts.family
+      };
+      requests.push(RequestFactory.updateTextStyle(objectId, styleReq, 0, cleanText.length));
+      boldRanges.forEach((r) => {
+        requests.push(RequestFactory.updateTextStyle(objectId, { bold: true }, r.start, r.length));
+      });
+      if (baseStyle.align) {
+        let alignStr = "START";
+        const align = String(baseStyle.align).toUpperCase();
+        if (align.includes("CENTER") || align.includes("MIDDLE")) alignStr = "CENTER";
+        else if (align.includes("END") || align.includes("RIGHT")) alignStr = "END";
+        else if (align.includes("JUSTIFY")) alignStr = "JUSTIFIED";
+        requests.push(RequestFactory.updateParagraphStyle(objectId, alignStr));
       }
-      if (hasImages && !points.length && !isTwo) {
-        const baseArea = layout.getRect("contentSlide.body");
-        const adjustedArea = adjustAreaForSubhead(baseArea, data.subhead);
-        const area = offsetRect(adjustedArea, 0, dy);
-        createContentCushion(slide, area, settings, layout);
-        renderImagesInArea(slide, layout, area, normalizeImages(data.images), imageUpdateOption);
-      }
-      addFooter(slide, layout, pageNum, settings, this.creditImageBlob);
+      return requests;
     }
   }
   class CardsDiagramRenderer {
-    render(slide, data, area, settings, layout) {
+    render(slideId, data, area, settings, layout) {
+      const requests = [];
+      const theme = layout.getTheme();
       const items = data.items || [];
-      if (!items.length) return;
+      if (!items.length) return requests;
       const type = (data.type || "").toLowerCase();
       const hasHeader = type.includes("headercards");
       const cols = data.columns || Math.min(items.length, 3);
@@ -1130,335 +987,407 @@ var global = this;
           title = item.title || item.label || "";
           desc = item.desc || item.description || item.text || "";
         }
+        const baseId = slideId + "_CARD_" + i;
         if (hasHeader) {
           const barH = layout.pxToPt(4);
-          const bar = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, x, y, cardW, barH);
-          bar.getFill().setSolidFill(settings.primaryColor);
-          bar.getBorder().setTransparent();
+          const barId = baseId + "_BAR";
+          requests.push(RequestFactory.createShape(slideId, barId, "RECTANGLE", x, y, cardW, barH));
+          requests.push(RequestFactory.updateShapeProperties(barId, settings.primaryColor, "TRANSPARENT"));
           const numStr = String(i + 1).padStart(2, "0");
-          const numBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x, y + layout.pxToPt(6), cardW, layout.pxToPt(20));
-          setStyledText(numBox, numStr, {
+          const numId = baseId + "_NUM";
+          requests.push(RequestFactory.createShape(slideId, numId, "TEXT_BOX", x, y + layout.pxToPt(6), cardW, layout.pxToPt(20)));
+          requests.push(...BatchTextStyleUtils.setText(slideId, numId, numStr, {
             size: 14,
             bold: true,
-            color: DEFAULT_THEME.colors.neutralGray,
-            align: SlidesApp.ParagraphAlignment.END
-          });
+            color: theme.colors.neutralGray,
+            align: "END"
+          }, theme));
           const titleTop = y + layout.pxToPt(6);
           const titleH = layout.pxToPt(30);
-          const titleBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x, titleTop, cardW, titleH);
-          setStyledText(titleBox, title, {
+          const titleId = baseId + "_TITLE";
+          requests.push(RequestFactory.createShape(slideId, titleId, "TEXT_BOX", x, titleTop, cardW, titleH));
+          requests.push(RequestFactory.updateShapeProperties(titleId, null, null, null, "TOP"));
+          requests.push(...BatchTextStyleUtils.setText(slideId, titleId, title, {
             size: 18,
             bold: true,
-            color: DEFAULT_THEME.colors.textPrimary,
-            align: SlidesApp.ParagraphAlignment.START
-          });
-          try {
-            titleBox.setContentAlignment(SlidesApp.ContentAlignment.TOP);
-          } catch (e) {
-          }
+            color: theme.colors.textPrimary,
+            align: "START"
+          }, theme));
           const descTop = titleTop + titleH;
           const descH = cardH - (descTop - y);
           if (descH > 20) {
-            const descBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x, descTop, cardW, descH);
-            setStyledText(descBox, desc, {
+            const descId = baseId + "_DESC";
+            requests.push(RequestFactory.createShape(slideId, descId, "TEXT_BOX", x, descTop, cardW, descH));
+            requests.push(RequestFactory.updateShapeProperties(descId, null, null, null, "TOP"));
+            requests.push(...BatchTextStyleUtils.setText(slideId, descId, desc, {
               size: 13,
-              color: typeof DEFAULT_THEME.colors.textSmallFont === "string" ? DEFAULT_THEME.colors.textSmallFont : "#424242",
-              align: SlidesApp.ParagraphAlignment.START
-            });
-            try {
-              descBox.setContentAlignment(SlidesApp.ContentAlignment.TOP);
-            } catch (e) {
-            }
+              color: typeof theme.colors.textSmallFont === "string" ? theme.colors.textSmallFont : "#424242",
+              align: "START"
+            }, theme));
           }
         } else {
           const dotSize = layout.pxToPt(6);
-          const dot = slide.insertShape(SlidesApp.ShapeType.ELLIPSE, x, y + layout.pxToPt(8), dotSize, dotSize);
-          dot.getFill().setSolidFill(settings.primaryColor);
-          dot.getBorder().setTransparent();
+          const dotId = baseId + "_DOT";
+          const dotY = y + layout.pxToPt(8);
+          requests.push(RequestFactory.createShape(slideId, dotId, "ELLIPSE", x, dotY, dotSize, dotSize));
+          requests.push(RequestFactory.updateShapeProperties(dotId, settings.primaryColor, "TRANSPARENT"));
           const contentX = x + dotSize + layout.pxToPt(10);
           const contentW = cardW - (dotSize + layout.pxToPt(10));
           const titleH = layout.pxToPt(30);
-          const titleBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, contentX, y, contentW, titleH);
-          setStyledText(titleBox, title, {
+          const titleId = baseId + "_TITLE";
+          requests.push(RequestFactory.createShape(slideId, titleId, "TEXT_BOX", contentX, y, contentW, titleH));
+          requests.push(RequestFactory.updateShapeProperties(titleId, null, null, null, "TOP"));
+          requests.push(...BatchTextStyleUtils.setText(slideId, titleId, title, {
             size: 16,
             bold: true,
-            color: DEFAULT_THEME.colors.textPrimary,
-            align: SlidesApp.ParagraphAlignment.START
-          });
-          try {
-            titleBox.setContentAlignment(SlidesApp.ContentAlignment.TOP);
-          } catch (e) {
-          }
+            color: theme.colors.textPrimary,
+            align: "START"
+          }, theme));
           const descTop = y + titleH - layout.pxToPt(5);
           const descH = cardH - (descTop - y);
           if (descH > 20) {
-            const descBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, contentX, descTop, contentW, descH);
-            setStyledText(descBox, desc, {
+            const descId = baseId + "_DESC";
+            requests.push(RequestFactory.createShape(slideId, descId, "TEXT_BOX", contentX, descTop, contentW, descH));
+            requests.push(RequestFactory.updateShapeProperties(descId, null, null, null, "TOP"));
+            requests.push(...BatchTextStyleUtils.setText(slideId, descId, desc, {
               size: 13,
-              color: typeof DEFAULT_THEME.colors.textSmallFont === "string" ? DEFAULT_THEME.colors.textSmallFont : "#424242",
-              align: SlidesApp.ParagraphAlignment.START
-            });
-            try {
-              descBox.setContentAlignment(SlidesApp.ContentAlignment.TOP);
-            } catch (e) {
-            }
+              color: typeof theme.colors.textSmallFont === "string" ? theme.colors.textSmallFont : "#424242",
+              align: "START"
+            }, theme));
           }
         }
       });
+      return requests;
     }
   }
   class TimelineDiagramRenderer {
-    render(slide, data, area, settings, layout) {
+    render(slideId, data, area, settings, layout) {
+      const requests = [];
+      const theme = layout.getTheme();
       const milestones = data.milestones || data.items || [];
-      if (!milestones.length) return;
-      const inner = layout.pxToPt(80), baseY = area.top + area.height * 0.5;
-      const leftX = area.left + inner, rightX = area.left + area.width - inner;
-      const line = slide.insertLine(SlidesApp.LineCategory.STRAIGHT, leftX, baseY, rightX, baseY);
-      line.getLineFill().setSolidFill(DEFAULT_THEME.colors.neutralGray);
-      line.setWeight(1);
-      const dotR = layout.pxToPt(8);
-      const gap = milestones.length > 1 ? (rightX - leftX) / (milestones.length - 1) : 0;
-      const cardW_pt = layout.pxToPt(160);
-      const connectorH = layout.pxToPt(20);
-      const dateHeight = layout.pxToPt(20);
-      const labelHeight = layout.pxToPt(50);
-      const dateToLabelGap = layout.pxToPt(5);
-      milestones.forEach((m, i) => {
-        const x = leftX + gap * i;
-        const dot = slide.insertShape(SlidesApp.ShapeType.ELLIPSE, x - dotR / 2, baseY - dotR / 2, dotR, dotR);
-        dot.getFill().setSolidFill("#FFFFFF");
-        dot.getBorder().getLineFill().setSolidFill(settings.primaryColor || DEFAULT_THEME.colors.primary);
-        dot.getBorder().setWeight(2);
-        const connector = slide.insertLine(SlidesApp.LineCategory.STRAIGHT, x, baseY - connectorH, x, baseY - dotR / 2);
-        connector.getLineFill().setSolidFill(settings.primaryColor || DEFAULT_THEME.colors.primary);
-        connector.setWeight(1.5);
-        const dateTop = baseY - connectorH - dateHeight;
-        const labelTop = dateTop - labelHeight - dateToLabelGap;
-        const dateShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x - cardW_pt / 2, dateTop, cardW_pt, dateHeight);
-        dateShape.getFill().setTransparent();
-        dateShape.getBorder().setTransparent();
-        setStyledText(dateShape, String(m.date || ""), {
-          size: 12,
-          bold: true,
-          color: settings.primaryColor || DEFAULT_THEME.colors.primary,
-          align: SlidesApp.ParagraphAlignment.CENTER
-        });
-        try {
-          dateShape.setContentAlignment(SlidesApp.ContentAlignment.BOTTOM);
-        } catch (e) {
-        }
-        const labelText = String(m.label || m.state || "");
-        const labelShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x - cardW_pt / 2, labelTop, cardW_pt, labelHeight);
-        labelShape.getFill().setTransparent();
-        labelShape.getBorder().setTransparent();
-        let bodyFontSize = 12;
-        if (labelText.length > 50) bodyFontSize = 10;
-        setStyledText(labelShape, labelText, {
-          size: bodyFontSize,
-          color: DEFAULT_THEME.colors.textPrimary,
-          // Stark Black/Gray
-          align: SlidesApp.ParagraphAlignment.CENTER
-        });
-        try {
-          dateShape.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
-          labelShape.setContentAlignment(SlidesApp.ContentAlignment.BOTTOM);
-        } catch (e) {
+      if (milestones.length === 0) return requests;
+      const centerY = area.top + area.height / 2;
+      const startX = area.left + 50;
+      const endX = area.left + area.width - 50;
+      const axisId = slideId + "_TL_AXIS";
+      requests.push(RequestFactory.createLine(slideId, axisId, startX, centerY, endX, centerY));
+      requests.push({
+        updateLineProperties: {
+          objectId: axisId,
+          lineProperties: {
+            weight: { magnitude: 4, unit: "PT" },
+            lineFill: { solidFill: { color: { rgbColor: { red: 0.8, green: 0.8, blue: 0.8 } } } },
+            // neutralGray #CCCCCC
+            dashStyle: "SOLID"
+          },
+          fields: "weight,lineFill,dashStyle"
         }
       });
+      const count = milestones.length;
+      const usableWidth = endX - startX;
+      const gap = usableWidth / (count + 1);
+      milestones.forEach((m, i) => {
+        const x = startX + gap * (i + 1);
+        const isTop = i % 2 === 0;
+        const cardH = 80;
+        const cardW = 140;
+        const connLen = 50;
+        const dotR = 24;
+        const unique = `_${i}`;
+        const dotId = slideId + "_TL_DOT" + unique;
+        const connId = slideId + "_TL_CONN" + unique;
+        const cardId = slideId + "_TL_CARD" + unique;
+        const connY1 = centerY;
+        const connY2 = isTop ? centerY - connLen : centerY + connLen;
+        requests.push(RequestFactory.createShape(slideId, dotId, "ELLIPSE", x - dotR / 2, centerY - dotR / 2, dotR, dotR));
+        requests.push(RequestFactory.updateShapeProperties(dotId, settings.primaryColor, "#FFFFFF", 3));
+        requests.push(RequestFactory.createLine(slideId, connId, x, connY1, x, connY2));
+        requests.push({
+          updateLineProperties: {
+            objectId: connId,
+            lineProperties: {
+              weight: { magnitude: 2, unit: "PT" },
+              lineFill: { solidFill: { color: { rgbColor: { red: 0.7, green: 0.7, blue: 0.7 } } } },
+              dashStyle: "DOT"
+            },
+            fields: "weight,lineFill,dashStyle"
+          }
+        });
+        const cardY = isTop ? connY2 - cardH : connY2;
+        const cardX = x - cardW / 2;
+        requests.push(RequestFactory.createShape(slideId, cardId, "ROUND_RECTANGLE", cardX, cardY, cardW, cardH));
+        requests.push(RequestFactory.updateShapeProperties(cardId, "#FFFFFF", theme.colors.ghostGray));
+        const date = m.date || m.year || "";
+        const label = m.label || m.title || m.text || "";
+        const fullText = `${date}
+${label}`;
+        requests.push({ insertText: { objectId: cardId, text: fullText } });
+        if (date) {
+          requests.push(RequestFactory.updateTextStyle(cardId, {
+            bold: true,
+            fontSize: 14,
+            color: settings.primaryColor,
+            fontFamily: theme.fonts.family
+          }, 0, date.length));
+        }
+        if (label) {
+          const start = date.length + 1;
+          requests.push(RequestFactory.updateTextStyle(cardId, {
+            bold: false,
+            fontSize: 12,
+            color: theme.colors.textPrimary || "#333333",
+            fontFamily: theme.fonts.family
+          }, start, label.length));
+        }
+        requests.push({ updateParagraphStyle: { objectId: cardId, style: { alignment: "CENTER" }, fields: "alignment" } });
+        requests.push({ updateShapeProperties: { objectId: cardId, shapeProperties: { contentAlignment: "MIDDLE" }, fields: "contentAlignment" } });
+      });
+      return requests;
     }
   }
   class ProcessDiagramRenderer {
-    render(slide, data, area, settings, layout) {
+    render(slideId, data, area, settings, layout) {
+      const requests = [];
+      const theme = layout.getTheme();
       const steps = data.steps || data.items || [];
-      if (!steps.length) return;
-      const n = steps.length;
-      const startY = area.top + layout.pxToPt(20);
-      let currentY = startY;
-      const totalH = area.height;
-      const itemH = totalH / n;
-      const actualItemH = Math.min(itemH, layout.pxToPt(100));
-      const margin = layout.pxToPt(20);
-      const numColW = layout.pxToPt(50);
-      const gapNumToText = layout.pxToPt(10);
-      const textLeft = area.left + numColW + gapNumToText;
-      const textWidth = area.width - (numColW + gapNumToText);
+      if (!steps.length) return requests;
+      const count = steps.length;
+      const gap = -15;
+      const itemWidth = (area.width - gap * (count - 1)) / count;
+      const itemHeight = Math.min(area.height, 150);
+      const y = area.top + (area.height - itemHeight) / 2;
       steps.forEach((step, i) => {
+        const x = area.left + i * (itemWidth + gap);
+        const unique = `_${i}`;
+        const shapeId = slideId + "_PR_CHEV_" + unique;
+        requests.push(RequestFactory.createShape(slideId, shapeId, "CHEVRON", x, y, itemWidth, itemHeight));
+        const bgColor = i % 2 === 0 ? theme.colors.primary : theme.colors.deepPrimary || theme.colors.primary;
+        requests.push({
+          updateShapeProperties: {
+            objectId: shapeId,
+            shapeProperties: {
+              shapeBackgroundFill: { solidFill: { color: { rgbColor: RequestFactory.toRgbColor(bgColor) || { red: 0, green: 0, blue: 0 } } } },
+              outline: { propertyState: "NOT_RENDERED" },
+              contentAlignment: "MIDDLE"
+            },
+            fields: "shapeBackgroundFill,outline,contentAlignment"
+          }
+        });
         const cleanText = String(step || "").replace(/^\s*\d+[\.\s]*/, "");
-        const numStr = String(i + 1).padStart(2, "0");
-        const numShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, area.left, currentY, numColW, layout.pxToPt(40));
-        setStyledText(numShape, numStr, {
-          size: 28,
-          // Slightly smaller but Bold
+        const fullText = `${i + 1}
+${cleanText}`;
+        requests.push({ insertText: { objectId: shapeId, text: fullText } });
+        requests.push(RequestFactory.updateTextStyle(shapeId, {
+          fontSize: 32,
           bold: true,
-          color: settings.primaryColor || DEFAULT_THEME.colors.primary,
-          align: SlidesApp.ParagraphAlignment.END
-          // Align right towards the text
+          color: "#FFFFFF",
+          fontFamily: theme.fonts.family
+        }, 0, String(i + 1).length));
+        requests.push(RequestFactory.updateTextStyle(shapeId, {
+          fontSize: 14,
+          bold: false,
+          color: "#FFFFFF",
+          // White text on colored background
+          fontFamily: theme.fonts.family
+        }, String(i + 1).length + 1, cleanText.length + 1));
+        requests.push({
+          updateParagraphStyle: {
+            objectId: shapeId,
+            style: { alignment: "CENTER" },
+            fields: "alignment"
+          }
         });
-        try {
-          numShape.setContentAlignment(SlidesApp.ContentAlignment.TOP);
-        } catch (e) {
-        }
-        const textShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, textLeft, currentY + layout.pxToPt(6), textWidth, actualItemH - margin);
-        setStyledText(textShape, cleanText, {
-          size: 14,
-          color: DEFAULT_THEME.colors.textPrimary,
-          align: SlidesApp.ParagraphAlignment.START,
-          bold: true
-          // Title-like weight for the step content
-        });
-        try {
-          textShape.setContentAlignment(SlidesApp.ContentAlignment.TOP);
-        } catch (e) {
-        }
-        if (i < n - 1) {
-          const lineY = currentY + actualItemH - margin / 2;
-          const line = slide.insertLine(SlidesApp.LineCategory.STRAIGHT, textLeft, lineY, area.left + area.width, lineY);
-          line.getLineFill().setSolidFill(DEFAULT_THEME.colors.faintGray);
-          line.setWeight(0.5);
-        }
-        currentY += actualItemH;
       });
+      return requests;
     }
   }
   class CycleDiagramRenderer {
-    render(slide, data, area, settings, layout) {
+    render(slideId, data, area, settings, layout) {
+      const requests = [];
+      const theme = layout.getTheme();
       const items = data.items || [];
-      if (!items.length) return;
+      if (!items.length) return requests;
       const centerX = area.left + area.width / 2;
       const centerY = area.top + area.height / 2;
-      const radius = Math.min(area.width, area.height) * 0.35;
-      const circleParams = {
-        left: centerX - radius,
-        top: centerY - radius,
-        width: radius * 2,
-        height: radius * 2
-      };
-      const mainCircle = slide.insertShape(SlidesApp.ShapeType.ELLIPSE, circleParams.left, circleParams.top, circleParams.width, circleParams.height);
-      mainCircle.getFill().setTransparent();
-      mainCircle.getBorder().getLineFill().setSolidFill(DEFAULT_THEME.colors.ghostGray);
-      mainCircle.getBorder().setWeight(1);
-      mainCircle.getBorder().setDashStyle(SlidesApp.DashStyle.DOT);
-      if (data.centerText) {
-        const centerW = radius * 1.2;
-        const centerTextBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, centerX - centerW / 2, centerY - layout.pxToPt(20), centerW, layout.pxToPt(40));
-        setStyledText(centerTextBox, data.centerText, {
-          size: 18,
-          bold: true,
-          align: SlidesApp.ParagraphAlignment.CENTER,
-          color: DEFAULT_THEME.colors.primary
-        });
-        try {
-          centerTextBox.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
-        } catch (e) {
-        }
-      }
+      const orbitRadius = Math.min(area.width, area.height) * 0.35;
       const count = items.length;
       const angleStep = 2 * Math.PI / count;
       const startAngle = -Math.PI / 2;
       items.forEach((item, i) => {
         const angle = startAngle + i * angleStep;
-        const itemX = centerX + Math.cos(angle) * radius;
-        const itemY = centerY + Math.sin(angle) * radius;
-        const dotR = layout.pxToPt(10);
-        const dot = slide.insertShape(SlidesApp.ShapeType.ELLIPSE, itemX - dotR / 2, itemY - dotR / 2, dotR, dotR);
-        dot.getFill().setSolidFill(DEFAULT_THEME.colors.backgroundWhite);
-        dot.getBorder().getLineFill().setSolidFill(DEFAULT_THEME.colors.primary);
-        dot.getBorder().setWeight(2);
-        const isRight = itemX > centerX;
-        const textW = layout.pxToPt(140);
-        const textH = layout.pxToPt(60);
-        const margin = layout.pxToPt(10);
-        let textLeft = isRight ? itemX + margin : itemX - textW - margin;
-        if (Math.abs(itemX - centerX) < 5) {
-          textLeft = itemX - textW / 2;
-        }
-        const textTop = itemY - textH / 2;
-        const labelStr = item.label || "";
-        const subLabelStr = item.subLabel || `${String(i + 1).padStart(2, "0")}`;
-        const align = Math.abs(itemX - centerX) < 5 ? SlidesApp.ParagraphAlignment.CENTER : isRight ? SlidesApp.ParagraphAlignment.START : SlidesApp.ParagraphAlignment.END;
-        const textBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, textLeft, textTop, textW, textH);
-        setStyledText(textBox, `${subLabelStr}
-${labelStr}`, {
-          size: 14,
-          bold: true,
-          // Title is bold
-          color: DEFAULT_THEME.colors.textPrimary,
-          align
+        const x = centerX + Math.cos(angle) * orbitRadius;
+        const y = centerY + Math.sin(angle) * orbitRadius;
+        const connId = slideId + `_CYC_CONN_${i}`;
+        requests.push(RequestFactory.createLine(slideId, connId, centerX, centerY, x, y));
+        requests.push({
+          updateLineProperties: {
+            objectId: connId,
+            lineProperties: {
+              lineFill: { solidFill: { color: { rgbColor: { red: 0.8, green: 0.8, blue: 0.8 } } } },
+              // Light Gray
+              weight: { magnitude: 4, unit: "PT" },
+              // Thicker
+              dashStyle: "SOLID"
+            },
+            fields: "lineFill,weight,dashStyle"
+          }
         });
-        if (Math.abs(itemX - centerX) > 5) {
-          const lineStart = isRight ? itemX + dotR / 2 : itemX - dotR / 2;
-          const lineEnd = isRight ? textLeft : textLeft + textW;
-          const connector = slide.insertLine(SlidesApp.LineCategory.STRAIGHT, lineStart, itemY, lineEnd, itemY);
-          connector.getLineFill().setSolidFill(DEFAULT_THEME.colors.primary);
-          connector.setWeight(1);
-        }
       });
+      const centerR = 140;
+      const centerId = slideId + "_CYC_CENTER";
+      const shadowId = slideId + "_CYC_CENTER_SHADOW";
+      requests.push(RequestFactory.createShape(slideId, shadowId, "ELLIPSE", centerX - centerR / 2 + 3, centerY - centerR / 2 + 3, centerR, centerR));
+      requests.push(RequestFactory.updateShapeProperties(shadowId, "#DDDDDD", "TRANSPARENT"));
+      requests.push(RequestFactory.createShape(slideId, centerId, "ELLIPSE", centerX - centerR / 2, centerY - centerR / 2, centerR, centerR));
+      requests.push(RequestFactory.updateShapeProperties(centerId, settings.primaryColor, "#FFFFFF", 3));
+      const centerText = data.centerText || data.title || "CYCLE";
+      requests.push({ insertText: { objectId: centerId, text: centerText } });
+      requests.push(RequestFactory.updateTextStyle(centerId, {
+        fontSize: 20,
+        bold: true,
+        color: "#FFFFFF",
+        fontFamily: theme.fonts.family
+      }));
+      requests.push({ updateParagraphStyle: { objectId: centerId, style: { alignment: "CENTER" }, fields: "alignment" } });
+      requests.push({ updateShapeProperties: { objectId: centerId, shapeProperties: { contentAlignment: "MIDDLE" }, fields: "contentAlignment" } });
+      items.forEach((item, i) => {
+        const angle = startAngle + i * angleStep;
+        const x = centerX + Math.cos(angle) * orbitRadius;
+        const y = centerY + Math.sin(angle) * orbitRadius;
+        const unique = `_CYC_${i}`;
+        const bubbleId = slideId + unique + "_BUBBLE";
+        const labelId = slideId + unique + "_LABEL";
+        const bubbleR = 60;
+        const bShadowId = bubbleId + "_SHADOW";
+        requests.push(RequestFactory.createShape(slideId, bShadowId, "ELLIPSE", x - bubbleR / 2 + 2, y - bubbleR / 2 + 2, bubbleR, bubbleR));
+        requests.push(RequestFactory.updateShapeProperties(bShadowId, "#DDDDDD", "TRANSPARENT"));
+        requests.push(RequestFactory.createShape(slideId, bubbleId, "ELLIPSE", x - bubbleR / 2, y - bubbleR / 2, bubbleR, bubbleR));
+        requests.push(RequestFactory.updateShapeProperties(bubbleId, "#FFFFFF", settings.primaryColor, 2));
+        const numStr = String(i + 1).padStart(2, "0");
+        requests.push({ insertText: { objectId: bubbleId, text: numStr } });
+        requests.push(RequestFactory.updateTextStyle(bubbleId, {
+          fontSize: 24,
+          bold: true,
+          color: settings.primaryColor,
+          fontFamily: theme.fonts.family
+        }));
+        requests.push({ updateParagraphStyle: { objectId: bubbleId, style: { alignment: "CENTER" }, fields: "alignment" } });
+        requests.push({ updateShapeProperties: { objectId: bubbleId, shapeProperties: { contentAlignment: "MIDDLE" }, fields: "contentAlignment" } });
+        const isRight = x > centerX;
+        const textW = 140;
+        const textH = 70;
+        const offsetX = isRight ? bubbleR / 2 + 5 : -bubbleR / 2 - textW - 5;
+        const textX = x + offsetX;
+        const textY = y - textH / 2;
+        const label = typeof item === "string" ? item : item.label || item.title || "";
+        requests.push(RequestFactory.createShape(slideId, labelId, "TEXT_BOX", textX, textY, textW, textH));
+        requests.push({ insertText: { objectId: labelId, text: label } });
+        requests.push(RequestFactory.updateTextStyle(labelId, {
+          fontSize: 14,
+          bold: true,
+          color: theme.colors.textPrimary || "#333333",
+          fontFamily: theme.fonts.family
+        }));
+        requests.push({
+          updateParagraphStyle: {
+            objectId: labelId,
+            style: { alignment: isRight ? "START" : "END" },
+            fields: "alignment"
+          }
+        });
+        requests.push({ updateShapeProperties: { objectId: labelId, shapeProperties: { contentAlignment: "MIDDLE" }, fields: "contentAlignment" } });
+      });
+      return requests;
     }
   }
   class PyramidDiagramRenderer {
-    render(slide, data, area, settings, layout) {
+    render(slideId, data, area, settings, layout) {
+      const requests = [];
       const levels = data.levels || data.items || [];
-      if (!levels.length) return;
-      const levelsToDraw = levels.slice(0, 5);
-      const levelHeight = layout.pxToPt(60);
-      const levelGap = layout.pxToPt(20);
-      const totalHeight = levelHeight * levelsToDraw.length + levelGap * (levelsToDraw.length - 1);
-      const startY = area.top + (area.height - totalHeight) / 2;
-      const contentW = layout.pxToPt(500);
+      if (!levels.length) return requests;
+      const count = levels.length;
+      const pyramidH = Math.min(area.height, 400);
+      const pyramidW = Math.min(area.width * 0.6, 500);
       const centerX = area.left + area.width / 2;
-      const startX = centerX - contentW / 2;
-      levelsToDraw.forEach((level, index) => {
-        const y = startY + index * (levelHeight + levelGap);
-        index === levelsToDraw.length - 1;
-        const numStr = String(index + 1).padStart(2, "0");
-        const numW = layout.pxToPt(50);
-        const numBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, startX, y, numW, levelHeight);
-        setStyledText(numBox, numStr, {
-          size: 32,
-          bold: true,
-          color: settings.primaryColor,
-          align: SlidesApp.ParagraphAlignment.END
-          // Right align number towards content
-        });
-        try {
-          numBox.setContentAlignment(SlidesApp.ContentAlignment.TOP);
-        } catch (e) {
-        }
-        const lineX = startX + numW + layout.pxToPt(10);
-        const line = slide.insertLine(SlidesApp.LineCategory.STRAIGHT, lineX, y + layout.pxToPt(5), lineX, y + levelHeight - layout.pxToPt(5));
-        line.getLineFill().setSolidFill(DEFAULT_THEME.colors.ghostGray);
-        line.setWeight(1);
-        const contentX = lineX + layout.pxToPt(15);
-        const textW = contentW - (contentX - startX);
-        const levelTitle = level.title || `Level ${index + 1}`;
-        const levelDesc = level.description || "";
-        const titleH = layout.pxToPt(25);
-        const titleBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, contentX, y, textW, titleH);
-        setStyledText(titleBox, levelTitle.toUpperCase(), {
-          size: 14,
-          bold: true,
-          color: DEFAULT_THEME.colors.textPrimary,
-          align: SlidesApp.ParagraphAlignment.START
-        });
-        if (levelDesc) {
-          const descBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, contentX, y + titleH, textW, levelHeight - titleH);
-          setStyledText(descBox, levelDesc, {
-            size: 12,
-            color: DEFAULT_THEME.colors.neutralGray,
-            align: SlidesApp.ParagraphAlignment.START
-          });
-          try {
-            descBox.setContentAlignment(SlidesApp.ContentAlignment.TOP);
-          } catch (e) {
+      const topY = area.top + (area.height - pyramidH) / 2;
+      const triId = slideId + "_PYR_MAIN";
+      requests.push(RequestFactory.createShape(slideId, triId, "TRIANGLE", centerX - pyramidW / 2, topY, pyramidW, pyramidH));
+      requests.push(RequestFactory.updateShapeProperties(triId, settings.primaryColor, "TRANSPARENT"));
+      const gap = 4;
+      const levelHeight = (pyramidH - gap * (count - 1)) / count;
+      for (let i = 1; i < count; i++) {
+        const lineY = topY + i * (pyramidH / count);
+        const ratio = i / count;
+        const widthAtY = pyramidW * ratio;
+        const lineId = slideId + `_PYR_LINE_${i}`;
+        const lineW = widthAtY - 4;
+        const lineH = 2;
+        const lineLeft = centerX - lineW / 2;
+        requests.push(RequestFactory.createShape(slideId, lineId, "RECTANGLE", lineLeft, lineY, lineW, lineH));
+        requests.push(RequestFactory.updateShapeProperties(lineId, "#FFFFFF", "TRANSPARENT"));
+      }
+      levels.forEach((level, index) => {
+        const y = topY + index * (pyramidH / count) + levelHeight / 2 - 10;
+        const depthRatio = (index + 0.5) / count;
+        const widthAtDepth = pyramidW * depthRatio;
+        const pyramidEdgeX = centerX + widthAtDepth / 2;
+        const lineStartX = pyramidEdgeX + 10;
+        const lineEndX = lineStartX + 30;
+        const textX = lineEndX + 10;
+        const connId = slideId + `_PYR_CONN_${index}`;
+        requests.push(RequestFactory.createLine(slideId, connId, lineStartX, y + 10, lineEndX, y + 10));
+        requests.push({
+          updateLineProperties: {
+            objectId: connId,
+            lineProperties: {
+              lineFill: { solidFill: { color: { rgbColor: { red: 0.2, green: 0.2, blue: 0.2 } } } },
+              // Dark Gray
+              weight: { magnitude: 1, unit: "PT" }
+            },
+            fields: "lineFill,weight"
           }
+        });
+        const textId = slideId + `_PYR_TXT_${index}`;
+        const title = level.label || level.title || "";
+        const sub = level.subLabel || level.desc || "";
+        const fullText = `${title}
+${sub}`;
+        requests.push(RequestFactory.createShape(slideId, textId, "TEXT_BOX", textX, y - 25, 200, 60));
+        requests.push({ insertText: { objectId: textId, text: fullText } });
+        if (title) {
+          requests.push(RequestFactory.updateTextStyle(textId, {
+            bold: true,
+            fontSize: 16,
+            color: settings.text_primary || "#333333",
+            fontFamily: layout.getTheme().fonts.family
+          }, 0, title.length));
         }
+        if (sub) {
+          const subStart = title.length + 1;
+          requests.push(RequestFactory.updateTextStyle(textId, {
+            bold: false,
+            fontSize: 12,
+            color: settings.ghost_gray || "#666666",
+            fontFamily: layout.getTheme().fonts.family
+          }, subStart, sub.length));
+        }
+        requests.push({
+          updateShapeProperties: {
+            objectId: textId,
+            shapeProperties: { contentAlignment: "MIDDLE" },
+            fields: "contentAlignment"
+          }
+        });
       });
+      return requests;
     }
   }
   class TriangleDiagramRenderer {
-    render(slide, data, area, settings, layout) {
+    render(slideId, data, area, settings, layout) {
+      const requests = [];
+      const theme = layout.getTheme();
       const items = data.items || [];
-      if (!items.length) return;
+      if (!items.length) return requests;
       const itemsToDraw = items.slice(0, 3);
       const centerX = area.left + area.width / 2;
       const centerY = area.top + area.height / 2;
@@ -1469,119 +1398,152 @@ ${labelStr}`, {
         { x: centerX - radius * 0.866, y: centerY + radius * 0.5 }
       ];
       const circleSize = layout.pxToPt(160);
-      const trianglePath = slide.insertShape(SlidesApp.ShapeType.TRIANGLE, centerX - radius / 2, centerY - radius / 2, radius, radius);
-      trianglePath.setRotation(0);
-      trianglePath.getFill().setSolidFill(DEFAULT_THEME.colors.faintGray);
-      trianglePath.getBorder().setTransparent();
-      positions.slice(0, itemsToDraw.length).forEach((pos, i) => {
-        const item = itemsToDraw[i];
+      const triangleId = slideId + "_TRI_CENTER";
+      requests.push(RequestFactory.createShape(slideId, triangleId, "TRIANGLE", centerX - radius, centerY - radius, radius * 2, radius * 2));
+      requests.push(RequestFactory.updateShapeProperties(triangleId, theme.colors.faintGray || "#EEEEEE", "TRANSPARENT"));
+      itemsToDraw.forEach((item, i) => {
+        const pos = positions[i];
         const title = item.title || item.label || "";
         const desc = item.desc || item.subLabel || "";
         const x = pos.x - circleSize / 2;
         const y = pos.y - circleSize / 2;
-        const circle = slide.insertShape(SlidesApp.ShapeType.ELLIPSE, x, y, circleSize, circleSize);
-        circle.getFill().setSolidFill(settings.primaryColor);
-        circle.getBorder().setTransparent();
-        setStyledText(circle, `${title}
-${desc}`, {
-          size: 14,
-          bold: true,
-          color: DEFAULT_THEME.colors.backgroundGray,
-          align: SlidesApp.ParagraphAlignment.CENTER
-        });
-        try {
-          circle.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
-          const textRange = circle.getText();
-          if (title.length > 0 && desc.length > 0) {
-          }
-        } catch (e) {
+        const circleId = slideId + "_TRI_ITEM_" + i;
+        requests.push(RequestFactory.createShape(slideId, circleId, "ELLIPSE", x, y, circleSize, circleSize));
+        requests.push(RequestFactory.updateShapeProperties(circleId, settings.primaryColor, "TRANSPARENT", 0, "MIDDLE"));
+        const fullText = `${title}
+${desc}`;
+        requests.push(RequestFactory.insertText(circleId, fullText));
+        if (title.length > 0) {
+          requests.push(RequestFactory.updateTextStyle(circleId, {
+            fontSize: 14,
+            bold: true,
+            color: theme.colors.backgroundGray,
+            fontFamily: theme.fonts.family
+          }, 0, title.length));
         }
+        if (desc.length > 0) {
+          requests.push(RequestFactory.updateTextStyle(circleId, {
+            fontSize: 12,
+            bold: false,
+            color: theme.colors.backgroundGray,
+            fontFamily: theme.fonts.family
+          }, title.length + 1, desc.length));
+        }
+        requests.push(RequestFactory.updateParagraphStyle(circleId, "CENTER"));
       });
+      return requests;
     }
   }
   class ComparisonDiagramRenderer {
-    render(slide, data, area, settings, layout) {
-      const leftTitle = data.leftTitle || "プランA";
-      const rightTitle = data.rightTitle || "プランB";
+    render(slideId, data, area, settings, layout) {
+      const requests = [];
+      const theme = layout.getTheme();
+      const leftTitle = data.leftTitle || "Plan A";
+      const rightTitle = data.rightTitle || "Plan B";
       const leftItems = data.leftItems || [];
       const rightItems = data.rightItems || [];
-      const gap = layout.pxToPt(60);
+      const gap = 60;
       const colWidth = (area.width - gap) / 2;
-      const compareColors = generateCompareColors(settings.primaryColor);
-      const headerH = layout.pxToPt(50);
-      const itemSpacing = layout.pxToPt(16);
-      const drawColumn = (x, title, items, accentColor) => {
-        const line = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, x, area.top, layout.pxToPt(60), layout.pxToPt(4));
-        line.getFill().setSolidFill(accentColor);
-        line.getBorder().setTransparent();
-        const titleBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x, area.top + layout.pxToPt(15), colWidth, headerH);
-        setStyledText(titleBox, title, {
-          size: 28,
-          // Even Larger
+      const headerH = 70;
+      const drawColumn = (x, title, items, suffix) => {
+        const headerId = slideId + "_CMP_HEAD_" + suffix;
+        const bodyId = slideId + "_CMP_BODY_" + suffix;
+        requests.push(RequestFactory.createShape(slideId, headerId, "ROUND_RECTANGLE", x, area.top, colWidth, headerH));
+        requests.push(RequestFactory.updateShapeProperties(headerId, settings.primaryColor, "TRANSPARENT"));
+        requests.push({ insertText: { objectId: headerId, text: title } });
+        requests.push(RequestFactory.updateTextStyle(headerId, {
+          fontSize: 24,
           bold: true,
-          color: DEFAULT_THEME.colors.textPrimary,
-          align: SlidesApp.ParagraphAlignment.START
-        });
-        let currentY = area.top + headerH + layout.pxToPt(10);
-        items.forEach((itemText) => {
-          const bulletSize = layout.pxToPt(6);
-          const bullet = slide.insertShape(SlidesApp.ShapeType.ELLIPSE, x, currentY + layout.pxToPt(7), bulletSize, bulletSize);
-          bullet.getFill().setSolidFill(DEFAULT_THEME.colors.neutralGray);
-          bullet.getBorder().setTransparent();
-          const textX = x + bulletSize + layout.pxToPt(8);
-          const textW = colWidth - (bulletSize + layout.pxToPt(8));
-          const itemH = layout.pxToPt(50);
-          const textBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, textX, currentY, textW, itemH);
-          setStyledText(textBox, itemText, {
-            size: 16,
-            color: DEFAULT_THEME.colors.textPrimary,
-            align: SlidesApp.ParagraphAlignment.START
-          });
-          try {
-            textBox.setContentAlignment(SlidesApp.ContentAlignment.TOP);
-          } catch (e) {
-          }
-          currentY += layout.pxToPt(25) + itemSpacing;
+          color: "#FFFFFF",
+          fontFamily: theme.fonts.family
+        }));
+        requests.push({ updateParagraphStyle: { objectId: headerId, style: { alignment: "CENTER" }, fields: "alignment" } });
+        requests.push({ updateShapeProperties: { objectId: headerId, shapeProperties: { contentAlignment: "MIDDLE" }, fields: "contentAlignment" } });
+        const bodyH = area.height - headerH - 10;
+        const bodyY = area.top + headerH + 10;
+        requests.push(RequestFactory.createShape(slideId, bodyId, "ROUND_RECTANGLE", x, bodyY, colWidth, bodyH));
+        requests.push(RequestFactory.updateShapeProperties(bodyId, theme.colors.faintGray || "#F8F9FA", "TRANSPARENT"));
+        let currentY = bodyY + 20;
+        const itemGap = 15;
+        items.forEach((itemText, i) => {
+          const unique = `_${suffix}_${i}`;
+          const iconId = slideId + "_CMP_ICON" + unique;
+          const textId = slideId + "_CMP_TXT" + unique;
+          const iconSize = 24;
+          requests.push(RequestFactory.createShape(slideId, iconId, "TEXT_BOX", x + 20, currentY, iconSize, iconSize));
+          requests.push({ insertText: { objectId: iconId, text: "✔" } });
+          requests.push(RequestFactory.updateTextStyle(iconId, {
+            fontSize: 18,
+            bold: true,
+            color: settings.primaryColor,
+            fontFamily: theme.fonts.family
+            // Use symbol font if needed, but standard usually has check
+          }));
+          requests.push({ updateParagraphStyle: { objectId: iconId, style: { alignment: "CENTER" }, fields: "alignment" } });
+          const textX = x + 20 + iconSize + 10;
+          const textW = colWidth - (20 + iconSize + 10 + 20);
+          const itemH = 40;
+          requests.push(RequestFactory.createShape(slideId, textId, "TEXT_BOX", textX, currentY, textW, itemH));
+          requests.push({ insertText: { objectId: textId, text: itemText } });
+          requests.push(RequestFactory.updateTextStyle(textId, {
+            fontSize: 16,
+            color: theme.colors.textPrimary || "#333333",
+            fontFamily: theme.fonts.family
+          }));
+          requests.push({ updateParagraphStyle: { objectId: textId, style: { alignment: "START" }, fields: "alignment" } });
+          currentY += itemH + itemGap;
         });
       };
-      drawColumn(area.left, leftTitle, leftItems, compareColors.left);
-      drawColumn(area.left + colWidth + gap, rightTitle, rightItems, compareColors.right);
-      const centerX = area.left + colWidth + gap / 2;
-      const sepY = area.top + layout.pxToPt(20);
-      const sepH = area.height - layout.pxToPt(40);
-      const sepLine = slide.insertLine(SlidesApp.LineCategory.STRAIGHT, centerX, sepY, centerX, sepY + sepH);
-      sepLine.getLineFill().setSolidFill(DEFAULT_THEME.colors.ghostGray);
-      sepLine.setWeight(1);
+      drawColumn(area.left, leftTitle, leftItems, "L");
+      drawColumn(area.left + colWidth + gap, rightTitle, rightItems, "R");
+      return requests;
     }
   }
+  function hexToRgb(hex) {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+      r: parseInt(result[1], 16),
+      g: parseInt(result[2], 16),
+      b: parseInt(result[3], 16)
+    } : null;
+  }
+  function darkenColor(color, amount) {
+    const rgb = hexToRgb(color);
+    if (!rgb) return color;
+    const darken = (c) => Math.max(0, Math.round(c * (1 - amount)));
+    const newR = darken(rgb.r);
+    const newG = darken(rgb.g);
+    const newB = darken(rgb.b);
+    return `#${newR.toString(16).padStart(2, "0")}${newG.toString(16).padStart(2, "0")}${newB.toString(16).padStart(2, "0")}`;
+  }
+  function generateCompareColors(baseColor) {
+    return {
+      left: darkenColor(baseColor, 0.3),
+      right: baseColor
+    };
+  }
   class StatsCompareDiagramRenderer {
-    render(slide, data, area, settings, layout) {
+    render(slideId, data, area, settings, layout) {
+      const requests = [];
+      const theme = layout.getTheme();
       const leftTitle = data.leftTitle || "導入前";
       const rightTitle = data.rightTitle || "導入後";
       const stats = data.stats || [];
-      if (!stats.length) return;
+      if (!stats.length) return requests;
       const compareColors = generateCompareColors(settings.primaryColor);
       const headerH = layout.pxToPt(45);
       const labelColW = area.width * 0.35;
       const valueColW = (area.width - labelColW) / 2;
       const leftHeaderX = area.left + labelColW;
-      const leftHeader = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, leftHeaderX, area.top, valueColW, headerH);
-      leftHeader.getFill().setSolidFill(compareColors.left);
-      leftHeader.getBorder().setTransparent();
-      setStyledText(leftHeader, leftTitle, { size: 14, bold: true, color: DEFAULT_THEME.colors.backgroundGray, align: SlidesApp.ParagraphAlignment.CENTER });
-      try {
-        leftHeader.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
-      } catch (e) {
-      }
+      const lhId = slideId + "_STAT_LH";
+      requests.push(RequestFactory.createShape(slideId, lhId, "RECTANGLE", leftHeaderX, area.top, valueColW, headerH));
+      requests.push(RequestFactory.updateShapeProperties(lhId, compareColors.left, "TRANSPARENT", 0, "MIDDLE"));
+      requests.push(...BatchTextStyleUtils.setText(slideId, lhId, leftTitle, { size: 14, bold: true, color: theme.colors.backgroundGray, align: "CENTER" }, theme));
       const rightHeaderX = area.left + labelColW + valueColW;
-      const rightHeader = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, rightHeaderX, area.top, valueColW, headerH);
-      rightHeader.getFill().setSolidFill(compareColors.right);
-      rightHeader.getBorder().setTransparent();
-      setStyledText(rightHeader, rightTitle, { size: 14, bold: true, color: DEFAULT_THEME.colors.backgroundGray, align: SlidesApp.ParagraphAlignment.CENTER });
-      try {
-        rightHeader.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
-      } catch (e) {
-      }
+      const rhId = slideId + "_STAT_RH";
+      requests.push(RequestFactory.createShape(slideId, rhId, "RECTANGLE", rightHeaderX, area.top, valueColW, headerH));
+      requests.push(RequestFactory.updateShapeProperties(rhId, compareColors.right, "TRANSPARENT", 0, "MIDDLE"));
+      requests.push(...BatchTextStyleUtils.setText(slideId, rhId, rightTitle, { size: 14, bold: true, color: theme.colors.backgroundGray, align: "CENTER" }, theme));
       const availableHeight = area.height - headerH;
       const rowHeight = Math.min(layout.pxToPt(60), availableHeight / stats.length);
       let currentY = area.top + headerH;
@@ -1590,54 +1552,42 @@ ${desc}`, {
         const leftValue = stat.leftValue || "";
         const rightValue = stat.rightValue || "";
         const trend = stat.trend || null;
-        const rowBg = index % 2 === 0 ? DEFAULT_THEME.colors.backgroundGray : "#FFFFFF";
-        const labelCell = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, area.left, currentY, labelColW, rowHeight);
-        labelCell.getFill().setSolidFill(rowBg);
-        labelCell.getBorder().getLineFill().setSolidFill(DEFAULT_THEME.colors.faintGray);
-        setStyledText(labelCell, label, { size: DEFAULT_THEME.fonts.sizes.body, bold: true, align: SlidesApp.ParagraphAlignment.START });
-        try {
-          labelCell.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
-        } catch (e) {
-        }
-        const leftCell = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, leftHeaderX, currentY, valueColW, rowHeight);
-        leftCell.getFill().setSolidFill(rowBg);
-        leftCell.getBorder().getLineFill().setSolidFill(DEFAULT_THEME.colors.faintGray);
-        setStyledText(leftCell, leftValue, { size: DEFAULT_THEME.fonts.sizes.body, align: SlidesApp.ParagraphAlignment.CENTER, color: compareColors.left });
-        try {
-          leftCell.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
-        } catch (e) {
-        }
-        const rightCell = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, rightHeaderX, currentY, valueColW - (trend ? layout.pxToPt(40) : 0), rowHeight);
-        rightCell.getFill().setSolidFill(rowBg);
-        rightCell.getBorder().getLineFill().setSolidFill(DEFAULT_THEME.colors.faintGray);
-        setStyledText(rightCell, rightValue, { size: DEFAULT_THEME.fonts.sizes.body, align: SlidesApp.ParagraphAlignment.CENTER, color: compareColors.right });
-        try {
-          rightCell.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
-        } catch (e) {
-        }
+        const rowBg = index % 2 === 0 ? theme.colors.backgroundGray : "#FFFFFF";
+        const baseId = slideId + "_STAT_R" + index;
+        const lId = baseId + "_L";
+        requests.push(RequestFactory.createShape(slideId, lId, "RECTANGLE", area.left, currentY, labelColW, rowHeight));
+        requests.push(RequestFactory.updateShapeProperties(lId, rowBg, theme.colors.faintGray, 1, "MIDDLE"));
+        requests.push(...BatchTextStyleUtils.setText(slideId, lId, label, { size: theme.fonts.sizes.body, bold: true, align: "START" }, theme));
+        const lvId = baseId + "_LV";
+        requests.push(RequestFactory.createShape(slideId, lvId, "RECTANGLE", leftHeaderX, currentY, valueColW, rowHeight));
+        requests.push(RequestFactory.updateShapeProperties(lvId, rowBg, theme.colors.faintGray, 1, "MIDDLE"));
+        requests.push(...BatchTextStyleUtils.setText(slideId, lvId, leftValue, { size: theme.fonts.sizes.body, align: "CENTER", color: compareColors.left }, theme));
+        const rvId = baseId + "_RV";
+        requests.push(RequestFactory.createShape(slideId, rvId, "RECTANGLE", rightHeaderX, currentY, valueColW - (trend ? layout.pxToPt(40) : 0), rowHeight));
+        requests.push(RequestFactory.updateShapeProperties(rvId, rowBg, theme.colors.faintGray, 1, "MIDDLE"));
+        requests.push(...BatchTextStyleUtils.setText(slideId, rvId, rightValue, { size: theme.fonts.sizes.body, align: "CENTER", color: compareColors.right }, theme));
         if (trend) {
           const trendX = rightHeaderX + valueColW - layout.pxToPt(35);
-          const trendShape = slide.insertShape(SlidesApp.ShapeType.ELLIPSE, trendX, currentY + rowHeight / 4, layout.pxToPt(25), layout.pxToPt(25));
-          const isUp = trend.toLowerCase() === "up";
+          const tId = baseId + "_TR";
+          const isUp = String(trend).toLowerCase() === "up";
           const trendColor = isUp ? "#28a745" : "#dc3545";
-          trendShape.getFill().setSolidFill(trendColor);
-          trendShape.getBorder().setTransparent();
-          setStyledText(trendShape, isUp ? "↑" : "↓", { size: 12, color: "#FFFFFF", bold: true, align: SlidesApp.ParagraphAlignment.CENTER });
-          try {
-            trendShape.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
-          } catch (e) {
-          }
+          requests.push(RequestFactory.createShape(slideId, tId, "ELLIPSE", trendX, currentY + rowHeight / 4, layout.pxToPt(25), layout.pxToPt(25)));
+          requests.push(RequestFactory.updateShapeProperties(tId, trendColor, "TRANSPARENT", 0, "MIDDLE"));
+          requests.push(...BatchTextStyleUtils.setText(slideId, tId, isUp ? "↑" : "↓", { size: 12, color: "#FFFFFF", bold: true, align: "CENTER" }, theme));
         }
         currentY += rowHeight;
       });
+      return requests;
     }
   }
   class BarCompareDiagramRenderer {
-    render(slide, data, area, settings, layout) {
+    render(slideId, data, area, settings, layout) {
+      const requests = [];
+      const theme = layout.getTheme();
       data.leftTitle || "導入前";
       data.rightTitle || "導入後";
       const stats = data.stats || [];
-      if (!stats.length) return;
+      if (!stats.length) return requests;
       generateCompareColors(settings.primaryColor);
       let maxValue = 0;
       stats.forEach((stat) => {
@@ -1648,11 +1598,8 @@ ${desc}`, {
       if (maxValue === 0) maxValue = 100;
       const labelColW = area.width * 0.2;
       area.width * 0.6;
-      area.width * 0.1;
-      area.width * 0.1;
       const rowHeight = Math.min(layout.pxToPt(80), area.height / stats.length);
       const barHeight = layout.pxToPt(18);
-      layout.pxToPt(4);
       let currentY = area.top;
       stats.forEach((stat, index) => {
         const label = stat.label || "";
@@ -1661,152 +1608,216 @@ ${desc}`, {
         const trend = stat.trend || null;
         const leftNum = parseFloat(String(leftValue).replace(/[^0-9.]/g, "")) || 0;
         const rightNum = parseFloat(String(rightValue).replace(/[^0-9.]/g, "")) || 0;
-        const labelShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, area.left, currentY, labelColW, rowHeight);
-        setStyledText(labelShape, label, {
+        const baseId = slideId + "_BAR_R" + index;
+        const labelId = baseId + "_LBL";
+        requests.push(RequestFactory.createShape(slideId, labelId, "TEXT_BOX", area.left, currentY, labelColW, rowHeight));
+        requests.push(...BatchTextStyleUtils.setText(slideId, labelId, label, {
           size: 14,
           bold: true,
-          align: SlidesApp.ParagraphAlignment.START,
-          color: DEFAULT_THEME.colors.textPrimary
-        });
-        try {
-          labelShape.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
-        } catch (e) {
-        }
+          align: "START",
+          color: theme.colors.textPrimary
+        }, theme));
+        requests.push(RequestFactory.updateShapeProperties(labelId, null, null, null, "MIDDLE"));
         const barLeft = area.left + labelColW + layout.pxToPt(20);
         const maxBarWidth = area.width - (labelColW + layout.pxToPt(80));
-        const barGap2 = layout.pxToPt(2);
-        const barY = currentY + (rowHeight - (barHeight * 2 + barGap2 * 2)) / 2;
+        const barGap = layout.pxToPt(2);
+        const barY = currentY + (rowHeight - (barHeight * 2 + barGap * 2)) / 2;
         const leftBarW = leftNum / maxValue * maxBarWidth;
         if (leftBarW > 0) {
-          const b = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, barLeft, barY, leftBarW, barHeight);
-          b.getFill().setSolidFill(DEFAULT_THEME.colors.neutralGray);
-          b.getBorder().setTransparent();
-          const v = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, barLeft + leftBarW + layout.pxToPt(5), barY - layout.pxToPt(2), layout.pxToPt(60), barHeight + layout.pxToPt(5));
-          setStyledText(v, leftValue, { size: 10, color: DEFAULT_THEME.colors.neutralGray });
+          const lbId = baseId + "_LB";
+          requests.push(RequestFactory.createShape(slideId, lbId, "RECTANGLE", barLeft, barY, leftBarW, barHeight));
+          requests.push(RequestFactory.updateShapeProperties(lbId, theme.colors.neutralGray, "TRANSPARENT"));
+          const lbvId = baseId + "_LBV";
+          requests.push(RequestFactory.createShape(slideId, lbvId, "TEXT_BOX", barLeft + leftBarW + layout.pxToPt(5), barY - layout.pxToPt(2), layout.pxToPt(60), barHeight + layout.pxToPt(5)));
+          requests.push(...BatchTextStyleUtils.setText(slideId, lbvId, leftValue, { size: 10, color: theme.colors.neutralGray }, theme));
         }
         const rightBarW = rightNum / maxValue * maxBarWidth;
         if (rightBarW > 0) {
-          const b = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, barLeft, barY + barHeight + barGap2, rightBarW, barHeight);
-          b.getFill().setSolidFill(settings.primaryColor);
-          b.getBorder().setTransparent();
-          const v = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, barLeft + rightBarW + layout.pxToPt(5), barY + barHeight + barGap2 - layout.pxToPt(2), layout.pxToPt(60), barHeight + layout.pxToPt(5));
-          setStyledText(v, rightValue, { size: 10, bold: true, color: settings.primaryColor });
+          const rbId = baseId + "_RB";
+          requests.push(RequestFactory.createShape(slideId, rbId, "RECTANGLE", barLeft, barY + barHeight + barGap, rightBarW, barHeight));
+          requests.push(RequestFactory.updateShapeProperties(rbId, settings.primaryColor, "TRANSPARENT"));
+          const rbvId = baseId + "_RBV";
+          requests.push(RequestFactory.createShape(slideId, rbvId, "TEXT_BOX", barLeft + rightBarW + layout.pxToPt(5), barY + barHeight + barGap - layout.pxToPt(2), layout.pxToPt(60), barHeight + layout.pxToPt(5)));
+          requests.push(...BatchTextStyleUtils.setText(slideId, rbvId, rightValue, { size: 10, bold: true, color: settings.primaryColor }, theme));
         }
         if (trend) {
           const trendX = area.left + area.width - layout.pxToPt(40);
-          const isUp = trend.toLowerCase() === "up";
-          const trendShape = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, trendX, currentY, layout.pxToPt(40), rowHeight);
+          const isUp = String(trend).toLowerCase() === "up";
+          const trId = baseId + "_TR";
+          requests.push(RequestFactory.createShape(slideId, trId, "TEXT_BOX", trendX, currentY, layout.pxToPt(40), rowHeight));
           const color = isUp ? "#2E7D32" : "#C62828";
           const sym = isUp ? "↑" : "↓";
-          setStyledText(trendShape, sym, {
-            size: 20,
-            bold: true,
-            color,
-            align: SlidesApp.ParagraphAlignment.CENTER
-          });
-          try {
-            trendShape.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
-          } catch (e) {
-          }
+          requests.push(...BatchTextStyleUtils.setText(slideId, trId, sym, { size: 20, bold: true, color, align: "CENTER" }, theme));
+          requests.push(RequestFactory.updateShapeProperties(trId, null, null, null, "MIDDLE"));
         }
         if (index < stats.length - 1) {
           const lineY = currentY + rowHeight;
-          const line = slide.insertLine(SlidesApp.LineCategory.STRAIGHT, area.left, lineY, area.left + area.width, lineY);
-          line.getLineFill().setSolidFill(DEFAULT_THEME.colors.ghostGray);
-          line.setWeight(0.5);
+          const lineId = baseId + "_LN";
+          requests.push(RequestFactory.createLine(slideId, lineId, area.left, lineY, area.left + area.width, lineY));
+          requests.push({
+            updateLineProperties: {
+              objectId: lineId,
+              lineProperties: {
+                lineFill: { solidFill: { color: { rgbColor: RequestFactory.toRgbColor(theme.colors.ghostGray) || { red: 0.9, green: 0.9, blue: 0.9 } } } },
+                weight: { magnitude: 0.5, unit: "PT" }
+              },
+              fields: "lineFill,weight"
+            }
+          });
         }
         currentY += rowHeight;
       });
+      return requests;
     }
   }
   class StepUpDiagramRenderer {
-    render(slide, data, area, settings, layout) {
+    render(slideId, data, area, settings, layout) {
+      const requests = [];
+      const theme = layout.getTheme();
       const items = data.items || [];
-      if (!items.length) return;
+      if (!items.length) return requests;
       const count = items.length;
-      const gap = layout.pxToPt(20);
       const validCount = Math.min(count, 5);
-      const stepWidth = (area.width - gap * (validCount - 1)) / validCount;
-      area.height / validCount;
+      const gap = 20;
+      const barWidth = (area.width - gap * (validCount - 1)) / validCount;
+      const maxBarH = area.height * 0.7;
+      const minBarH = area.height * 0.3;
       items.slice(0, validCount).forEach((item, i) => {
-        const x = area.left + i * (stepWidth + gap);
-        const totalRise = area.height * 0.6;
-        const yStep = totalRise / (validCount - 1 || 1);
-        const y = area.top + area.height - layout.pxToPt(100) - i * yStep;
-        const lineW = stepWidth;
-        const line = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, x, y, lineW, layout.pxToPt(4));
-        line.getFill().setSolidFill(settings.primaryColor);
-        line.getBorder().setTransparent();
-        const numStr = String(i + 1).padEnd(2, "0");
-        const numBoxH = layout.pxToPt(40);
-        const numBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x, y - numBoxH + layout.pxToPt(5), lineW, numBoxH);
-        setStyledText(numBox, numStr, {
-          size: 32,
+        const ratio = i / (validCount - 1 || 1);
+        const barH = minBarH + (maxBarH - minBarH) * ratio;
+        const x = area.left + i * (barWidth + gap);
+        const y = area.top + area.height - barH;
+        const unique = `_STEP_${i}`;
+        const barId = slideId + unique + "_BAR";
+        const numId = slideId + unique + "_NUM";
+        const titleId = slideId + unique + "_TITLE";
+        const descId = slideId + unique + "_DESC";
+        requests.push(RequestFactory.createShape(slideId, barId, "RECTANGLE", x, y, barWidth, barH));
+        requests.push(RequestFactory.updateShapeProperties(barId, settings.primaryColor, "TRANSPARENT"));
+        const numStr = String(i + 1).padStart(2, "0");
+        requests.push(RequestFactory.createShape(slideId, numId, "TEXT_BOX", x, y + barH - 50, barWidth, 40));
+        requests.push({ insertText: { objectId: numId, text: numStr } });
+        requests.push(RequestFactory.updateTextStyle(numId, {
+          fontSize: 32,
           bold: true,
-          color: settings.primaryColor,
-          align: SlidesApp.ParagraphAlignment.START
-        });
-        try {
-          numBox.setContentAlignment(SlidesApp.ContentAlignment.BOTTOM);
-        } catch (e) {
-        }
-        const dropLine = slide.insertLine(SlidesApp.LineCategory.STRAIGHT, x, y + layout.pxToPt(2), x, area.top + area.height);
-        dropLine.getLineFill().setSolidFill(DEFAULT_THEME.colors.ghostGray);
-        dropLine.setDashStyle(SlidesApp.DashStyle.DOT);
-        dropLine.setWeight(1);
-        const titleContentY = y + layout.pxToPt(10);
-        const textH = area.top + area.height - titleContentY;
-        const titleHeight = layout.pxToPt(25);
-        const textBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x, titleContentY, stepWidth + gap / 2, titleHeight);
-        const title = item.title || item.label || "";
-        const desc = item.desc || item.description || item.text || "";
-        setStyledText(textBox, `${title.toUpperCase()}`, {
-          size: 14,
+          color: "#FFFFFF",
+          // High contrast
+          fontFamily: theme.fonts.family
+        }));
+        requests.push({ updateParagraphStyle: { objectId: numId, style: { alignment: "CENTER" }, fields: "alignment" } });
+        const titleContent = typeof item === "string" ? item : item.title || item.label || "";
+        requests.push(RequestFactory.createShape(slideId, titleId, "TEXT_BOX", x, y - 60, barWidth, 50));
+        requests.push({ insertText: { objectId: titleId, text: titleContent } });
+        requests.push(RequestFactory.updateTextStyle(titleId, {
+          fontSize: 16,
           bold: true,
-          color: DEFAULT_THEME.colors.textPrimary
-        });
-        try {
-          textBox.setContentAlignment(SlidesApp.ContentAlignment.TOP);
-        } catch (e) {
-        }
+          color: theme.colors.textPrimary || "#333333",
+          fontFamily: theme.fonts.family
+        }));
+        requests.push({ updateParagraphStyle: { objectId: titleId, style: { alignment: "CENTER" }, fields: "alignment" } });
+        requests.push({ updateShapeProperties: { objectId: titleId, shapeProperties: { contentAlignment: "BOTTOM" }, fields: "contentAlignment" } });
+        const desc = typeof item === "object" ? item.desc || item.description : null;
         if (desc) {
-          const descBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x, titleContentY + titleHeight, stepWidth + gap / 2, textH - titleHeight);
-          setStyledText(descBox, desc, {
-            size: 12,
-            color: DEFAULT_THEME.colors.textSmallFont
-          });
-          try {
-            descBox.setContentAlignment(SlidesApp.ContentAlignment.TOP);
-          } catch (e) {
+          const descBoxH = Math.min(barH - 60, 100);
+          if (descBoxH > 30) {
+            requests.push(RequestFactory.createShape(slideId, descId, "TEXT_BOX", x + 5, y + 10, barWidth - 10, descBoxH));
+            requests.push({ insertText: { objectId: descId, text: desc } });
+            requests.push(RequestFactory.updateTextStyle(descId, {
+              fontSize: 12,
+              color: "#FFFFFF",
+              fontFamily: theme.fonts.family
+            }));
+            requests.push({ updateParagraphStyle: { objectId: descId, style: { alignment: "CENTER" }, fields: "alignment" } });
+            requests.push({ updateShapeProperties: { objectId: descId, shapeProperties: { contentAlignment: "TOP" }, fields: "contentAlignment" } });
           }
         }
       });
+      return requests;
+    }
+  }
+  class AgendaDiagramRenderer {
+    render(slideId, data, area, settings, layout) {
+      const requests = [];
+      const theme = layout.getTheme();
+      const items = data.items || [];
+      if (items.length === 0) return requests;
+      const COLUMN_COUNT = 2;
+      const ROW_COUNT = Math.ceil(items.length / COLUMN_COUNT);
+      const GAP_X = 40;
+      const GAP_Y = 25;
+      const itemWidth = (area.width - GAP_X * (COLUMN_COUNT - 1)) / COLUMN_COUNT;
+      const itemHeight = Math.min((area.height - GAP_Y * (ROW_COUNT - 1)) / ROW_COUNT, 80);
+      items.forEach((itemText, index) => {
+        const col = index % COLUMN_COUNT;
+        const row = Math.floor(index / COLUMN_COUNT);
+        const x = area.left + col * (itemWidth + GAP_X);
+        const y = area.top + row * (itemHeight + GAP_Y);
+        const uniqueId = `_AG_${index}`;
+        const numShapeId = slideId + uniqueId + "_NUM";
+        const cardShapeId = slideId + uniqueId + "_CARD";
+        const numberSize = itemHeight;
+        requests.push(RequestFactory.createShape(slideId, numShapeId, "RECTANGLE", x, y, numberSize, numberSize));
+        requests.push(RequestFactory.updateShapeProperties(numShapeId, settings.primaryColor, "TRANSPARENT"));
+        const numStr = (index + 1).toString().padStart(2, "0");
+        requests.push({ insertText: { objectId: numShapeId, text: numStr } });
+        requests.push(RequestFactory.updateTextStyle(numShapeId, {
+          fontSize: 28,
+          bold: true,
+          color: "#FFFFFF",
+          fontFamily: theme.fonts.family
+        }));
+        requests.push({ updateParagraphStyle: { objectId: numShapeId, style: { alignment: "CENTER" }, fields: "alignment" } });
+        requests.push({ updateShapeProperties: { objectId: numShapeId, shapeProperties: { contentAlignment: "MIDDLE" }, fields: "contentAlignment" } });
+        const textWidth = itemWidth - numberSize;
+        const textX = x + numberSize;
+        requests.push(RequestFactory.createShape(slideId, cardShapeId, "RECTANGLE", textX, y, textWidth, itemHeight));
+        requests.push(RequestFactory.updateShapeProperties(cardShapeId, settings.card_bg || "#F5F5F5", "TRANSPARENT"));
+        requests.push({ insertText: { objectId: cardShapeId, text: itemText } });
+        requests.push(RequestFactory.updateTextStyle(cardShapeId, {
+          fontSize: 18,
+          color: settings.text_primary || "#333333",
+          fontFamily: theme.fonts.family
+        }));
+        requests.push({
+          updateShapeProperties: {
+            objectId: cardShapeId,
+            shapeProperties: { contentAlignment: "MIDDLE" },
+            fields: "contentAlignment"
+          }
+        });
+      });
+      return requests;
     }
   }
   class LanesDiagramRenderer {
-    render(slide, data, area, settings, layout) {
+    render(slideId, data, area, settings, layout) {
+      const requests = [];
+      const theme = layout.getTheme();
       const lanes = data.lanes || [];
       const n = Math.max(1, lanes.length);
-      const { laneGapPx, lanePadPx, laneTitleHeightPx, cardGapPx, cardMinHeightPx, cardMaxHeightPx, arrowHeightPx, arrowGapPx } = DEFAULT_THEME.diagram;
+      const { laneGapPx, lanePadPx, laneTitleHeightPx, cardGapPx, cardMinHeightPx, cardMaxHeightPx, arrowHeightPx, arrowGapPx } = theme.diagram;
       const px = (p) => layout.pxToPt(p);
       const laneW = (area.width - px(laneGapPx) * (n - 1)) / n;
       const cardBoxes = [];
       for (let j = 0; j < n; j++) {
         const lane = lanes[j] || { title: "", items: [] };
         const left = area.left + j * (laneW + px(laneGapPx));
-        const lt = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, left, area.top, laneW, px(laneTitleHeightPx));
-        lt.getFill().setSolidFill(settings.primaryColor);
-        lt.getBorder().getLineFill().setSolidFill(settings.primaryColor);
-        setStyledText(lt, lane.title || "", { size: DEFAULT_THEME.fonts.sizes.laneTitle, bold: true, color: DEFAULT_THEME.colors.backgroundGray, align: SlidesApp.ParagraphAlignment.CENTER });
-        try {
-          lt.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
-        } catch (e) {
-        }
+        const laneIdPrefix = slideId + `_LANE_${j}`;
+        const ltId = laneIdPrefix + "_HEAD";
+        requests.push(RequestFactory.createShape(slideId, ltId, "RECTANGLE", left, area.top, laneW, px(laneTitleHeightPx)));
+        requests.push(RequestFactory.updateShapeProperties(ltId, settings.primaryColor, settings.primaryColor, 1));
+        requests.push(...BatchTextStyleUtils.setText(slideId, ltId, lane.title || "", {
+          size: theme.fonts.sizes.laneTitle,
+          bold: true,
+          color: theme.colors.backgroundGray,
+          align: "CENTER"
+        }, theme));
+        requests.push(RequestFactory.updateShapeProperties(ltId, null, null, null, "MIDDLE"));
         const laneBodyTop = area.top + px(laneTitleHeightPx);
         const laneBodyHeight = area.height - px(laneTitleHeightPx);
-        const laneBg = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, left, laneBodyTop, laneW, laneBodyHeight);
-        laneBg.getFill().setSolidFill(DEFAULT_THEME.colors.backgroundGray);
-        laneBg.getBorder().getLineFill().setSolidFill(DEFAULT_THEME.colors.laneBorder);
+        const lbId = laneIdPrefix + "_BODY";
+        requests.push(RequestFactory.createShape(slideId, lbId, "RECTANGLE", left, laneBodyTop, laneW, laneBodyHeight));
+        requests.push(RequestFactory.updateShapeProperties(lbId, theme.colors.backgroundGray, theme.colors.laneBorder));
         const items = Array.isArray(lane.items) ? lane.items : [];
         const rows = Math.max(1, items.length);
         const availH = laneBodyHeight - px(lanePadPx) * 2;
@@ -1816,14 +1827,13 @@ ${desc}`, {
         cardBoxes[j] = [];
         for (let i = 0; i < rows; i++) {
           const cardTop = firstTop + i * (cardH + px(cardGapPx));
-          const card = slide.insertShape(SlidesApp.ShapeType.ROUND_RECTANGLE, left + px(lanePadPx), cardTop, laneW - px(lanePadPx) * 2, cardH);
-          card.getFill().setSolidFill(DEFAULT_THEME.colors.backgroundGray);
-          card.getBorder().getLineFill().setSolidFill(DEFAULT_THEME.colors.cardBorder);
-          setStyledText(card, items[i] || "", { size: DEFAULT_THEME.fonts.sizes.body });
-          try {
-            card.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
-          } catch (e) {
-          }
+          const cardId = laneIdPrefix + `_CARD_${i}`;
+          requests.push(RequestFactory.createShape(slideId, cardId, "ROUND_RECTANGLE", left + px(lanePadPx), cardTop, laneW - px(lanePadPx) * 2, cardH));
+          requests.push(RequestFactory.updateShapeProperties(cardId, theme.colors.backgroundGray, theme.colors.cardBorder));
+          requests.push(...BatchTextStyleUtils.setText(slideId, cardId, items[i] || "", {
+            size: theme.fonts.sizes.body
+          }, theme));
+          requests.push(RequestFactory.updateShapeProperties(cardId, null, null, null, "MIDDLE"));
           cardBoxes[j][i] = {
             left: left + px(lanePadPx),
             top: cardTop,
@@ -1836,48 +1846,86 @@ ${desc}`, {
       for (let j = 0; j < n - 1; j++) {
         for (let i = 0; i < maxRows; i++) {
           if (cardBoxes[j] && cardBoxes[j][i] && cardBoxes[j + 1] && cardBoxes[j + 1][i]) {
-            drawArrowBetweenRects(slide, cardBoxes[j][i], cardBoxes[j + 1][i], px(arrowHeightPx), px(arrowGapPx), settings);
+            const boxA = cardBoxes[j][i];
+            const boxB = cardBoxes[j + 1][i];
+            const startX = boxA.left + boxA.width;
+            const startY = boxA.top + boxA.height / 2;
+            const endX = boxB.left;
+            const endY = boxB.top + boxB.height / 2;
+            const arrowId = slideId + `_ARR_${j}_${i}`;
+            requests.push(RequestFactory.createLine(slideId, arrowId, startX, startY, endX, endY));
+            const arrowColor = RequestFactory.toRgbColor(settings.primaryColor) || { red: 0, green: 0, blue: 0 };
+            requests.push({
+              updateLineProperties: {
+                objectId: arrowId,
+                lineProperties: {
+                  lineFill: { solidFill: { color: { rgbColor: arrowColor } } },
+                  weight: { magnitude: 2, unit: "PT" },
+                  endArrow: "FILL_ARROW"
+                },
+                fields: "lineFill,weight,endArrow"
+              }
+            });
           }
         }
       }
+      return requests;
     }
   }
   class FlowChartDiagramRenderer {
-    render(slide, data, area, settings, layout) {
+    render(slideId, data, area, settings, layout) {
+      const requests = [];
+      const theme = layout.getTheme();
       const steps = data.steps || data.items || [];
-      if (!steps.length) return;
+      if (!steps.length) return requests;
       const count = steps.length;
       const gap = 30;
       const boxWidth = (area.width - gap * (count - 1)) / count;
       const boxHeight = 80;
       const y = area.top + (area.height - boxHeight) / 2;
-      steps.forEach((step, i) => {
+      for (let i = 0; i < count; i++) {
+        const step = steps[i];
         const x = area.left + i * (boxWidth + gap);
-        const shape = slide.insertShape(SlidesApp.ShapeType.ROUND_RECTANGLE, x, y, boxWidth, boxHeight);
-        shape.getFill().setSolidFill(DEFAULT_THEME.colors.backgroundGray);
-        shape.getBorder().getLineFill().setSolidFill(settings.primaryColor);
-        shape.getBorder().setWeight(2);
-        setStyledText(shape, typeof step === "string" ? step : step.label || "", { size: DEFAULT_THEME.fonts.sizes.body, align: SlidesApp.ParagraphAlignment.CENTER });
-        try {
-          shape.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
-        } catch (e) {
-        }
+        const baseId = slideId + `_FLOW_${i}`;
+        const boxId = baseId + "_BOX";
+        const arrowId = baseId + "_ARR";
+        requests.push(RequestFactory.createShape(slideId, boxId, "ROUND_RECTANGLE", x, y, boxWidth, boxHeight));
+        requests.push(RequestFactory.updateShapeProperties(boxId, theme.colors.backgroundGray, settings.primaryColor, 2, "MIDDLE"));
+        const label = typeof step === "string" ? step : step.label || "";
+        requests.push(...BatchTextStyleUtils.setText(slideId, boxId, label, {
+          size: theme.fonts.sizes.body,
+          align: "CENTER",
+          color: theme.colors.textPrimary
+        }, theme));
         if (i < count - 1) {
           const ax = x + boxWidth;
           const ay = y + boxHeight / 2;
           const bx = x + boxWidth + gap;
           const by = ay;
-          const line = slide.insertLine(SlidesApp.LineCategory.STRAIGHT, ax, ay, bx, by);
-          line.setEndArrow(SlidesApp.ArrowStyle.FILL_ARROW);
-          line.getLineFill().setSolidFill(DEFAULT_THEME.colors.neutralGray);
+          requests.push(RequestFactory.createLine(slideId, arrowId, ax, ay, bx, by));
+          requests.push({
+            updateLineProperties: {
+              objectId: arrowId,
+              lineProperties: {
+                lineFill: { solidFill: { color: { rgbColor: { red: 0.6, green: 0.6, blue: 0.6 } } } },
+                // Neutral Gray (approx)
+                weight: { magnitude: 1, unit: "PT" },
+                endArrow: "ARROW"
+              },
+              fields: "lineFill,weight,endArrow"
+            }
+          });
         }
-      });
+      }
+      return requests;
     }
   }
   class KPIDiagramRenderer {
-    render(slide, data, area, settings, layout) {
+    render(slideId, data, area, settings, layout) {
+      const requests = [];
+      const theme = layout.getTheme();
       const items = data.items || [];
-      if (!items.length) return;
+      if (!items.length) return requests;
       const cols = items.length > 4 ? 4 : items.length || 1;
       const gap = layout.pxToPt(40);
       const cardW = (area.width - gap * (cols - 1)) / cols;
@@ -1885,49 +1933,56 @@ ${desc}`, {
       const y = area.top + (area.height - cardH) / 2 + layout.pxToPt(20);
       items.forEach((item, i) => {
         const x = area.left + i * (cardW + gap);
+        const baseId = slideId + `_KPI_${i}`;
         if (i > 0) {
           const lineH = layout.pxToPt(100);
           const lineY = y + (cardH - lineH) / 2;
           const lineX = x - gap / 2;
-          const line = slide.insertLine(SlidesApp.LineCategory.STRAIGHT, lineX, lineY, lineX, lineY + lineH);
-          line.getLineFill().setSolidFill(DEFAULT_THEME.colors.ghostGray);
-          line.setWeight(1);
+          const lineId = baseId + "_LN";
+          requests.push(RequestFactory.createLine(slideId, lineId, lineX, lineY, lineX, lineY + lineH));
+          requests.push({
+            updateLineProperties: {
+              objectId: lineId,
+              lineProperties: {
+                lineFill: { solidFill: { color: { rgbColor: { red: 0.9, green: 0.9, blue: 0.95 } } } },
+                // Ghost Gray approx
+                weight: { magnitude: 1, unit: "PT" }
+              },
+              fields: "lineFill,weight"
+            }
+          });
         }
         const labelH = layout.pxToPt(20);
-        const labelBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x, y + layout.pxToPt(5), cardW, labelH);
-        setStyledText(labelBox, (item.label || "METRIC").toUpperCase(), {
+        const labelId = baseId + "_LBL";
+        requests.push(RequestFactory.createShape(slideId, labelId, "TEXT_BOX", x, y + layout.pxToPt(5), cardW, labelH));
+        requests.push(RequestFactory.updateShapeProperties(labelId, null, null, null, "BOTTOM"));
+        requests.push(...BatchTextStyleUtils.setText(slideId, labelId, (item.label || "METRIC").toUpperCase(), {
           size: 11,
-          // Slightly smaller
-          color: DEFAULT_THEME.colors.neutralGray,
-          align: SlidesApp.ParagraphAlignment.CENTER,
+          color: theme.colors.neutralGray,
+          align: "CENTER",
           bold: true
-        });
-        try {
-          labelBox.setContentAlignment(SlidesApp.ContentAlignment.BOTTOM);
-        } catch (e) {
-        }
+        }, theme));
         const valueH = layout.pxToPt(90);
-        const valueBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x, y + labelH, cardW, valueH);
+        const valueId = baseId + "_VAL";
+        requests.push(RequestFactory.createShape(slideId, valueId, "TEXT_BOX", x, y + labelH, cardW, valueH));
+        requests.push(RequestFactory.updateShapeProperties(valueId, null, null, null, "TOP"));
         const valStr = String(item.value || "0");
         let fontSize = 72;
         if (valStr.length > 4) fontSize = 60;
         if (valStr.length > 6) fontSize = 48;
         if (valStr.length > 10) fontSize = 36;
-        setStyledText(valueBox, valStr, {
+        requests.push(...BatchTextStyleUtils.setText(slideId, valueId, valStr, {
           size: fontSize,
           bold: true,
           color: settings.primaryColor,
-          align: SlidesApp.ParagraphAlignment.CENTER,
+          align: "CENTER",
           fontType: "lato"
-        });
-        try {
-          valueBox.setContentAlignment(SlidesApp.ContentAlignment.TOP);
-        } catch (e) {
-        }
+        }, theme));
         if (item.change || item.status) {
           const statusH = layout.pxToPt(30);
-          const statusBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, x, y + labelH + valueH, cardW, statusH);
-          let color = DEFAULT_THEME.colors.neutralGray;
+          const statusId = baseId + "_STS";
+          requests.push(RequestFactory.createShape(slideId, statusId, "TEXT_BOX", x, y + labelH + valueH, cardW, statusH));
+          let color = theme.colors.neutralGray;
           let prefix = "";
           if (item.status === "good") {
             color = "#2E7D32";
@@ -1937,84 +1992,151 @@ ${desc}`, {
             color = "#C62828";
             prefix = "↓ ";
           }
-          setStyledText(statusBox, prefix + (item.change || ""), {
+          requests.push(...BatchTextStyleUtils.setText(slideId, statusId, prefix + (item.change || ""), {
             size: 14,
             bold: true,
             color,
-            align: SlidesApp.ParagraphAlignment.CENTER
-          });
+            align: "CENTER"
+          }, theme));
         }
       });
+      return requests;
     }
   }
   class TableDiagramRenderer {
-    render(slide, data, area, settings, layout) {
+    render(slideId, data, area, settings, layout) {
+      const requests = [];
       const headers = data.headers || [];
       const rows = data.rows || [];
-      const numCols = Math.max(
-        headers.length,
-        rows.length > 0 && Array.isArray(rows[0]) ? rows[0].length : 0
-      );
-      const numRows = rows.length + (headers.length ? 1 : 0);
-      Logger.log(`Table: ${numRows} rows x ${numCols} cols, headers: ${JSON.stringify(headers)}`);
-      Logger.log(`Table area: left=${area.left}, top=${area.top}, width=${area.width}, height=${area.height}`);
-      if (numRows === 0 || numCols === 0) return;
-      const table = slide.insertTable(numRows, numCols);
-      table.setLeft(area.left);
-      table.setTop(area.top);
-      table.setWidth(area.width);
       const theme = layout.getTheme();
-      for (let r = 0; r < numRows; r++) {
-        for (let c = 0; c < numCols; c++) {
-          const cell = table.getCell(r, c);
-          cell.getFill().setTransparent();
-          cell.getBorderRight().setTransparent();
-          cell.getBorderLeft().setTransparent();
-          cell.getBorderTop().setTransparent();
-          const borderBottom = cell.getBorderBottom();
-          borderBottom.setSolidFill(theme.colors.ghostGray);
-          borderBottom.setWeight(1);
+      const numCols = Math.max(headers.length, rows.length > 0 && Array.isArray(rows[0]) ? rows[0].length : 0);
+      const numRows = rows.length + (headers.length ? 1 : 0);
+      if (numRows === 0 || numCols === 0) return requests;
+      const tableId = slideId + "_TBL";
+      requests.push({
+        createTable: {
+          objectId: tableId,
+          elementProperties: {
+            pageObjectId: slideId,
+            size: { width: { magnitude: area.width, unit: "PT" }, height: { magnitude: area.height, unit: "PT" } },
+            transform: { scaleX: 1, scaleY: 1, translateX: area.left, translateY: area.top, unit: "PT" }
+          },
+          rows: numRows,
+          columns: numCols
         }
-      }
+      });
+      requests.push({
+        updateTableBorderProperties: {
+          objectId: tableId,
+          tableRange: { location: { rowIndex: 0, columnIndex: 0 }, rowSpan: numRows, columnSpan: numCols },
+          borderPosition: "ALL",
+          tableBorderProperties: {
+            tableBorderFill: { solidFill: { color: { rgbColor: { red: 0, green: 0, blue: 0 } } } },
+            // Should accept transparent?
+            // Actually API handles transparency via propertyState='NOT_RENDERED' or fill alpha?
+            // Let's set fill to NOT_RENDERED doesn't exist for TableBorderFill? 
+            // Actually it does: "solidFill: { alpha: 0 }" or similar.
+            // Or set weight to 0.
+            weight: { magnitude: 0, unit: "PT" }
+          },
+          fields: "weight"
+        }
+      });
       let rowIndex = 0;
       if (headers.length) {
-        for (let c = 0; c < numCols; c++) {
-          const cell = table.getCell(0, c);
-          cell.getText().setText(headers[c] || "");
-          const style = cell.getText().getTextStyle();
-          style.setFontFamily(theme.fonts.family);
-          style.setBold(true);
-          style.setFontSize(14);
-          style.setForegroundColor(settings.primaryColor);
-          cell.getBorderBottom().setSolidFill(settings.primaryColor);
-          cell.getBorderBottom().setWeight(3);
-          try {
-            cell.setContentAlignment(SlidesApp.ContentAlignment.BOTTOM);
-          } catch (e) {
+        headers.forEach((header, c) => {
+          const text = header || "";
+          if (text) {
+            requests.push({ insertText: { objectId: tableId, cellLocation: { rowIndex: 0, columnIndex: c }, text } });
+            requests.push(RequestFactory.updateTextStyle(tableId, {
+              bold: true,
+              fontSize: 14,
+              color: "#FFFFFF",
+              fontFamily: theme.fonts.family
+            }));
+            requests.push({
+              updateTextStyle: {
+                objectId: tableId,
+                cellLocation: { rowIndex: 0, columnIndex: c },
+                style: {
+                  bold: true,
+                  fontSize: { magnitude: 14, unit: "PT" },
+                  foregroundColor: { opaqueColor: { themeColor: "BACKGROUND1" } },
+                  fontFamily: theme.fonts.family
+                },
+                fields: "bold,fontSize,foregroundColor,fontFamily"
+              }
+            });
           }
-        }
+          requests.push({
+            updateTableCellProperties: {
+              objectId: tableId,
+              tableRange: { location: { rowIndex: 0, columnIndex: c }, rowSpan: 1, columnSpan: 1 },
+              tableCellProperties: {
+                tableCellBackgroundFill: { solidFill: { color: { themeColor: "ACCENT1" } } },
+                contentAlignment: "MIDDLE"
+              },
+              fields: "tableCellBackgroundFill,contentAlignment"
+            }
+          });
+        });
         rowIndex++;
       }
       rows.forEach((row, rIdx) => {
         var _a;
+        const actualRowIndex = rowIndex + rIdx;
+        const isEven = actualRowIndex % 2 === 0;
+        const bgFill = isEven ? { solidFill: { color: { rgbColor: { red: 0.97, green: 0.97, blue: 0.98 } } } } : { solidFill: { color: { themeColor: "BACKGROUND1" } } };
         for (let c = 0; c < numCols; c++) {
-          const cell = table.getCell(rowIndex, c);
-          cell.getText().setText(String((_a = row[c]) != null ? _a : ""));
-          const rowStyle = cell.getText().getTextStyle();
-          rowStyle.setFontFamily(theme.fonts.family);
-          rowStyle.setFontSize(12);
-          rowStyle.setForegroundColor(theme.colors.textPrimary);
-          try {
-            cell.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
-          } catch (e) {
+          const cellText = String((_a = row[c]) != null ? _a : "");
+          if (cellText) {
+            requests.push({ insertText: { objectId: tableId, cellLocation: { rowIndex: actualRowIndex, columnIndex: c }, text: cellText } });
+            requests.push({
+              updateTextStyle: {
+                objectId: tableId,
+                cellLocation: { rowIndex: actualRowIndex, columnIndex: c },
+                style: {
+                  fontSize: { magnitude: 12, unit: "PT" },
+                  foregroundColor: { opaqueColor: { themeColor: "TEXT1" } },
+                  fontFamily: theme.fonts.family
+                },
+                fields: "fontSize,foregroundColor,fontFamily"
+              }
+            });
           }
+          requests.push({
+            updateTableCellProperties: {
+              objectId: tableId,
+              tableRange: { location: { rowIndex: actualRowIndex, columnIndex: c }, rowSpan: 1, columnSpan: 1 },
+              tableCellProperties: {
+                tableCellBackgroundFill: bgFill,
+                contentAlignment: "MIDDLE"
+              },
+              fields: "tableCellBackgroundFill,contentAlignment"
+            }
+          });
+          requests.push({
+            updateTableBorderProperties: {
+              objectId: tableId,
+              tableRange: { location: { rowIndex: actualRowIndex, columnIndex: c }, rowSpan: 1, columnSpan: 1 },
+              borderPosition: "BOTTOM",
+              tableBorderProperties: {
+                tableBorderFill: { solidFill: { color: { rgbColor: { red: 0.9, green: 0.9, blue: 0.9 } } } },
+                weight: { magnitude: 1, unit: "PT" },
+                dashStyle: "SOLID"
+              },
+              fields: "tableBorderFill,weight,dashStyle"
+            }
+          });
         }
-        rowIndex++;
       });
+      return requests;
     }
   }
   class FAQDiagramRenderer {
-    render(slide, data, area, settings, layout) {
+    render(slideId, data, area, settings, layout) {
+      const requests = [];
+      const theme = layout.getTheme();
       const items = data.items || data.points || [];
       const parsedItems = [];
       if (items.length && typeof items[0] === "string") {
@@ -2026,94 +2148,115 @@ ${desc}`, {
       } else {
         items.forEach((it) => parsedItems.push(it));
       }
-      if (!parsedItems.length) return;
+      if (!parsedItems.length) return requests;
       const gap = layout.pxToPt(30);
       const itemH = (area.height - gap * (parsedItems.length - 1)) / parsedItems.length;
       parsedItems.forEach((item, i) => {
         const y = area.top + i * (itemH + gap);
         const qStr = (item.q || "").replace(/^[QA][:. ]+/, "");
         const aStr = (item.a || "").replace(/^[QA][:. ]+/, "");
-        const qInd = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, area.left, y, layout.pxToPt(30), layout.pxToPt(30));
-        setStyledText(qInd, "Q.", { size: 16, bold: true, color: settings.primaryColor });
-        const qBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, area.left + layout.pxToPt(30), y, area.width - layout.pxToPt(30), layout.pxToPt(40));
-        setStyledText(qBox, qStr, { size: 14, bold: true, color: DEFAULT_THEME.colors.textPrimary });
+        const baseId = slideId + `_FAQ_${i}`;
+        const qIndId = baseId + "_QI";
+        requests.push(RequestFactory.createShape(slideId, qIndId, "TEXT_BOX", area.left, y, layout.pxToPt(30), layout.pxToPt(30)));
+        requests.push(...BatchTextStyleUtils.setText(slideId, qIndId, "Q.", { size: 16, bold: true, color: settings.primaryColor }, theme));
+        const qBoxId = baseId + "_QC";
+        requests.push(RequestFactory.createShape(slideId, qBoxId, "TEXT_BOX", area.left + layout.pxToPt(30), y, area.width - layout.pxToPt(30), layout.pxToPt(40)));
+        requests.push(...BatchTextStyleUtils.setText(slideId, qBoxId, qStr, { size: 14, bold: true, color: theme.colors.textPrimary }, theme));
         const aY = y + layout.pxToPt(30);
-        const aInd = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, area.left, aY, layout.pxToPt(30), layout.pxToPt(30));
-        setStyledText(aInd, "A.", { size: 16, bold: true, color: DEFAULT_THEME.colors.neutralGray });
+        const aIndId = baseId + "_AI";
+        requests.push(RequestFactory.createShape(slideId, aIndId, "TEXT_BOX", area.left, aY, layout.pxToPt(30), layout.pxToPt(30)));
+        requests.push(...BatchTextStyleUtils.setText(slideId, aIndId, "A.", { size: 16, bold: true, color: theme.colors.neutralGray }, theme));
         const aBoxHasHeight = itemH - layout.pxToPt(40);
         if (aBoxHasHeight > 10) {
-          const aBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, area.left + layout.pxToPt(30), aY, area.width - layout.pxToPt(30), aBoxHasHeight);
-          setStyledText(aBox, aStr, { size: 12, color: DEFAULT_THEME.colors.textPrimary });
-          try {
-            aBox.setContentAlignment(SlidesApp.ContentAlignment.TOP);
-          } catch (e) {
-          }
+          const aBoxId = baseId + "_AC";
+          requests.push(RequestFactory.createShape(slideId, aBoxId, "TEXT_BOX", area.left + layout.pxToPt(30), aY, area.width - layout.pxToPt(30), aBoxHasHeight));
+          requests.push(...BatchTextStyleUtils.setText(slideId, aBoxId, aStr, { size: 12, color: theme.colors.textPrimary }, theme));
+          requests.push(RequestFactory.updateShapeProperties(aBoxId, null, null, null, "TOP"));
         }
         if (i < parsedItems.length - 1) {
           const lineY = y + itemH + gap / 2;
-          const line = slide.insertLine(SlidesApp.LineCategory.STRAIGHT, area.left, lineY, area.left + area.width, lineY);
-          line.getLineFill().setSolidFill(DEFAULT_THEME.colors.ghostGray);
-          line.setWeight(0.5);
+          const lineId = baseId + "_LN";
+          requests.push(RequestFactory.createLine(slideId, lineId, area.left, lineY, area.left + area.width, lineY));
+          requests.push({
+            updateLineProperties: {
+              objectId: lineId,
+              lineProperties: {
+                lineFill: { solidFill: { color: { rgbColor: { red: 0.9, green: 0.9, blue: 0.9 } } } },
+                // Approx Ghost Gray
+                weight: { magnitude: 0.5, unit: "PT" }
+              },
+              fields: "lineFill,weight"
+            }
+          });
         }
       });
+      return requests;
     }
   }
   class QuoteDiagramRenderer {
-    render(slide, data, area, settings, layout) {
+    render(slideId, data, area, settings, layout) {
+      const requests = [];
+      const theme = layout.getTheme();
       const text = data.text || data.points && data.points[0] || "";
       const author = data.author || data.points && data.points[1] || "";
       const quoteSize = layout.pxToPt(200);
-      const quoteMark = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, area.left + layout.pxToPt(20), area.top - layout.pxToPt(40), quoteSize, quoteSize);
-      setStyledText(quoteMark, "“", {
+      const quoteId = slideId + "_QUOTE_MARK";
+      requests.push(RequestFactory.createShape(slideId, quoteId, "TEXT_BOX", area.left + layout.pxToPt(20), area.top - layout.pxToPt(40), quoteSize, quoteSize));
+      requests.push(...BatchTextStyleUtils.setText(slideId, quoteId, "“", {
         size: 200,
         color: "#F0F0F0",
-        // Very faint
-        fontType: "georgia",
-        // Serif
+        fontFamily: "Georgia",
         bold: true
-      });
-      quoteMark.sendToBack();
+      }, theme));
       const contentW = area.width * 0.9;
       const contentX = area.left + (area.width - contentW) / 2;
       const textTop = area.top + layout.pxToPt(60);
-      const quoteBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, contentX, textTop, contentW, layout.pxToPt(160));
-      setStyledText(quoteBox, text, {
+      const textId = slideId + "_QUOTE_TEXT";
+      requests.push(RequestFactory.createShape(slideId, textId, "TEXT_BOX", contentX, textTop, contentW, layout.pxToPt(160)));
+      requests.push(...BatchTextStyleUtils.setText(slideId, textId, text, {
         size: 32,
         bold: false,
-        color: DEFAULT_THEME.colors.textPrimary,
-        align: SlidesApp.ParagraphAlignment.CENTER,
-        fontType: "georgia"
-      });
-      try {
-        quoteBox.setContentAlignment(SlidesApp.ContentAlignment.BOTTOM);
-      } catch (e) {
-      }
+        // Explicit false
+        color: theme.colors.textPrimary,
+        align: "CENTER",
+        fontFamily: "Georgia"
+      }, theme));
+      requests.push(RequestFactory.updateShapeProperties(textId, null, null, null, "BOTTOM"));
       const lineW = layout.pxToPt(40);
       const lineX = area.left + (area.width - lineW) / 2;
       const lineY = textTop + layout.pxToPt(165);
-      const line = slide.insertLine(SlidesApp.LineCategory.STRAIGHT, lineX, lineY, lineX + lineW, lineY);
-      line.getLineFill().setSolidFill(settings.primaryColor);
-      line.setWeight(2);
-      if (author) {
-        const authorBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, contentX, lineY + layout.pxToPt(5), contentW, layout.pxToPt(30));
-        setStyledText(authorBox, author, {
-          size: 14,
-          align: SlidesApp.ParagraphAlignment.CENTER,
-          color: DEFAULT_THEME.colors.neutralGray,
-          bold: true
-          // Small but bold
-        });
-        try {
-          authorBox.setContentAlignment(SlidesApp.ContentAlignment.TOP);
-        } catch (e) {
+      const lineId = slideId + "_QUOTE_LINE";
+      requests.push(RequestFactory.createLine(slideId, lineId, lineX, lineY, lineX + lineW, lineY));
+      requests.push({
+        updateLineProperties: {
+          objectId: lineId,
+          lineProperties: {
+            lineFill: { solidFill: { color: { rgbColor: RequestFactory.toRgbColor(settings.primaryColor) || { red: 0, green: 0, blue: 0 } } } },
+            weight: { magnitude: 2, unit: "PT" }
+          },
+          fields: "lineFill,weight"
         }
+      });
+      if (author) {
+        const authId = slideId + "_QUOTE_AUTH";
+        requests.push(RequestFactory.createShape(slideId, authId, "TEXT_BOX", contentX, lineY + layout.pxToPt(5), contentW, layout.pxToPt(30)));
+        requests.push(...BatchTextStyleUtils.setText(slideId, authId, author, {
+          size: 14,
+          align: "CENTER",
+          color: theme.colors.neutralGray,
+          bold: true
+        }, theme));
+        requests.push(RequestFactory.updateShapeProperties(authId, null, null, null, "TOP"));
       }
+      return requests;
     }
   }
   class ProgressDiagramRenderer {
-    render(slide, data, area, settings, layout) {
+    render(slideId, data, area, settings, layout) {
+      const requests = [];
+      const theme = layout.getTheme();
       const items = data.items || [];
-      if (!items.length) return;
+      if (!items.length) return requests;
       const rowH = layout.pxToPt(50);
       const gap = layout.pxToPt(15);
       const startY = area.top + (area.height - items.length * (rowH + gap)) / 2;
@@ -2121,32 +2264,40 @@ ${desc}`, {
         const y = startY + i * (rowH + gap);
         const labelW = layout.pxToPt(150);
         const barAreaW = area.width - labelW - layout.pxToPt(60);
-        const labelBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, area.left, y, labelW, rowH);
-        setStyledText(labelBox, item.label || "", { size: 14, bold: true, align: SlidesApp.ParagraphAlignment.END });
-        try {
-          labelBox.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
-        } catch (e) {
-        }
-        const barBg = slide.insertShape(SlidesApp.ShapeType.ROUND_RECTANGLE, area.left + labelW + layout.pxToPt(20), y + rowH / 3, barAreaW, rowH / 3);
-        barBg.getFill().setSolidFill(DEFAULT_THEME.colors.ghostGray);
-        barBg.getBorder().setTransparent();
+        const baseId = slideId + `_PROG_${i}`;
+        const labelId = baseId + "_LBL";
+        requests.push(RequestFactory.createShape(slideId, labelId, "TEXT_BOX", area.left, y, labelW, rowH));
+        requests.push(...BatchTextStyleUtils.setText(slideId, labelId, item.label || "", {
+          size: 14,
+          bold: true,
+          align: "END"
+        }, theme));
+        requests.push(RequestFactory.updateShapeProperties(labelId, null, null, null, "MIDDLE"));
+        const barBgId = baseId + "_BG";
+        requests.push(RequestFactory.createShape(slideId, barBgId, "ROUND_RECTANGLE", area.left + labelW + layout.pxToPt(20), y + rowH / 3, barAreaW, rowH / 3));
+        requests.push(RequestFactory.updateShapeProperties(barBgId, theme.colors.ghostGray, "TRANSPARENT"));
         const percent = Math.min(100, Math.max(0, parseInt(item.percent || 0)));
         if (percent > 0) {
-          const barFg = slide.insertShape(SlidesApp.ShapeType.ROUND_RECTANGLE, area.left + labelW + layout.pxToPt(20), y + rowH / 3, barAreaW * (percent / 100), rowH / 3);
-          barFg.getFill().setSolidFill(settings.primaryColor);
-          barFg.getBorder().setTransparent();
+          const barFgId = baseId + "_FG";
+          const fgW = barAreaW * (percent / 100);
+          requests.push(RequestFactory.createShape(slideId, barFgId, "ROUND_RECTANGLE", area.left + labelW + layout.pxToPt(20), y + rowH / 3, fgW, rowH / 3));
+          requests.push(RequestFactory.updateShapeProperties(barFgId, settings.primaryColor, "TRANSPARENT"));
         }
-        const valBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, area.left + labelW + barAreaW + layout.pxToPt(30), y, layout.pxToPt(50), rowH);
-        setStyledText(valBox, `${percent}%`, { size: 14, color: DEFAULT_THEME.colors.neutralGray });
-        try {
-          valBox.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
-        } catch (e) {
-        }
+        const valId = baseId + "_VAL";
+        requests.push(RequestFactory.createShape(slideId, valId, "TEXT_BOX", area.left + labelW + barAreaW + layout.pxToPt(30), y, layout.pxToPt(50), rowH));
+        requests.push(...BatchTextStyleUtils.setText(slideId, valId, `${percent}%`, {
+          size: 14,
+          color: theme.colors.neutralGray
+        }, theme));
+        requests.push(RequestFactory.updateShapeProperties(valId, null, null, null, "MIDDLE"));
       });
+      return requests;
     }
   }
   class ImageTextDiagramRenderer {
-    render(slide, data, area, settings, layout) {
+    render(slideId, data, area, settings, layout) {
+      const requests = [];
+      const theme = layout.getTheme();
       const imageUrl = data.image;
       const points = data.points || [];
       const gap = layout.pxToPt(20);
@@ -2154,33 +2305,28 @@ ${desc}`, {
       const isImageLeft = data.imagePosition !== "right";
       const imgX = isImageLeft ? area.left : area.left + halfW + gap;
       const txtX = isImageLeft ? area.left + halfW + gap : area.left;
-      if (imageUrl) {
-        try {
-          const blob = insertImageFromUrlOrFileId(imageUrl);
-          let img;
-          if (blob) {
-            img = slide.insertImage(blob);
-          } else if (typeof imageUrl === "string" && imageUrl.startsWith("http")) {
-            img = slide.insertImage(imageUrl);
-          }
-          if (img) {
-            const scale = Math.min(halfW / img.getWidth(), area.height / img.getHeight());
-            const w = img.getWidth() * scale;
-            const h = img.getHeight() * scale;
-            img.setWidth(w).setHeight(h).setLeft(imgX + (halfW - w) / 2).setTop(area.top + (area.height - h) / 2);
-          } else {
-            throw new Error("Image insert failed");
-          }
-        } catch (e) {
-          Logger.log("Image insert failed: " + e);
-          const ph = slide.insertShape(SlidesApp.ShapeType.RECTANGLE, imgX, area.top, halfW, area.height);
-          ph.getFill().setSolidFill(DEFAULT_THEME.colors.ghostGray);
-          setStyledText(ph, "Image Placeholder", { align: SlidesApp.ParagraphAlignment.CENTER });
-        }
+      const imgId = slideId + "_IMG";
+      if (imageUrl && typeof imageUrl === "string" && imageUrl.startsWith("http")) {
+        requests.push(RequestFactory.createImage(slideId, imgId, imageUrl, imgX, area.top, halfW, area.height));
+      } else {
+        const phId = slideId + "_IMG_PH";
+        requests.push(RequestFactory.createShape(slideId, phId, "RECTANGLE", imgX, area.top, halfW, area.height));
+        requests.push(RequestFactory.updateShapeProperties(phId, theme.colors.ghostGray, "TRANSPARENT"));
+        requests.push(...BatchTextStyleUtils.setText(slideId, phId, "Image Placeholder (URL required)", {
+          size: 14,
+          align: "CENTER",
+          color: theme.colors.neutralGray
+        }, theme));
+        requests.push(RequestFactory.updateShapeProperties(phId, null, null, null, "MIDDLE"));
       }
-      const textBox = slide.insertShape(SlidesApp.ShapeType.TEXT_BOX, txtX, area.top, halfW, area.height);
-      const textContent = points.join("\n");
-      setStyledText(textBox, textContent, { size: DEFAULT_THEME.fonts.sizes.body });
+      const txtId = slideId + "_TXT";
+      const textContent = Array.isArray(points) ? points.join("\n") : String(points);
+      requests.push(RequestFactory.createShape(slideId, txtId, "TEXT_BOX", txtX, area.top, halfW, area.height));
+      requests.push(...BatchTextStyleUtils.setText(slideId, txtId, textContent, {
+        size: theme.fonts.sizes.body,
+        color: theme.colors.textPrimary
+      }, theme));
+      return requests;
     }
   }
   class DiagramRendererFactory {
@@ -2202,6 +2348,10 @@ ${desc}`, {
       if (normalizedType.includes("cycle")) {
         Logger.log("[Factory] Matched CycleDiagramRenderer");
         return new CycleDiagramRenderer();
+      }
+      if (normalizedType.includes("agenda")) {
+        Logger.log("[Factory] Matched AgendaDiagramRenderer");
+        return new AgendaDiagramRenderer();
       }
       if (normalizedType.includes("pyramid")) {
         Logger.log("[Factory] Matched PyramidDiagramRenderer");
@@ -2267,239 +2417,190 @@ ${desc}`, {
     constructor(creditImageBlob) {
       this.creditImageBlob = creditImageBlob;
     }
-    generate(slide, data, layout, pageNum, settings, imageUpdateOption = "update") {
-      Logger.log(`[GasDiagramSlideGenerator] Generating Diagram Slide: ${data.layout || data.type}`);
-      Logger.log(`[Debug] ColorUtils loaded: ${!!ColorUtils}`);
-      const titlePlaceholder = slide.getPlaceholder(SlidesApp.PlaceholderType.TITLE) || slide.getPlaceholder(SlidesApp.PlaceholderType.CENTERED_TITLE);
-      if (titlePlaceholder) {
-        try {
-          const textRange = titlePlaceholder.asShape().getText();
-          textRange.setText(data.title || "");
-          textRange.getTextStyle().setBold(true);
-        } catch (e) {
-          Logger.log(`Warning: Title placeholder found but text could not be set. ${e}`);
-        }
+    generate(slideId, data, layout, pageNum, settings) {
+      const requests = [];
+      if (data.title) {
+        const titleId = slideId + "_TITLE";
+        const titleRect = layout.getRect("contentSlide.title") || { left: 30, top: 20, width: 900, height: 60 };
+        requests.push(RequestFactory.createShape(slideId, titleId, "TEXT_BOX", titleRect.left, titleRect.top, titleRect.width, titleRect.height));
+        requests.push({ insertText: { objectId: titleId, text: data.title } });
+        requests.push(RequestFactory.updateTextStyle(titleId, {
+          fontSize: 32,
+          bold: true,
+          color: settings.primaryColor,
+          fontFamily: layout.getTheme().fonts.family
+        }));
+        requests.push({ updateParagraphStyle: { objectId: titleId, style: { alignment: "START" }, fields: "alignment" } });
+        requests.push({ updateShapeProperties: { objectId: titleId, shapeProperties: { contentAlignment: "BOTTOM" }, fields: "contentAlignment" } });
       }
       const type = (data.type || data.layout || "").toLowerCase();
-      Logger.log("Generating Diagram Slide: " + type);
-      const placeholders = slide.getPlaceholders();
-      const getPlaceholderTypeSafe = (p) => {
-        try {
-          const shape = p.asShape();
-          if (shape) {
-            return shape.getPlaceholderType();
-          }
-        } catch (e) {
-        }
-        return null;
-      };
-      const targetPlaceholder = placeholders.find((p) => getPlaceholderTypeSafe(p) === SlidesApp.PlaceholderType.BODY) || placeholders.find((p) => getPlaceholderTypeSafe(p) === SlidesApp.PlaceholderType.OBJECT) || placeholders.find((p) => getPlaceholderTypeSafe(p) === SlidesApp.PlaceholderType.PICTURE);
-      let workArea;
-      if (targetPlaceholder) {
-        workArea = {
-          left: targetPlaceholder.getLeft(),
-          top: targetPlaceholder.getTop(),
-          width: targetPlaceholder.getWidth(),
-          height: targetPlaceholder.getHeight()
-        };
-      } else {
+      const renderer = DiagramRendererFactory.getRenderer(type);
+      if (renderer) {
         const typeKey = `${type}Slide`;
         const areaRect = layout.getRect(`${typeKey}.area`) || layout.getRect("contentSlide.body");
-        workArea = areaRect;
+        const workArea = {
+          left: areaRect.left,
+          top: areaRect.top,
+          width: areaRect.width,
+          height: areaRect.height
+        };
+        const diagramReqs = renderer.render(slideId, data, workArea, settings, layout);
+        requests.push(...diagramReqs);
+      } else {
+        Logger.log("Diagram logic not implemented for type: " + type);
       }
-      Logger.log(`WorkArea for ${type}: left=${workArea.left}, top=${workArea.top}, width=${workArea.width}, height=${workArea.height}`);
-      if (targetPlaceholder) {
-        try {
-          targetPlaceholder.remove();
-        } catch (e) {
-          Logger.log("Warning: Could not remove target placeholder: " + e);
-        }
-      }
-      const elementsBefore = slide.getPageElements().map((e) => e.getObjectId());
-      try {
-        const renderer = DiagramRendererFactory.getRenderer(type);
-        if (renderer) {
-          renderer.render(slide, data, workArea, settings, layout);
-        } else {
-          Logger.log("Diagram logic not implemented for type: " + type);
-        }
-      } catch (e) {
-        Logger.log(`ERROR in drawing ${type}: ${e}`);
-      }
-      const newElements = slide.getPageElements().filter((e) => {
-        if (elementsBefore.includes(e.getObjectId())) return false;
-        try {
-          const shape = e.asShape();
-          if (shape) {
-            const placeholderType = shape.getPlaceholderType();
-            if (placeholderType === SlidesApp.PlaceholderType.TITLE || placeholderType === SlidesApp.PlaceholderType.SUBTITLE || placeholderType === SlidesApp.PlaceholderType.CENTERED_TITLE) {
-              return false;
-            }
-          }
-        } catch (e2) {
-        }
-        return true;
-      });
-      let generatedGroup = null;
-      if (newElements.length > 1) {
-        try {
-          generatedGroup = slide.group(newElements);
-          Logger.log(`Grouped ${newElements.length} content elements for ${type}`);
-        } catch (e) {
-          Logger.log(`Warning: Could not group elements: ${e}`);
-        }
-      } else if (newElements.length === 1) {
-        generatedGroup = newElements[0];
-      }
-      if (generatedGroup) {
-        const groupWidth = generatedGroup.getWidth();
-        const groupHeight = generatedGroup.getHeight();
-        const workAreaCenterX = workArea.left + workArea.width / 2;
-        const workAreaCenterY = workArea.top + workArea.height / 2;
-        const newLeft = workAreaCenterX - groupWidth / 2;
-        const newTop = workAreaCenterY - groupHeight / 2;
-        generatedGroup.setLeft(newLeft);
-        generatedGroup.setTop(newTop);
-        Logger.log(`Centered Group: left=${newLeft}, top=${newTop} (Area Center: ${workAreaCenterX}, ${workAreaCenterY})`);
-      }
-      addFooter(slide, layout, pageNum, settings, this.creditImageBlob);
+      return requests;
     }
   }
   class GasSlideRepository {
+    // Note: All generators (Title, Section, Content, Diagram) are refactored to use Batch API.
     createPresentation(presentation, templateId, destinationId, settingsOverride) {
       const slidesApp = SlidesApp;
       const driveApp = DriveApp;
       let pres;
+      let presId;
       if (destinationId) {
-        try {
-          Logger.log(`Using existing destination ID: ${destinationId}`);
-          pres = slidesApp.openById(destinationId);
-        } catch (e) {
-          Logger.log(`Error opening destination: ${e.toString()}`);
-          throw new Error(`Failed to open destination presentation with ID: ${destinationId}. Details: ${e.message}`);
-        }
+        pres = slidesApp.openById(destinationId);
       } else if (templateId) {
-        try {
-          Logger.log(`Attempting to access template ID: ${templateId}`);
-          const templateFile = driveApp.getFileById(templateId);
-          const newFile = templateFile.makeCopy(presentation.title);
-          Logger.log(`Template copied. New File ID: ${newFile.getId()}`);
-          pres = slidesApp.openById(newFile.getId());
-        } catch (e) {
-          Logger.log(`Error accessing/copying template: ${e.toString()}`);
-          throw new Error(`Failed to access or copy template with ID: ${templateId}. Ensure the ID is correct and the script has permission to access it. Details: ${e.message}`);
-        }
+        const templateFile = driveApp.getFileById(templateId);
+        const newFile = templateFile.makeCopy(presentation.title);
+        pres = slidesApp.openById(newFile.getId());
       } else {
         pres = slidesApp.create(presentation.title);
       }
-      const templateSlides = pres.getSlides();
+      presId = pres ? pres.getId() : "mock-presentation-id";
       const pageWidth = pres.getPageWidth();
       const pageHeight = pres.getPageHeight();
-      const layoutManager = new LayoutManager(pageWidth, pageHeight);
+      const themeName = settingsOverride && settingsOverride.theme ? settingsOverride.theme : "Green";
+      const selectedTheme = AVAILABLE_THEMES[themeName] || DEFAULT_THEME;
+      const layoutManager = new LayoutManager(pageWidth, pageHeight, selectedTheme);
+      const settings = { primaryColor: selectedTheme.colors.primary, ...settingsOverride };
+      const layoutIdMap = /* @__PURE__ */ new Map();
+      try {
+        const presData = Slides.Presentations.get(presId);
+        if (presData.layouts) {
+          presData.layouts.forEach((layout) => {
+            const props = layout.layoutProperties;
+            if (props) {
+              if (props.displayName) {
+                layoutIdMap.set(props.displayName.toUpperCase(), layout.objectId);
+              }
+              if (props.name) {
+                layoutIdMap.set(props.name.toUpperCase(), layout.objectId);
+              }
+            }
+          });
+        }
+      } catch (e) {
+        Logger.log("Warning: Failed to fetch presentation details via Advanced API. Layout mapping may be limited. " + e);
+      }
+      Logger.log(`Mapped Layouts (Display Name -> ID): ${Array.from(layoutIdMap.keys()).join(", ")}`);
       const titleGenerator = new GasTitleSlideGenerator(null);
       const sectionGenerator = new GasSectionSlideGenerator(null);
       const contentGenerator = new GasContentSlideGenerator(null);
       const diagramGenerator = new GasDiagramSlideGenerator(null);
-      const theme = layoutManager.getTheme();
-      const settings = {
-        primaryColor: theme.colors.primary,
-        enableGradient: false,
-        showTitleUnderline: true,
-        showBottomBar: true,
-        showDateColumn: true,
-        showPageNumber: true,
-        primary_color: theme.colors.primary,
-        text_primary: theme.colors.textPrimary,
-        background_gray: theme.colors.backgroundGray,
-        card_bg: theme.colors.cardBg,
-        ghost_gray: theme.colors.ghostGray,
-        ...settingsOverride && settingsOverride.colors ? {
-          primaryColor: settingsOverride.colors.primary,
-          primary_color: settingsOverride.colors.primary,
-          text_primary: settingsOverride.colors.text
-        } : {}
-      };
+      let allRequests = [];
+      let cleanupSlideId = null;
+      if (!templateId && !destinationId) {
+        const slides = pres.getSlides();
+        if (slides.length > 0) {
+          cleanupSlideId = slides[0].getObjectId();
+        }
+      }
       presentation.slides.forEach((slideModel, index) => {
         var _a;
+        const layoutType = (slideModel.layout || "content").toUpperCase();
+        const rawType = (((_a = slideModel.rawData) == null ? void 0 : _a.type) || "").toLowerCase();
+        Logger.log(`[Slide ${index + 1}] Processing - Requested Layout: '${slideModel.layout}', Normalized: '${layoutType}', RawType: '${rawType}'`);
+        let slideLayout;
+        const layouts = pres.getLayouts();
+        const targetLayoutId = layoutIdMap.get(layoutType);
+        if (targetLayoutId) {
+          slideLayout = layouts.find((l) => l.getObjectId() === targetLayoutId);
+        }
+        if (!slideLayout) {
+          slideLayout = layouts.find((l) => l.getLayoutName().toUpperCase() === layoutType);
+        }
+        if (!slideLayout && layoutType !== "TITLE" && layoutType !== "SECTION") {
+          const fallbackId = layoutIdMap.get("CONTENT");
+          if (fallbackId) {
+            slideLayout = layouts.find((l) => l.getObjectId() === fallbackId);
+            if (slideLayout) {
+              Logger.log(`[Slide ${index + 1}] Layout '${layoutType}' not found. Falling back to 'CONTENT'.`);
+            }
+          }
+          if (!slideLayout) {
+            slideLayout = layouts.find((l) => l.getLayoutName().toUpperCase() === "CONTENT" || l.getLayoutName().toUpperCase() === "TITLE_AND_BODY");
+          }
+        }
+        if (!slideLayout) {
+          slideLayout = layouts.find((l) => l.getLayoutName().toUpperCase() === "BLANK") || layouts[layouts.length - 1];
+          Logger.log(`[Slide ${index + 1}] Layout '${layoutType}' not found. Falling back to '${slideLayout.getLayoutName()}'`);
+        } else {
+          Logger.log(`[Slide ${index + 1}] Found Layout: '${slideLayout.getLayoutName()}' (ID: ${slideLayout.getObjectId()})`);
+        }
+        const slideId = `gen_slide_${index}`;
+        allRequests.push(RequestFactory.createSlide(slideId, slideLayout.getObjectId(), false));
         const commonData = {
           title: slideModel.title.value,
           subtitle: slideModel.subtitle,
           date: (/* @__PURE__ */ new Date()).toLocaleDateString(),
           points: slideModel.content.items,
-          // Map content items to points for Content/Agenda
           content: slideModel.content.items,
           ...slideModel.rawData
-          // Merge all extra data from JSON
         };
-        let slideLayout;
-        const layouts = pres.getLayouts();
-        if (index === 0) {
-          Logger.log("Available Layouts: " + layouts.map((l) => l.getLayoutName()).join(", "));
-        }
-        const findLayout = (name) => {
-          return layouts.find((l) => l.getLayoutName().toUpperCase() === name.toUpperCase());
-        };
-        const layoutType = (slideModel.layout || "content").toUpperCase();
+        let reqs = [];
         if (layoutType === "TITLE") {
-          slideLayout = findLayout("TITLE") || layouts[0];
-        } else if (layoutType === "SECTION") {
-          slideLayout = findLayout("SECTION_HEADER") || findLayout("SECTION ONLY") || findLayout("SECTION TITLE_AND_DESCRIPTION") || layouts[1];
-        } else if (layoutType === "CONTENT" || layoutType === "AGENDA") {
-          slideLayout = findLayout("TITLE_AND_BODY") || findLayout("TITLE_AND_TWO_COLUMNS") || layouts[2];
+          reqs = titleGenerator.generate(slideId, commonData, layoutManager, index + 1, settings);
+        } else if (layoutType === "SECTION" || layoutType === "SECTION_HEADER") {
+          reqs = sectionGenerator.generate(slideId, commonData, layoutManager, index + 1, settings);
+        } else if (rawType.includes("timeline") || rawType.includes("process") || // ... other diagrams
+        rawType.includes("diagram")) {
+          reqs = diagramGenerator.generate(slideId, commonData, layoutManager, index + 1, settings);
         } else {
-          slideLayout = findLayout("TITLE_AND_BODY") || findLayout("TITLE_ONLY") || layouts[layouts.length - 1];
+          reqs = contentGenerator.generate(slideId, commonData, layoutManager, index + 1, settings);
         }
-        if (!slideLayout) {
-          slideLayout = layouts[0];
-        }
-        Logger.log(`Slide ${index + 1} (${slideModel.layout}): Using Layout '${slideLayout.getLayoutName()}'`);
-        const slide = pres.appendSlide(slideLayout);
-        const rawType = (((_a = slideModel.rawData) == null ? void 0 : _a.type) || "").toLowerCase();
-        Logger.log(`Dispatching Slide ${index + 1}: LayoutType=${layoutType}, RawType=${rawType}`);
-        if (layoutType === "TITLE") {
-          titleGenerator.generate(slide, commonData, layoutManager, index + 1, settings);
-        } else if (layoutType === "SECTION" || rawType === "section") {
-          sectionGenerator.generate(slide, commonData, layoutManager, index + 1, settings);
-        } else if (rawType.includes("timeline") || rawType.includes("process") || rawType.includes("cycle") || rawType.includes("triangle") || rawType.includes("pyramid") || rawType.includes("diagram") || rawType.includes("compare") || rawType.includes("stepup") || rawType.includes("flowchart") || rawType.includes("cards") || rawType.includes("kpi") || rawType.includes("table") || rawType.includes("faq") || rawType.includes("progress") || rawType.includes("quote") || rawType.includes("imagetext")) {
-          diagramGenerator.generate(slide, commonData, layoutManager, index + 1, settings);
-        } else {
-          contentGenerator.generate(slide, commonData, layoutManager, index + 1, settings);
-        }
-        if (slideModel.notes) {
-          try {
-            const notesPage = slide.getNotesPage();
-            notesPage.getSpeakerNotesShape().getText().setText(slideModel.notes);
-          } catch (e) {
-            Logger.log(`Warning: Could not set speaker notes. ${e}`);
-          }
-        }
+        Logger.log(`[Slide ${index + 1}] Generator Used for layoutType '${layoutType}': ${reqs.length} requests generated.`);
+        allRequests.push(...reqs);
       });
-      const initialCount = templateSlides.length;
-      if (templateId) {
-        for (let i = 0; i < initialCount; i++) {
-          if (pres.getSlides().length > presentation.slides.length) {
-            pres.getSlides()[0].remove();
-          }
+      const presentationUrl = pres.getUrl();
+      if (allRequests.length > 0) {
+        if (cleanupSlideId) {
+          allRequests.push({ deleteObject: { objectId: cleanupSlideId } });
         }
-      } else {
-        if (pres.getSlides().length > presentation.slides.length) {
-          pres.getSlides()[0].remove();
+        try {
+          Slides.Presentations.batchUpdate({ requests: allRequests }, presId);
+          Logger.log(`Executed ${allRequests.length} requests successfully.`);
+        } catch (e) {
+          Logger.log(`Batch Update Failed: ${e}`);
+          throw e;
         }
       }
-      return pres.getUrl();
+      return presentationUrl;
     }
   }
   function generateSlides(data) {
     try {
       Logger.log("Library Call: generateSlides with data: " + JSON.stringify(data));
+      let slides = data.slides;
+      let theme = data.theme;
+      if (Array.isArray(data)) {
+        slides = data;
+      }
+      if (!Array.isArray(slides)) {
+        throw new Error("Invalid input: 'slides' must be an array.");
+      }
       const request = {
         title: data.title || "無題のプレゼンテーション",
         templateId: data.templateId,
         // Optional ID for template
         destinationId: data.destinationId,
         // Optional ID for existing destination
-        settings: data.settings,
-        slides: data.slides.map((s) => ({
+        settings: {
+          ...data.settings || {},
+          theme: theme || data.settings && data.settings.theme
+        },
+        slides: slides.map((s) => ({
           ...s,
           // Spread all valid properties from source
           title: s.title,
@@ -2555,7 +2656,115 @@ ${desc}`, {
   function createJsonResponse(data) {
     return ContentService.createTextOutput(JSON.stringify(data)).setMimeType(ContentService.MimeType.JSON);
   }
+  class GasSlidesApiTester {
+    /**
+     * Executes a prototype batch update to demonstrate API speed and atomicity.
+     * @param presentationId The ID of the target presentation
+     */
+    runPrototype(presentationId) {
+      const pageId = "TEST_SLIDE_" + Math.floor(Math.random() * 1e5);
+      const titleId = pageId + "_TITLE";
+      const bodyId = pageId + "_BODY";
+      const shapeId = pageId + "_SHAPE";
+      const requests = [
+        // 1. Create a generic Slide
+        {
+          createSlide: {
+            objectId: pageId,
+            slideLayoutReference: {
+              predefinedLayout: "TITLE_AND_BODY"
+            },
+            placeholderIdMappings: [
+              {
+                layoutPlaceholder: { type: "TITLE", index: 0 },
+                objectId: titleId
+              },
+              {
+                layoutPlaceholder: { type: "BODY", index: 0 },
+                objectId: bodyId
+              }
+            ]
+          }
+        },
+        // 2. Populate Title
+        {
+          insertText: {
+            objectId: titleId,
+            text: "🚀 High-Speed API Generation"
+          }
+        },
+        // 3. Populate Body with multiple bullets
+        {
+          insertText: {
+            objectId: bodyId,
+            text: "This entire slide was created in ONE round-trip request.\n\nBenefits:\n- No timeout risks for large decks\n- Atomic (all or nothing)\n- Precise ID control"
+          }
+        },
+        // 4. Create a custom shape (Star)
+        {
+          createShape: {
+            objectId: shapeId,
+            shapeType: "STAR_5_POINT",
+            elementProperties: {
+              pageObjectId: pageId,
+              size: {
+                width: { magnitude: 120, unit: "PT" },
+                height: { magnitude: 120, unit: "PT" }
+              },
+              transform: {
+                scaleX: 1,
+                scaleY: 1,
+                translateX: 500,
+                translateY: 100,
+                unit: "PT"
+              }
+            }
+          }
+        },
+        // 5. Add text to shape and style it
+        {
+          insertText: {
+            objectId: shapeId,
+            text: "FAST"
+          }
+        },
+        {
+          updateTextStyle: {
+            objectId: shapeId,
+            style: {
+              bold: true,
+              fontSize: { magnitude: 18, unit: "PT" },
+              foregroundColor: {
+                opaqueColor: { themeColor: "ACCENT1" }
+              }
+            },
+            fields: "bold,fontSize,foregroundColor"
+          }
+        }
+      ];
+      Logger.log("Starting Batch Update...");
+      const startTime = (/* @__PURE__ */ new Date()).getTime();
+      try {
+        const resource = { requests };
+        Slides.Presentations.batchUpdate(resource, presentationId);
+        const duration = (/* @__PURE__ */ new Date()).getTime() - startTime;
+        Logger.log(`✅ Batch Update Complete in ${duration}ms!`);
+        return `Generated 1 slide with ${requests.length} operations in ${duration}ms.`;
+      } catch (e) {
+        Logger.log("❌ Error in Batch Update: " + e.toString());
+        throw new Error("API Prototype Failed: " + e.message);
+      }
+    }
+  }
   global.generateSlides = generateSlides;
   global.doPost = doPost;
   global.doGet = doGet;
+  global.testSlidesApi = () => {
+    const pres = SlidesApp.create("API Prototype Test " + (/* @__PURE__ */ new Date()).toLocaleString());
+    const id = pres.getId();
+    Logger.log("Created Temp Presentation: " + pres.getUrl());
+    const tester = new GasSlidesApiTester();
+    const result = tester.runPrototype(id);
+    Logger.log(result);
+  };
 })();

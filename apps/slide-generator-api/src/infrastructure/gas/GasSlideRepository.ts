@@ -6,6 +6,7 @@ import { GasTitleSlideGenerator } from './generators/GasTitleSlideGenerator';
 import { GasSectionSlideGenerator } from './generators/GasSectionSlideGenerator'; // Not refactored yet, assuming legacy implementation or minimal impact
 import { GasContentSlideGenerator } from './generators/GasContentSlideGenerator';
 import { GasDiagramSlideGenerator } from './generators/GasDiagramSlideGenerator';
+import { RequestFactory } from './RequestFactory';
 import { DEFAULT_THEME, AVAILABLE_THEMES } from '../../common/config/DefaultTheme';
 
 export class GasSlideRepository implements ISlideRepository {
@@ -85,9 +86,13 @@ export class GasSlideRepository implements ISlideRepository {
         // If we use `pres.appendSlide`, we get a Slide object with an ID.
         // Iterating efficiently:
 
-        // Remove default slide if creating new
-        if (!templateId && !destinationId && pres.getSlides().length > 0) {
-            pres.getSlides()[0].remove();
+        // Identify if we have a default slide to remove (only for new presentations)
+        let cleanupSlideId: string | null = null;
+        if (!templateId && !destinationId) {
+            const slides = pres.getSlides();
+            if (slides.length > 0) {
+                cleanupSlideId = slides[0].getObjectId();
+            }
         }
 
         presentation.slides.forEach((slideModel, index) => {
@@ -142,8 +147,9 @@ export class GasSlideRepository implements ISlideRepository {
                 Logger.log(`[Slide ${index + 1}] Found Layout: '${slideLayout.getLayoutName()}' (ID: ${slideLayout.getObjectId()})`);
             }
 
-            const slide = pres.appendSlide(slideLayout);
-            const slideId = slide.getObjectId();
+            const slideId = `gen_slide_${index}`;
+            // Use Batch Create Slide
+            allRequests.push(RequestFactory.createSlide(slideId, slideLayout.getObjectId(), false));
 
             // Step B: Generate Content Requests
             const commonData = {
@@ -181,12 +187,11 @@ export class GasSlideRepository implements ISlideRepository {
 
         // 6. Execute Batch Update
         if (allRequests.length > 0) {
-            // Important: Save and close to ensure SlidesApp changes (appendSlide) are visible to Advanced Slides API
-            pres.saveAndClose();
+            // Append cleanup deletion if needed (must be after creation to ensure at least 1 slide)
+            if (cleanupSlideId) {
+                allRequests.push({ deleteObject: { objectId: cleanupSlideId } });
+            }
 
-            // Split into chunks if too large (API limit is usually high, but safe practice)
-            // Limit is 100 requests per call is FALSE. Limit is generous, but payload size matters.
-            // We can send all in one go for typical pres (e.g. < 50 slides).
             try {
                 // @ts-ignore
                 Slides.Presentations.batchUpdate({ requests: allRequests }, presId);
@@ -195,9 +200,6 @@ export class GasSlideRepository implements ISlideRepository {
                 Logger.log(`Batch Update Failed: ${e}`);
                 throw e;
             }
-        } else {
-            // If no requests, just save
-            pres.saveAndClose();
         }
 
         return presentationUrl;

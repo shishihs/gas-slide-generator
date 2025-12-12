@@ -1,8 +1,6 @@
 import { IDiagramRenderer } from './IDiagramRenderer';
 import { LayoutManager } from '../../../../common/utils/LayoutManager';
 import { RequestFactory } from '../../RequestFactory';
-import { setStyledText } from '../../../../common/utils/SlideUtils';
-import { generateProcessColors } from '../../../../common/utils/ColorUtils';
 
 export class ProcessDiagramRenderer implements IDiagramRenderer {
     render(slideId: string, data: any, area: any, settings: any, layout: LayoutManager): GoogleAppsScript.Slides.Schema.Request[] {
@@ -32,7 +30,7 @@ export class ProcessDiagramRenderer implements IDiagramRenderer {
                 updateShapeProperties: {
                     objectId: shapeId,
                     shapeProperties: {
-                        shapeBackgroundFill: { solidFill: { color: { rgbColor: this.hexToRgb(bgColor) } } },
+                        shapeBackgroundFill: { solidFill: { color: { rgbColor: RequestFactory.toRgbColor(bgColor) || { red: 0, green: 0, blue: 0 } } } },
                         outline: { propertyState: 'NOT_RENDERED' },
                         contentAlignment: 'MIDDLE'
                     },
@@ -76,12 +74,6 @@ export class ProcessDiagramRenderer implements IDiagramRenderer {
         return requests;
     }
 
-    private hexToRgb(hex: string): GoogleAppsScript.Slides.Schema.RgbColor {
-        const safeHex = (hex && typeof hex === 'string') ? hex : '#000000';
-        const r = parseInt(safeHex.slice(1, 3), 16) / 255;
-        const g = parseInt(safeHex.slice(3, 5), 16) / 255;
-        const b = parseInt(safeHex.slice(5, 7), 16) / 255;
-        return { red: r, green: g, blue: b };
-    }
+
 }
 

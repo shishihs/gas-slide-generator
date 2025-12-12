@@ -34,16 +34,7 @@ export class BarCompareDiagramRenderer implements IDiagramRenderer {
         const barHeight = layout.pxToPt(18);
         let currentY = area.top;
 
-        // Helper for Line RGB
-        const hexToRgb = (hex: string) => {
-            const safeHex = (hex && typeof hex === 'string') ? hex : '#000000';
-            const h = safeHex.replace('#', '');
-            return {
-                red: parseInt(h.substring(0, 2), 16) / 255,
-                green: parseInt(h.substring(2, 4), 16) / 255,
-                blue: parseInt(h.substring(4, 6), 16) / 255
-            };
-        };
+
 
         stats.forEach((stat: any, index: number) => {
             const label = stat.label || '';
@@ -120,7 +111,7 @@ export class BarCompareDiagramRenderer implements IDiagramRenderer {
                     updateLineProperties: {
                         objectId: lineId,
                         lineProperties: {
-                            lineFill: { solidFill: { color: { rgbColor: hexToRgb(theme.colors.ghostGray) } } },
+                            lineFill: { solidFill: { color: { rgbColor: RequestFactory.toRgbColor(theme.colors.ghostGray) || { red: 0.9, green: 0.9, blue: 0.9 } } } },
                             weight: { magnitude: 0.5, unit: 'PT' }
                         },
                         fields: 'lineFill,weight'

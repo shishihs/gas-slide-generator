@@ -15,16 +15,7 @@ export class LanesDiagramRenderer implements IDiagramRenderer {
         const laneW = (area.width - px(laneGapPx) * (n - 1)) / n;
         const cardBoxes: any[] = [];
 
-        // Helper for colors
-        const hexToRgb = (hex: string) => {
-            const safeHex = (hex && typeof hex === 'string') ? hex : '#000000';
-            const h = safeHex.replace('#', '');
-            return {
-                red: parseInt(h.substring(0, 2), 16) / 255,
-                green: parseInt(h.substring(2, 4), 16) / 255,
-                blue: parseInt(h.substring(4, 6), 16) / 255
-            };
-        };
+
 
         for (let j = 0; j < n; j++) {
             const lane = lanes[j] || { title: '', items: [] };
@@ -90,11 +81,14 @@ export class LanesDiagramRenderer implements IDiagramRenderer {
 
                     const arrowId = slideId + `_ARR_${j}_${i}`;
                     requests.push(RequestFactory.createLine(slideId, arrowId, startX, startY, endX, endY));
+
+                    const arrowColor = RequestFactory.toRgbColor(settings.primaryColor) || { red: 0, green: 0, blue: 0 };
+
                     requests.push({
                         updateLineProperties: {
                             objectId: arrowId,
                             lineProperties: {
-                                lineFill: { solidFill: { color: { rgbColor: hexToRgb(settings.primaryColor) } } },
+                                lineFill: { solidFill: { color: { rgbColor: arrowColor } } },
                                 weight: { magnitude: 2, unit: 'PT' },
                                 endArrow: 'FILL_ARROW'
                             },

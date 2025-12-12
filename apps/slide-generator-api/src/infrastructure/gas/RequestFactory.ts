@@ -1,12 +1,10 @@
 
 export class RequestFactory {
-    static createSlide(pageId: string, layoutId: string = 'TITLE_AND_BODY'): GoogleAppsScript.Slides.Schema.Request {
+    static createSlide(pageId: string, layoutId: string = 'TITLE_AND_BODY', isPredefined: boolean = true): GoogleAppsScript.Slides.Schema.Request {
         return {
             createSlide: {
                 objectId: pageId,
-                slideLayoutReference: {
-                    predefinedLayout: layoutId
-                }
+                slideLayoutReference: isPredefined ? { predefinedLayout: layoutId } : { layoutId: layoutId }
             }
         };
     }
@@ -65,18 +63,11 @@ export class RequestFactory {
             textStyle.foregroundColor = {
                 opaqueColor: { themeColor: style.color.startsWith('#') ? 'DARK1' : style.color as any }
             };
-            if (style.color.startsWith('#')) {
-                const hex = style.color.replace('#', '');
-                if (hex.length >= 6) {
-                    const r = parseInt(hex.substring(0, 2), 16) / 255;
-                    const g = parseInt(hex.substring(2, 4), 16) / 255;
-                    const b = parseInt(hex.substring(4, 6), 16) / 255;
-                    textStyle.foregroundColor = {
-                        opaqueColor: {
-                            rgbColor: { red: r, green: g, blue: b }
-                        }
-                    };
-                }
+            const rgb = RequestFactory.toRgbColor(style.color);
+            if (rgb) {
+                textStyle.foregroundColor = {
+                    opaqueColor: { rgbColor: rgb }
+                };
             }
             fields.push('foregroundColor');
         }
@@ -180,19 +171,13 @@ export class RequestFactory {
             // Check for transparent
             if (fillHex === 'TRANSPARENT') {
                 shapeProperties.shapeBackgroundFill = { propertyState: 'NOT_RENDERED' };
-            } else if (typeof fillHex === 'string' && fillHex.startsWith('#') && fillHex.length >= 7) {
-                // Hex to RGB
-                // Simple parser (assumes #RRGGBB)
-                const r = parseInt(fillHex.substring(1, 3), 16) / 255;
-                const g = parseInt(fillHex.substring(3, 5), 16) / 255;
-                const b = parseInt(fillHex.substring(5, 7), 16) / 255;
-                shapeProperties.shapeBackgroundFill = {
-                    solidFill: {
-                        color: {
-                            rgbColor: { red: r, green: g, blue: b }
-                        }
-                    }
-                };
+            } else {
+                const rgb = RequestFactory.toRgbColor(fillHex);
+                if (rgb) {
+                    shapeProperties.shapeBackgroundFill = {
+                        solidFill: { color: { rgbColor: rgb } }
+                    };
+                }
             }
             fields.push('shapeBackgroundFill');
         }
@@ -201,11 +186,11 @@ export class RequestFactory {
             const outline: any = {};
             if (borderHex === 'TRANSPARENT') {
                 outline.propertyState = 'NOT_RENDERED';
-            } else if (borderHex && typeof borderHex === 'string' && borderHex.startsWith('#') && borderHex.length >= 7) {
-                const r = parseInt(borderHex.substring(1, 3), 16) / 255;
-                const g = parseInt(borderHex.substring(3, 5), 16) / 255;
-                const b = parseInt(borderHex.substring(5, 7), 16) / 255;
-                outline.outlineFill = { solidFill: { color: { rgbColor: { red: r, green: g, blue: b } } } };
+            } else {
+                const rgb = RequestFactory.toRgbColor(borderHex);
+                if (rgb) {
+                    outline.outlineFill = { solidFill: { color: { rgbColor: rgb } } };
+                }
             }
             if (borderWeightPt !== undefined) {
                 outline.weight = { magnitude: borderWeightPt, unit: 'PT' };
@@ -308,6 +293,16 @@ export class RequestFactory {
                 }
             }
         };
+    }
+
+    static toRgbColor(hex: string): GoogleAppsScript.Slides.Schema.RgbColor | undefined {
+        if (!hex || typeof hex !== 'string' || !hex.startsWith('#') || hex.length < 7) {
+            return undefined;
+        }
+        const r = parseInt(hex.substring(1, 3), 16) / 255;
+        const g = parseInt(hex.substring(3, 5), 16) / 255;
+        const b = parseInt(hex.substring(5, 7), 16) / 255;
+        return { red: r, green: g, blue: b };
     }
 
     static groupObjects(pageId: string, groupObjectId: string, childrenObjectIds: string[]): GoogleAppsScript.Slides.Schema.Request {

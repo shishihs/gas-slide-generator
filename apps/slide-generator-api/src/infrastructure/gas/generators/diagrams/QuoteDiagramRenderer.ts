@@ -44,26 +44,13 @@ export class QuoteDiagramRenderer implements IDiagramRenderer {
         const lineId = slideId + '_QUOTE_LINE';
 
         requests.push(RequestFactory.createLine(slideId, lineId, lineX, lineY, lineX + lineW, lineY));
-        // We need primary color for line. Assuming primaryColor is Hex.
-        // We'll trust user supplied correct Hex or use fallback.
-        // No easy hexToRgb here unless we inline it or use settings.primaryColor directly if API supported hex (it doesn't for Line).
-        // I'll inline a simple hex parser again or assume gray/black fallback for safety if primaryColor is complex.
-        // Or I can paste the helper. I'll paste the helper. 
-        const hexToRgb = (hex: string) => {
-            const safeHex = (hex && typeof hex === 'string') ? hex : '#000000';
-            const h = safeHex.replace('#', '');
-            return {
-                red: parseInt(h.substring(0, 2), 16) / 255,
-                green: parseInt(h.substring(2, 4), 16) / 255,
-                blue: parseInt(h.substring(4, 6), 16) / 255
-            };
-        };
+
 
         requests.push({
             updateLineProperties: {
                 objectId: lineId,
                 lineProperties: {
-                    lineFill: { solidFill: { color: { rgbColor: hexToRgb(settings.primaryColor) } } },
+                    lineFill: { solidFill: { color: { rgbColor: RequestFactory.toRgbColor(settings.primaryColor) || { red: 0, green: 0, blue: 0 } } } },
                     weight: { magnitude: 2, unit: 'PT' }
                 },
                 fields: 'lineFill,weight'
